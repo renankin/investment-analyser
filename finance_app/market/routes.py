@@ -1,12 +1,9 @@
-from flask import Blueprint, flash, redirect, request, render_template, url_for
+from flask import Blueprint, flash, json, redirect, request, render_template, url_for
 
-from finance_app.assets import repository as assets
-from finance_app.market import dividends, prices, sources, splits
+from finance_app.assets import assets
+from finance_app.market import dividends, prices, sources, stock_splits
 
 market_bp = Blueprint("market", __name__, template_folder="templates")
-
-
-###### Market source routes ######
 
 
 @market_bp.route("/market/sources")
@@ -93,9 +90,6 @@ def update_source(source_id):
     return render_template("update_source.html", source=s)
 
 
-######## Dividends routes ########
-
-
 @market_bp.route("/market/dividends/add/<int:asset_id>", methods=["POST"])
 def add_dividends(asset_id):
 
@@ -146,9 +140,6 @@ def show_dividends(asset_id):
     return redirect(url_for("market.get_dividends"))
 
 
-####### Price routes #######
-
-
 @market_bp.route("/market/prices/add/<int:asset_id>", methods=["POST"])
 def add_prices(asset_id):
     """Insert prices for asset."""
@@ -190,10 +181,19 @@ def get_prices():
 def show_prices(asset_id):
     """Show prices for asset."""
 
-    p = prices.get_prices_for_asset(asset_id)
+    p = prices.get_prices(asset_id)
+
+    data = json.dumps([price["unit_price"] for price in p])
+    labels = json.dumps([price["date"] for price in p])
+
+    a = assets.get_asset(asset_id)
+
+    asset_name = json.dumps(a["asset_name"])
 
     if p:
-        return render_template("show_prices.html", prices=p)
+        return render_template(
+            "show_prices.html", data=data, labels=labels, asset_name=asset_name
+        )
 
     flash("No prices to show.")
     return redirect(url_for("market.get_prices"))
@@ -206,7 +206,7 @@ def show_prices(asset_id):
 def add_splits(asset_id):
     """Insert splits for asset."""
 
-    if splits.insert_splits_for_asset(asset_id):
+    if stock_splits.insert_splits_for_asset(asset_id):
         flash("Splits added.")
     else:
         flash("Failed to add splits.")
@@ -218,7 +218,7 @@ def add_splits(asset_id):
 def delete_splits(asset_id):
     """Deletes stock splits from asset."""
 
-    if splits.delete_splits_for_asset(asset_id):
+    if stock_splits.delete_splits_for_asset(asset_id):
         flash("Splits deleted.")
     else:
         flash("No splits to delete.")
@@ -243,7 +243,7 @@ def get_splits():
 def show_splits(asset_id):
     """Show stock splits for asset."""
 
-    s = splits.get_splits_for_asset(asset_id)
+    s = stock_splits.get_stock_splits(asset_id)
 
     if s:
         return render_template("show_splits.html", splits=s)

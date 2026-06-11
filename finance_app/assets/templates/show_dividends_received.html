@@ -15,7 +15,7 @@
       {% for div in dividends: %}
         <tr>
           <td>{{ div["date"] | format_date }}</td>
-          <td>{{ div["amount_received"] | format_currency(div["currency"]) }}</td>
+          <td>{{ div["amount_received"] | format_currency(currency) }}</td>
         </tr>
         {% set ns.total = ns.total + div["amount_received"] %}
         {% set ns.currency = div["currency"] %}
@@ -24,7 +24,7 @@
     <tfoot>
       <tr>
         <th class="border-0 text-end">Total</th>
-        <td class="border-0">{{ ns.total | format_currency(ns.currency) }}</td>
+        <td class="border-0">{{ ns.total | format_currency(currency) }}</td>
       </tr>
     </tfoot>
   </table>

@@ -20,6 +20,19 @@ def get_all_sources() -> list:
     return []
 
 
+def get_assets(source_id: int) -> list:
+    """Returns a list of dictionaries containing `asset_id`."""
+
+    query = "SELECT asset_id FROM assets WHERE market_source_id = ?"
+
+    assets = query_db(query, (source_id,))
+
+    if assets:
+        return assets
+
+    return []
+
+
 def get_source_by_id(source_id: int) -> dict:
     """Fetch source from database and returns a dictionary with `display_name`, `source_key`,
     `supports_prices`, `supports_dividends` and `supports_stock_splits`"""
@@ -36,7 +49,6 @@ def get_source_by_id(source_id: int) -> dict:
         return source
 
     return {}
-
 
 
 def update_source(

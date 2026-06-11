@@ -1,9 +1,9 @@
 from flask import Blueprint, flash, request, redirect, render_template, url_for
 
-from finance_app.accounts import repository as accounts
-from finance_app.assets import repository as assets
-from finance_app.market import dividends, prices, sources, splits
-from finance_app.transactions import repository as transactions
+from finance_app.accounts import accounts
+from finance_app.assets import assets
+from finance_app.market import dividends, prices, sources, stock_splits
+from finance_app.transactions import transactions
 
 assets_bp = Blueprint("assets", __name__, template_folder="templates")
 
@@ -18,7 +18,7 @@ def index():
     a = assets.get_all_assets()
 
     if a:
-        return render_template("read_assets.html", assets=a)
+        return render_template("show_assets.html", assets=a)
 
     flash("No assets to show. Must add asset first.")
     return redirect(url_for("assets.add"))
@@ -53,7 +53,7 @@ def add():
 def edit(asset_id):
     """Edit asset."""
 
-    a = assets.get_asset_by_id(asset_id)
+    a = assets.get_asset(asset_id)
 
     s = sources.get_all_sources()
 
@@ -75,15 +75,15 @@ def edit(asset_id):
     return render_template("edit_asset.html", asset=a, market_sources=s)
 
 
-@assets_bp.route("/assets/delete/<int:asset_id>", methods=["POST"])
+@assets_bp.route("/assets/<int:asset_id>/delete", methods=["POST"])
 def delete(asset_id):
     """Delete asset."""
 
-    if transactions.get_transactions_from_asset(asset_id):
+    if transactions.get_transactions(asset_id):
         flash("Must delete transactions first.")
         return redirect(url_for("assets.index"))
 
-    if prices.get_prices_for_asset(asset_id):
+    if prices.get_prices(asset_id):
         flash("Must delete prices first.")
         return redirect(url_for("assets.index"))
 
@@ -91,7 +91,7 @@ def delete(asset_id):
         flash("Must delete dividends first.")
         return redirect(url_for("assets.index"))
 
-    if splits.get_splits_for_asset(asset_id):
+    if stock_splits.get_stock_splits(asset_id):
         flash("Must delete splits first.")
         return redirect(url_for("assets.index"))
 
@@ -99,3 +99,24 @@ def delete(asset_id):
     flash("Asset deleted.")
 
     return redirect(url_for("assets.index"))
+
+
+@assets_bp.route("/assets/<int:asset_id>/dividends")
+def show_dividends(asset_id):
+    """Show dividends received for asset."""
+
+    dividends = assets.get_dividends_received(asset_id)
+
+    asset = assets.get_asset(asset_id)
+
+    account = accounts.get_account(asset["account_id"])
+
+    if not dividends:
+        flash("No dividends to show.")
+        return redirect(url_for("assets.index"))
+
+    return render_template(
+        "show_dividends_received.html",
+        dividends=dividends,
+        currency=account["currency"],
+    )

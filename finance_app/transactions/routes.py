@@ -1,8 +1,8 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from finance_app.accounts import repository as accounts
-from finance_app.assets import repository as assets
-from finance_app.transactions import repository as transactions
+from finance_app.accounts import accounts as accounts
+from finance_app.assets import assets as assets
+from finance_app.transactions import transactions as transactions
 
 
 transactions_bp = Blueprint("transactions", __name__, template_folder="templates")
@@ -20,8 +20,8 @@ def index():
 
     t = transactions.get_all_transactions()
 
-    if transactions:
-        return render_template("transactions.html", transactions=t)
+    if t:
+        return render_template("show_transactions.html", transactions=t)
 
     flash("No transactions to show. Must add transaction first.")
     return redirect(url_for("transactions.add"))
@@ -54,7 +54,7 @@ def add():
 def delete(transaction_id):
     """Deletes transaction"""
 
-    t = transactions.get_transaction_by_id(transaction_id)
+    t = transactions.get_transaction(transaction_id)
 
     if t:
         transactions.delete_transaction(transaction_id)
@@ -71,7 +71,7 @@ def delete(transaction_id):
 def edit(transaction_id):
     """Edit transaction"""
 
-    t = transactions.get_transaction_by_id(transaction_id)
+    t = transactions.get_transaction(transaction_id)
 
     if not t:
         flash("Transaction invalid.")

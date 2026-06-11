@@ -1,11 +1,13 @@
+import plotly.express as px
+
 from finance_app.db import execute_db, query_db
-from finance_app.assets import repository as assets
+from finance_app.assets import assets as assets
 from finance_app.market import sources
 
 from finance_app.market.fetchers.fetcher_registry import FetcherProtocol
 
 
-def get_prices_for_asset(asset_id: int) -> list:
+def get_prices(asset_id: int) -> list:
     """Get the prices for asset id and return them as list of dictionaries
     with `date`, `unit_price` and `currency` as keys."""
 
@@ -14,7 +16,7 @@ def get_prices_for_asset(asset_id: int) -> list:
         " JOIN accounts ON accounts.account_id = "
         " (SELECT account_id FROM assets WHERE asset_id = ?)"
         " WHERE prices.asset_id = ?"
-        " ORDER BY prices.date DESC"
+        " ORDER BY prices.date"
     )
 
     prices = query_db(query, (asset_id, asset_id))
@@ -29,7 +31,7 @@ def get_most_recent_price(asset_id: int) -> dict:
     """Returns the most recent price for asset and returns a dictionary
     containing `price` and `date` key."""
 
-    p = get_prices_for_asset(asset_id)
+    p = get_prices(asset_id)
 
     if p:
         price_date = max([price["date"] for price in p])
@@ -45,7 +47,7 @@ def get_most_recent_price(asset_id: int) -> dict:
 def delete_prices_for_asset(asset_id: int) -> bool:
     """Deletes prices from database and returns True if successful."""
 
-    prices = get_prices_for_asset(asset_id)
+    prices = get_prices(asset_id)
 
     if prices:
         execute_db("DELETE FROM prices WHERE asset_id = ?", (asset_id,))
@@ -57,7 +59,7 @@ def delete_prices_for_asset(asset_id: int) -> bool:
 def insert_prices_for_asset(asset_id: int) -> bool:
     """Insert prices for asset in database and returns True if successful."""
 
-    asset = assets.get_asset_by_id(asset_id)
+    asset = assets.get_asset(asset_id)
 
     market_source = sources.get_source_by_id(asset["market_source_id"])
 

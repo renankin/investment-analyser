@@ -7,11 +7,13 @@
   <table class="table table-borderless">
     <thead>
       <tr>
-        <th>Account name</th>
-        <th>Asset name</th>
+        <th>Account</th>
+        <th>Asset</th>
         <th>Date</th>
         <th>Shares</th>
         <th>Price</th>
+        <th>Split Shares</th>
+        <th>Split Prices</th>
         <th>Total</th>
       </tr>
     </thead>
@@ -23,7 +25,15 @@
           <td>{{ t["date"]| format_date }}</td>
           <td>{{ "%.2f" | format(t["shares"]) }}</td>
           <td>{{ t["price"] | format_currency(t["currency"]) }}</td>
-          <td>{{ (t["price"] * t["shares"]) | format_currency(t["currency"]) }}</td>
+          {% if t["is_adjusted"] %}
+            <td>{{ "%.2f" | format(t["adj_shares"]) }}</td>
+            <td>{{ t["adj_price"] | format_currency(t["currency"]) }}</td>
+            <td>{{ (t["adj_price"] * t["adj_shares"]) | format_currency(t["currency"]) }}</td>
+          {% else %}
+            <td>-</td>
+            <td>-</td>
+            <td>{{ (t["price"] * t["shares"]) | format_currency(t["currency"]) }}</td>
+          {% endif %}
           <td>
             <form action="{{ url_for('transactions.edit', transaction_id=t['transaction_id']) }}"
                   method="get">

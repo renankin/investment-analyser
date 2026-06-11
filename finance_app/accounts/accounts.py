@@ -19,7 +19,7 @@ def get_all_accounts() -> list:
     return []
 
 
-def get_account_by_id(account_id: int) -> dict:
+def get_account(account_id: int) -> dict:
     """Fetch account from database based on the id and returns a dictionary containing
     `account_id`, `account_name` and `currency`."""
 
@@ -33,6 +33,20 @@ def get_account_by_id(account_id: int) -> dict:
         return account
 
     return {}
+
+
+def get_assets(account_id: int) -> list:
+    """Get all assets from a given account and returns a list of dictionaries
+    containing `asset_id` and `asset_name` keys."""
+
+    query = "SELECT asset_id, asset_name FROM assets WHERE account_id = ?"
+
+    assets = query_db(query, (account_id,))
+
+    if assets:
+        return assets
+
+    return []
 
 
 def insert_account(account_name: str, currency: str):

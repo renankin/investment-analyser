@@ -68,26 +68,16 @@ def execute_db(query: str, args=()):
 
 
 def query_db(query: str, args=(), one=False):
-    """Query the database.
-    * if `One` is True, returns the result from only one row
-    (either single value or dictionary), otherwise returns a list."""
+    """Returns a dictionary with queried database if `One` is True. Otherwise, returns a list of dictionaries if `One` is False."""
 
     cur = get_db().execute(query, args)
     res = cur.fetchall()
     cur.close()
 
     if res:
-        n_arguments = len(res[0])
         if one:
-            if n_arguments == 1:  # Returns single value
-                return next(iter(res[0].values()))
-            else:  # Returns dictionary
-                return res[0]
-        else:
-            if n_arguments == 1:  # Return list of values
-                return [next(iter(entry.values())) for entry in res]
-            else:
-                return res  # Returns list of dictonaries
+            return res[0]
+        return res
 
     return None
 

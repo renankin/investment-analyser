@@ -3,20 +3,30 @@
   Prices
 {% endblock title %}
 {% block main %}
-  <table class="table">
-    <thead>
-      <tr>
-        <th>Date</th>
-        <th>Value</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for price in prices: %}
-        <tr>
-          <td>{{ price["date"] | format_date }}</td>
-          <td>{{ price["unit_price"] | format_currency(price["currency"]) }}</td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div>
+    <canvas id="myChart"></canvas>
+  </div>
 {% endblock main %}
+{% block javascript %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('myChart');
+
+    const labels = JSON.parse({{ labels | tojson }})
+    const data = JSON.parse({{ data | tojson }})
+    const title = JSON.parse({{ asset_name | tojson }})
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: title,
+          data: data,
+          borderWidth: 1,
+          pointStyle: false,
+        }]
+      }
+    });
+  </script>
+{% endblock javascript %}

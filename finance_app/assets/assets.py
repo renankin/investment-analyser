@@ -1,5 +1,8 @@
 from finance_app.db import execute_db, query_db
 
+from finance_app.market import dividends
+from finance_app.transactions import transactions
+
 
 def delete_asset(asset_id: int):
     """Delete asset."""
@@ -28,32 +31,14 @@ def get_all_assets() -> list:
     return []
 
 
-def get_assets_from_source(source_id: int) -> list:
-    """Fetches assets from database and returns a list of dictionaries containing `asset_id`."""
-
-    query = "SELECT asset_id FROM assets WHERE market_source_id = ?"
-
-    assets = query_db(query, (source_id,))
-
-    if assets:
-        return assets
-
-    return []
-
-
-def get_asset_by_id(asset_id: int) -> dict:
-    """Fetch asset from database and returns a dictionary
-    containing `account_id`, `account_name`, `asset_id`, `asset_name`,
-    `source_display_name`, `market_source_id`, `source_key` and `still_open`."""
+def get_asset(asset_id: int) -> dict:
+    """Returns a dictionary containing `account_id`, `asset_id`, `asset_name`,
+     `market_source_id` and `still_open`."""
 
     query = (
-        "SELECT assets.asset_id, accounts.account_id, assets.asset_name,"
-        " market_sources.display_name AS source_display_name, market_sources.source_key,"
-        " assets.market_source_id, assets.still_open, accounts.account_name"
+        "SELECT account_id, asset_id, asset_name, market_source_id, still_open"
         " FROM assets"
-        " JOIN accounts ON assets.account_id = accounts.account_id"
-        " JOIN market_sources ON assets.market_source_id = market_sources.source_id"
-        " WHERE assets.asset_id = ?"
+        " WHERE asset_id = ?"
     )
 
     asset = query_db(query, (asset_id,), one=True)
@@ -64,18 +49,36 @@ def get_asset_by_id(asset_id: int) -> dict:
     return []
 
 
-def get_assets_from_account(account_id: int) -> list:
-    """Get all assets from a given account and returns a list of dictionaries
-    containing `asset_id` and `asset_name` keys."""
+def get_dividends_received(asset_id: int) -> list[dict]:
+    """Get the dividends received for asset. Returns a list of dictionaries
+    containing `date` and `amount_received`."""
 
-    query = "SELECT asset_id, asset_name FROM assets WHERE account_id = ?"
+    market_divs = dividends.get_dividends_for_asset(asset_id)
+    t = transactions.get_adjusted_transactions(asset_id)
 
-    assets = query_db(query, (account_id,))
+    divs_received = []
+    for div in market_divs:
+        a = get_asset(asset_id)
+        if not a["still_open"]:
+            last_date = max([transaction["date"] for transaction in t])
+            if div["date"] >= last_date:
+                continue
 
-    if assets:
-        return assets
+        # Find how many shares on that dividend date
+        shares = 0
+        div_received = False
+        for transaction in t:
+            if transaction["date"] <= div["date"]:
+                div_received = True
+                shares += transaction["shares"]
 
-    return []
+        if div_received:
+            value = shares * div["dividend_value"]
+            divs_received.append(
+                {"date": div["date"], "amount_received": value}
+            )
+
+    return divs_received
 
 
 def insert_asset(

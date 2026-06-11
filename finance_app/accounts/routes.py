@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, redirect, request, render_template, url_for
 
-from finance_app.accounts import repository as accounts
-from finance_app.assets import repository as assets
+from finance_app.accounts import accounts as accounts
+from finance_app.assets import assets as assets
 
 accounts_bp = Blueprint("accounts", __name__, template_folder="templates")
 
@@ -38,7 +38,7 @@ def add():
 def edit(account_id):
     """Edit account."""
 
-    account = accounts.get_account_by_id(account_id)
+    account = accounts.get_account(account_id)
 
     if request.method == "POST":
         account_name = request.form.get("account_name")
@@ -55,7 +55,7 @@ def edit(account_id):
 def delete(account_id):
     """Delete account."""
 
-    a = assets.get_assets_from_account(account_id)
+    a = assets.get_assets(account_id)
 
     if a:
         flash("Account not deleted. Must delete its transactions first.")

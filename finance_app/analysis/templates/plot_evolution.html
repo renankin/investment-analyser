@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+{% block title %}
+  Capital Evolution
+{% endblock title %}
+{% block main %}
+  <div>
+    <canvas id="myChart"></canvas>
+  </div>
+  <p>
+    Current value: {{ current_value["value"] }}
+    ({{ current_value["date"] | format_date }})
+  </p>
+  <div>
+    Plot for account:
+    <form action="{{ url_for('analysis.portfolio_evolution') }}" method="get">
+      <select name="account_id" class="form-select">
+        {% for account in accounts %}
+          <option value="{{ account['account_id'] }}">{{ account["account_name"] }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-primary">Plot</button>
+    </form>
+  </div>
+  <div>
+    Plot for asset:
+    <form action="{{ url_for('analysis.portfolio_evolution') }}" method="get">
+      <select name="asset_id" class="form-select">
+        {% for asset in assets %}<option value="{{ asset['asset_id'] }}">{{ asset["asset_name"] }}</option>{% endfor %}
+      </select>
+      <button class="btn btn-primary">Plot</button>
+    </form>
+  </div>
+{% endblock main %}
+{% block javascript %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById("myChart") ;
+
+    const labels = JSON.parse({{ labels | tojson }})
+    const data = JSON.parse({{ data | tojson }})
+    const title = JSON.parse({{ title | tojson }})
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: title,
+          data: data,
+          borderWidth: 1,
+          pointStyle: false,
+        }]
+      }
+    });
+  </script>
+{% endblock javascript %}
