@@ -2,7 +2,7 @@ import pandas as pd
 
 from finance_app.accounts import accounts
 from finance_app.transactions import transactions
-from finance_app.market import prices
+from finance_app.market import market
 
 
 def get_all_accounts_history() -> pd.Series:
@@ -47,7 +47,7 @@ def get_asset_history(asset_id: int) -> pd.Series:
     df1["shares_cumsum"] = df1["shares"].cumsum()
 
     # Get the prices for that asset
-    p = prices.get_prices(asset_id)
+    p = market.get_prices(asset_id)
     if not p:
         return pd.Series()
 

@@ -3,7 +3,6 @@ from flask import Blueprint, flash, json, redirect, request, render_template, ur
 from finance_app.accounts import accounts
 from finance_app.assets import assets
 from finance_app.analysis import roi, capital_evolution
-from finance_app.transactions import transactions
 
 analysis_bp = Blueprint("analysis", __name__, template_folder="templates")
 

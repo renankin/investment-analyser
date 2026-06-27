@@ -2,7 +2,7 @@ from scipy import optimize
 import datetime as dt
 
 from finance_app.assets import assets
-from finance_app.market import prices
+from finance_app.market import market
 from finance_app.transactions import transactions
 
 
@@ -25,7 +25,7 @@ def get_all_return() -> list[dict]:
 
         market_value = 0
         if asset["still_open"]:
-            p = prices.get_most_recent_price(asset["asset_id"])
+            p = market.get_most_recent_price(asset["asset_id"])
             if p:
                 total_shares = sum(t["shares"] for t in trans)
                 market_value = total_shares * p["price"]
@@ -79,7 +79,7 @@ def get_irr(asset_id: int) -> float | None:
 
     a = assets.get_asset(asset_id)
     if a["still_open"]:
-        p = prices.get_most_recent_price(asset_id)
+        p = market.get_most_recent_price(asset_id)
         if p:
             cashflow.append(p["price"] * total_shares)
             dates.append(p["date"])

@@ -1,6 +1,6 @@
 from finance_app.db import execute_db, query_db
 
-from finance_app.market import dividends
+from finance_app.market import market
 from finance_app.transactions import transactions
 
 
@@ -53,7 +53,7 @@ def get_dividends_received(asset_id: int) -> list[dict]:
     """Get the dividends received for asset. Returns a list of dictionaries
     containing `date` and `amount_received`."""
 
-    market_divs = dividends.get_dividends_for_asset(asset_id)
+    market_divs = market.get_dividends(asset_id)
     t = transactions.get_adjusted_transactions(asset_id)
 
     divs_received = []

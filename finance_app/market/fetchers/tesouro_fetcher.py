@@ -1,11 +1,17 @@
-import datetime as dt
+import csv
+import pandas as pd
+from pathlib import Path
+import time
 import requests
+import os
 
 
-def get_prices(bond_symbol: str) -> list[dict]:
-    """
-    Scrape "Tesouro Transparente" portal and return daily prices for bond.
-    """
+CSV_FILE = "instance/tesouro_direto.csv"
+
+
+def save_prices():
+    """Access "Tesouro Transparente" portal to fetch bond prices
+    and save in a local csv file."""
 
     url = (
         "https://www.tesourotransparente.gov.br/ckan/dataset/"
@@ -18,25 +24,70 @@ def get_prices(bond_symbol: str) -> list[dict]:
 
     r.raise_for_status()
 
-    prices = []
+    with open(CSV_FILE, "w") as file:
+        writer = csv.DictWriter(
+            file,
+            fieldnames=[
+                "bond_name",
+                "due_date",
+                "base_date",
+                "purchase_rate",
+                "sell_rate",
+                "purchase_price",
+                "sell_price",
+                "base_price",
+            ],
+        )
 
-    i = 0
-    for line in r.iter_lines():
-        items = line.decode("utf-8").split(";")
+        writer.writeheader()
 
-        # Items are: bond_name, due_date, base_date, purchase_rate, sell_rate, 
-        # purchase_price, sell_price and base_price
+        i = 0
+        for line in r.iter_lines():
+            items = line.decode("utf-8").split(";")
 
-        if i > 0:  # Skip header
-            bond_name = items[0]
-            maturity = dt.datetime.strptime(items[1], "%d/%m/%Y")
+            if i > 0:  # Skip header
+                writer.writerow(
+                    {
+                        "bond_name": items[0],
+                        "due_date": items[1],
+                        "base_date": items[2],
+                        "purchase_rate": items[3].replace(",", "."),
+                        "sell_rate": items[4].replace(",", "."),
+                        "purchase_price": items[5].replace(",", "."),
+                        "sell_price": items[6].replace(",", "."),
+                        "base_price": items[7].replace(",", "."),
+                    }
+                )
 
-            if bond_symbol == f"{bond_name} {maturity.year}":
-                base_date = dt.datetime.strptime(items[2], "%d/%m/%Y")
-                base_price = float(items[7].replace(",", "."))
+            i += 1
 
-                prices.append({"date": base_date.date(), "price": base_price})
 
-        i += 1
+def get_prices(bond_symbol: str) -> pd.Series:
+    """Returns as pandas Series indexed to `date` and named `prices`"""
 
-    return prices
+    if os.path.exists(CSV_FILE):
+        # Check if file has been updated today
+        if Path(CSV_FILE).stat().st_mtime < time.time() - 86400:
+            save_prices()
+
+        df = pd.read_csv(CSV_FILE, parse_dates=[1, 2], date_format="%d/%m/%Y")
+
+        df["bond_symbol"] = df["bond_name"] + " " + df["due_date"].dt.year.astype(str)
+
+        df_filtered = df[df["bond_symbol"] == bond_symbol]
+
+        if df_filtered.empty:
+            return pd.Series()
+
+        df_filtered.rename(
+            columns={"base_date": "date", "sell_price": "price"}, inplace=True
+        )
+
+        df_filtered.set_index("date", inplace=True)
+
+        return df_filtered["price"]
+        
+
+    else:
+        save_prices()
+        get_prices(bond_symbol)

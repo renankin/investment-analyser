@@ -1,3 +1,5 @@
+import pandas as pd
+
 from finance_app.market.fetchers import yfinance_fetcher, tesouro_fetcher
 
 # Map market source key with module name
@@ -19,29 +21,23 @@ class FetcherProtocol:
         self.supports_prices = market_source["supports_prices"]
         self.supports_splits = market_source["supports_stock_splits"]
 
-    def fetch_dividends(self, symbol: str) -> list[dict]:
-        """Fetches dividends from source and returns a list of dictionaries containing
-        `date` and `dividend` keys."""
+    def fetch_dividends(self, symbol: str) -> pd.Series:
 
         if self.supports_dividends:
             return self.module.get_dividends(symbol)
-        
-        return []
 
-    def fetch_prices(self, symbol: str) -> list[dict]:
-        """Fetches daily prices from source and returns a list of dictionaries
-        containing `date` and `price` keys."""
+        return pd.Series()
 
-        if self.supports_prices:        
+    def fetch_prices(self, symbol: str) -> pd.Series:
+
+        if self.supports_prices:
             return self.module.get_prices(symbol)
-        
-        return []
 
-    def fetch_stock_splits(self, symbol: str) -> list[dict]:
-        """Fetches stock splits from source and returns a list of dictionaries
-        containing `date` and `split_ratio` keys."""
+        return pd.Series()
+
+    def fetch_stock_splits(self, symbol: str) -> pd.Series:
 
         if self.supports_splits:
             return self.module.get_stock_splits(symbol)
-        
-        return []
+
+        return pd.Series()

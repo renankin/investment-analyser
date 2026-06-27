@@ -1,4 +1,5 @@
 import datetime as dt
+import pandas as pd
 import sqlite3
 
 import click
@@ -9,6 +10,11 @@ def adapt_date_iso(val):
     """Adapt datetime.date to ISO 8601 date."""
     return val.isoformat()
 
+def adapt_date_pandas(val):
+    """Adapt DateTimeIndex to ISO 8601 date."""
+
+    return val.strftime("%Y-%m-%d")
+
 
 def convert_date(val):
     """Convert ISO 8601 date to datetime.date object."""
@@ -17,6 +23,7 @@ def convert_date(val):
 
 sqlite3.register_converter("date", convert_date)
 sqlite3.register_adapter(dt.date, adapt_date_iso)
+sqlite3.register_adapter(pd.Timestamp, adapt_date_pandas)
 
 
 def dict_factory(cursor, row):

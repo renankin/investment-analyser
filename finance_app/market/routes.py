@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, json, redirect, request, render_template, url_for
 
 from finance_app.assets import assets
-from finance_app.market import dividends, prices, sources, stock_splits
+from finance_app.market import market
 
 market_bp = Blueprint("market", __name__, template_folder="templates")
 
@@ -10,7 +10,7 @@ market_bp = Blueprint("market", __name__, template_folder="templates")
 def show_sources():
     """Get market sources and display them in a table."""
 
-    s = sources.get_all_sources()
+    s = market.get_all_sources()
 
     return render_template("show_sources.html", market_sources=s)
 
@@ -33,7 +33,7 @@ def add_source():
         if not s:
             s = False
 
-        if sources.insert_source(display_name, source_key, p, d, s):
+        if market.insert_source(display_name, source_key, p, d, s):
             flash("Source added.")
             return redirect(url_for("market.show_sources"))
 
@@ -42,7 +42,7 @@ def add_source():
     return render_template("add_source.html")
 
 
-@market_bp.route("/market/sources/delete/<int:source_id>", methods=["POST"])
+@market_bp.route("/market/sources/<int:source_id>/delete", methods=["POST"])
 def delete_source(source_id):
     """Deletes source from database."""
 
@@ -52,7 +52,7 @@ def delete_source(source_id):
         flash("Must delete assets first.")
         return redirect(url_for("market.show_sources"))
 
-    if sources.delete_source(source_id):
+    if market.delete_source(source_id):
         flash("Source deleted.")
     else:
         flash("Failed to delete source.")
@@ -60,11 +60,11 @@ def delete_source(source_id):
     return redirect(url_for("market.show_sources"))
 
 
-@market_bp.route("/market/sources/edit/<int:source_id>", methods=["GET", "POST"])
-def update_source(source_id):
+@market_bp.route("/market/sources/<int:source_id>/edit", methods=["GET", "POST"])
+def edit_source(source_id):
     """Edits source."""
 
-    s = sources.get_source_by_id(source_id)
+    s = market.get_source_by_id(source_id)
 
     if request.method == "POST":
         display_name = request.form.get("source_name")
@@ -80,7 +80,7 @@ def update_source(source_id):
         if not s:
             s = False
 
-        if sources.update_source(source_id, display_name, source_key, p, d, s):
+        if market.update_source(source_id, display_name, source_key, p, d, s):
             flash("Source updated.")
         else:
             flash("Failed to update source.")
@@ -90,10 +90,38 @@ def update_source(source_id):
     return render_template("update_source.html", source=s)
 
 
+@market_bp.route("/market/sources/<int:source_id>/update", methods=["POST"])
+def update_source(source_id):
+    """Updates all entries in the source."""
+
+    all_assets = market.get_assets_from_source(source_id)
+
+    source = market.get_source_by_id(source_id)
+
+    flash("Database updated.")
+
+    for asset in all_assets:
+        asset_id = asset["asset_id"]
+
+        if source["supports_prices"]:
+            if not market.insert_prices(asset_id):
+                flash(f"No prices for {asset["asset_name"]}.")
+
+        if source["supports_dividends"]:
+            if not market.insert_dividends(asset_id):
+                flash(f"No dividends for {asset["asset_name"]}.")
+
+        if source["supports_stock_splits"]:
+            if not market.insert_stock_splits(asset_id):
+                flash(f"No stock splits for {asset["asset_name"]}.")
+
+    return redirect(url_for("market.show_sources"))
+
+
 @market_bp.route("/market/dividends/add/<int:asset_id>", methods=["POST"])
 def add_dividends(asset_id):
 
-    if dividends.insert_dividends_for_asset(asset_id):
+    if market.insert_dividends(asset_id):
         flash("Dividends added.")
 
     else:
@@ -119,7 +147,7 @@ def get_dividends():
 def delete_dividends(asset_id):
     """Delete dividends for asset."""
 
-    if dividends.delete_dividends_for_asset(asset_id):
+    if market.delete_dividends(asset_id):
         flash("Dividends deleted.")
     else:
         flash("Failed to delete dividends.")
@@ -131,7 +159,7 @@ def delete_dividends(asset_id):
 def show_dividends(asset_id):
     """Show dividends for asset."""
 
-    divs = dividends.get_dividends_for_asset(asset_id)
+    divs = market.get_dividends(asset_id)
 
     if divs:
         return render_template("show_dividends.html", dividends=divs)
@@ -144,7 +172,7 @@ def show_dividends(asset_id):
 def add_prices(asset_id):
     """Insert prices for asset."""
 
-    if prices.insert_prices_for_asset(asset_id):
+    if market.insert_prices(asset_id):
         flash("Prices added.")
     else:
         flash("Failed to add prices.")
@@ -156,7 +184,7 @@ def add_prices(asset_id):
 def delete_prices(asset_id):
     """Deletes prices from asset."""
 
-    if prices.delete_prices_for_asset(asset_id):
+    if market.delete_prices(asset_id):
         flash("Prices deleted.")
     else:
         flash("Failed to delete prices.")
@@ -181,7 +209,7 @@ def get_prices():
 def show_prices(asset_id):
     """Show prices for asset."""
 
-    p = prices.get_prices(asset_id)
+    p = market.get_prices(asset_id)
 
     data = json.dumps([price["unit_price"] for price in p])
     labels = json.dumps([price["date"] for price in p])
@@ -206,7 +234,7 @@ def show_prices(asset_id):
 def add_splits(asset_id):
     """Insert splits for asset."""
 
-    if stock_splits.insert_splits_for_asset(asset_id):
+    if market.insert_stock_splits(asset_id):
         flash("Splits added.")
     else:
         flash("Failed to add splits.")
@@ -218,7 +246,7 @@ def add_splits(asset_id):
 def delete_splits(asset_id):
     """Deletes stock splits from asset."""
 
-    if stock_splits.delete_splits_for_asset(asset_id):
+    if market.delete_stock_splits(asset_id):
         flash("Splits deleted.")
     else:
         flash("No splits to delete.")
@@ -243,7 +271,7 @@ def get_splits():
 def show_splits(asset_id):
     """Show stock splits for asset."""
 
-    s = stock_splits.get_stock_splits(asset_id)
+    s = market.get_stock_splits(asset_id)
 
     if s:
         return render_template("show_splits.html", splits=s)
