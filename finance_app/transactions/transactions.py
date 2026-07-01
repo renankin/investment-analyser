@@ -20,6 +20,7 @@ def get_all_transactions() -> list:
         " FROM transactions"
         " JOIN assets ON transactions.asset_id = assets.asset_id"
         " JOIN accounts ON assets.account_id = accounts.account_id"
+        " ORDER BY transactions.date DESC"
     )
 
     transactions = query_db(query)

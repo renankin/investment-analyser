@@ -3,8 +3,17 @@
   History
 {% endblock title %}
 {% block main %}
-  <a href="{{ url_for('transactions.add') }}">Add new transaction</a>
-  <table class="table table-borderless">
+  <div class="mb-3">
+    <a href="{{ url_for('transactions.add') }}">Add new transaction</a>
+  </div>
+  <div class="mb-3">
+    <input class="form-control"
+           type="text"
+           id="search-field"
+           onkeyup="filterTable()"
+           placeholder="Search for asset names..." />
+  </div>
+  <table class="table table-borderless" id="transactions-table">
     <thead>
       <tr>
         <th>Account</th>
@@ -51,3 +60,29 @@
     </tbody>
   </table>
 {% endblock main %}
+{% block javascript %}
+  <script>
+    function filterTable() {
+
+      const input = document.getElementById('search-field');
+      const table = document.getElementById('transactions-table');
+      const tr = table.getElementsByTagName('tr');
+      const filter = input.value.toUpperCase();
+
+      for (let i = 0; i < tr.length; i++ )
+      {
+        let td = tr[i].getElementsByTagName('td')[1];
+        if (td)
+        {
+          let txtValue = td.textContent || td.innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+
+  </script>
+{% endblock javascript %}

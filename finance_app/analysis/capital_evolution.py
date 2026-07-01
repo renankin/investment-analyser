@@ -40,6 +40,9 @@ def get_asset_history(asset_id: int) -> pd.Series:
 
     # Get the cummulative sum of shares
     t = transactions.get_adjusted_transactions(asset_id)
+    if not t:
+        return pd.Series()
+    
     df1 = pd.DataFrame(t)[["date", "shares"]]
 
     # Combine transactions which are ocurring in the same date

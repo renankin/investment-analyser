@@ -53,3 +53,6 @@ def portfolio_evolution():
             accounts=accounts.get_all_accounts(),
             assets=assets.get_all_assets(),
         )
+    
+    flash("No data to plot.")
+    return redirect(url_for("analysis.portfolio_evolution"))
