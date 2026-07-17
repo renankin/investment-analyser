@@ -3,6 +3,7 @@ from flask import Blueprint, flash, json, redirect, request, render_template, ur
 from finance_app.accounts import accounts
 from finance_app.assets import assets
 from finance_app.analysis import roi, capital_evolution
+from finance_app.market.fetchers.yfinance_fetcher import Fetcher
 
 analysis_bp = Blueprint("analysis", __name__, template_folder="templates")
 
@@ -53,6 +54,24 @@ def portfolio_evolution():
             accounts=accounts.get_all_accounts(),
             assets=assets.get_all_assets(),
         )
-    
+
     flash("No data to plot.")
     return redirect(url_for("analysis.portfolio_evolution"))
+
+
+@analysis_bp.route("/analysis/etf-screener")
+def etf_screener():
+    """Compares the top holdings and fund size for different ETFs."""
+
+    ticker = request.args.get("ticker")
+
+    if ticker:
+        security = Fetcher(ticker)
+
+        if security.is_etf():
+
+            return render_template("etf_screener.html", etf=security)
+
+        flash("Failed to load fund data.")
+
+    return render_template("etf_screener.html")

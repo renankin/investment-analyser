@@ -1,7 +1,9 @@
+from pandas import Series
+
 from finance_app.db import execute_db, query_db
 from finance_app.assets import assets
-
-from finance_app.market.fetchers.fetcher_registry import FetcherProtocol
+from finance_app.market.fetchers.yfinance_fetcher import Fetcher
+from finance_app.market.fetchers import tesouro_fetcher
 
 
 def get_all_sources() -> list:
@@ -183,10 +185,13 @@ def insert_prices(asset_id: int) -> bool:
 
     market_source = get_source_by_id(asset["market_source_id"])
 
-    fetcher = FetcherProtocol(market_source)
-
-    prices = fetcher.fetch_prices(asset["asset_name"])
-
+    if market_source["source_key"] == "yfinance":
+        prices = Fetcher(asset["asset_name"]).get_prices()
+    elif market_source["source_key"] == "tesouro_website":
+        prices = tesouro_fetcher.get_prices(asset["asset_name"])
+    else:
+        prices = Series()
+    
     if not prices.empty:
         args = []
         for date, price in prices.items():
@@ -240,9 +245,10 @@ def insert_stock_splits(asset_id: int) -> bool:
 
     market_source = get_source_by_id(asset["market_source_id"])
 
-    fetcher = FetcherProtocol(market_source)
-
-    splits = fetcher.fetch_stock_splits(asset["asset_name"])
+    if market_source["source_key"] == "yfinance":
+        splits = Fetcher(asset["asset_name"]).get_stock_splits()
+    else:
+        splits = Series()
 
     if not splits.empty:
         args = []
@@ -300,9 +306,10 @@ def insert_dividends(asset_id: int) -> bool:
 
     market_source = get_source_by_id(asset["market_source_id"])
 
-    fetcher = FetcherProtocol(market_source)
-
-    dividends = fetcher.fetch_dividends(asset["asset_name"])
+    if market_source["source_key"] == "yfinance":
+        dividends = Fetcher(asset["asset_name"]).get_dividends()
+    else:
+        dividends = Series()
 
     if not dividends.empty:
         args = []

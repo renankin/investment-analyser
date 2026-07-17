@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -49,13 +49,24 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle"
                role="button"
-               data-bs-toggle="dropdown">Analysis</a>
+               data-bs-toggle="dropdown">Portfolio analysis</a>
             <ul class="dropdown-menu">
               <li>
                 <a class="dropdown-item" href="{{ url_for('analysis.show_return') }}">ROI</a>
               </li>
               <li>
-                <a class="dropdown-item" href="{{ url_for('analysis.portfolio_evolution') }}">Portfolio evolution</a>
+                <a class="dropdown-item"
+                   href="{{ url_for('analysis.portfolio_evolution') }}">Evolution</a>
+              </li>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle"
+               role="button"
+               data-bs-toggle="dropdown">Market analysis</a>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" href="{{ url_for('analysis.etf_screener') }}">Screen ETFs</a>
               </li>
             </ul>
           </li>
