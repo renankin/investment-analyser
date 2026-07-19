@@ -3,27 +3,46 @@
   Edit
 {% endblock title %}
 {% block main %}
-  <form action="{{ url_for('transactions.edit', transaction_id=transaction['transaction_id']) }}"
-        method="post">
-    <p>
-      Asset name: {{ transaction["asset_name"] }}
+  <div class="container">
+    <form action="{{ url_for('transactions.edit', transaction_id=transaction['transaction_id']) }}"
+          method="post">
       <input name="asset_id" type="hidden" value="{{ transaction['asset_id'] }}" />
-    </p>
-    
-    <p>
-      Date:
-      <input name="date" type="date" value="{{ transaction['date'] }}" />
-    </p>
-    <p>
-      Shares:
-      <input name="shares" type="text" value="{{ transaction['shares'] }}" />
-    </p>
-    <p>
-      Price:
-      <input name="price" type="text" value="{{ transaction['price'] }}" />
-    </p>
-    <p>
-      <button type="submit" class="btn btn-primary">Edit</button>
-    </p>
-  </form>
+      <div class="mb-3">
+        <label class="form-label" for="assetNameInput">Asset name</label>
+        <input name="asset_name"
+               type="text"
+               class="form-control"
+               id="assetNameInput"
+               value="{{ asset['asset_name'] }}"
+               disabled />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="dateInput">Date</label>
+        <input name="date"
+               type="date"
+               class="form-control"
+               id="dateInput"
+               value="{{ transaction['date'] }}" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="sharesInput">Shares</label>
+        <input name="shares"
+               type="text"
+               class="form-control"
+               id="sharesInput"
+               value="{{ transaction['shares'] }}" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="priceInput">Price</label>
+        <input name="price"
+               type="text"
+               class="form-control"
+               id="priceInput"
+               value="{{ transaction['price'] }}" />
+      </div>
+      <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Edit</button>
+      </div>
+    </form>
+  </div>
 {% endblock main %}

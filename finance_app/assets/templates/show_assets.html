@@ -3,47 +3,64 @@
   Assets
 {% endblock title %}
 {% block main %}
-  <a href="{{ url_for('assets.add') }}">Add new asset</a>
-  <table class="table table-borderless">
-    <thead>
-      <tr>
-        <th>Asset name</th>
-        <th>Account name</th>
-        <th>Market source</th>
-        <th>Position open</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for asset in assets: %}
-        <tr>
-          <td>{{ asset["asset_name"] }}</td>
-          <td>{{ asset["account_name"] }}</td>
-          <td>{{ asset["source_display_name"] }}</td>
-          <td>
-            <input type="checkbox"
-                   disabled
-                   {% if asset["still_open"] %}checked{% endif %} />
-          </td>
-          <td>
-            <form action="{{ url_for('assets.show_dividends', asset_id=asset['asset_id']) }}"
-                  method="get">
-              <button type="submit" class="btn btn-primary">Show Dividends</button>
-            </form>
-          </td>
-          <td>
-            <form action="{{ url_for('assets.edit', asset_id=asset['asset_id']) }}"
-                  method="get">
-              <button type="submit" class="btn btn-primary">Edit asset</button>
-            </form>
-          </td>
-          <td>
-            <form action="{{ url_for('assets.delete', asset_id=asset['asset_id']) }}"
-                  method="post">
-              <button type="submit" class="btn btn-primary">Delete asset</button>
-            </form>
-          </td>
-        </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="container">
+    <div class="mb-3">
+      <a href="{{ url_for('assets.add') }}">Add new asset</a>
+    </div>
+    <form action="{{ url_for('assets.index') }}" method="get">
+      <div class="mb-3">
+        <input type="text"
+               class="form-control"
+               name="search"
+               placeholder="Type asset name">
+      </div>
+      <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+    </form>
+    {% if assets %}
+      <table class="table table-borderless">
+        <thead>
+          <tr>
+            <th>Asset name</th>
+            <th>Account name</th>
+            <th>Market source</th>
+            <th>Position open</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for asset in assets: %}
+            <tr>
+              <td>{{ asset["asset_name"] }}</td>
+              <td>{{ asset["account_name"] }}</td>
+              <td>{{ asset["source_display_name"] }}</td>
+              <td>
+                <input type="checkbox"
+                       disabled
+                       {% if asset["still_open"] %}checked{% endif %} />
+              </td>
+              <td>
+                <form action="{{ url_for('assets.show_dividends', asset_id=asset['asset_id']) }}"
+                      method="get">
+                  <button type="submit" class="btn btn-primary">Show Dividends</button>
+                </form>
+              </td>
+              <td>
+                <form action="{{ url_for('assets.edit', asset_id=asset['asset_id']) }}"
+                      method="get">
+                  <button type="submit" class="btn btn-primary">Edit asset</button>
+                </form>
+              </td>
+              <td>
+                <form action="{{ url_for('assets.delete', asset_id=asset['asset_id']) }}"
+                      method="post">
+                  <button type="submit" class="btn btn-primary">Delete asset</button>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
 {% endblock main %}

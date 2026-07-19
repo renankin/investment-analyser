@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %}
+  Accounts
+{% endblock title %}
+{% block main %}
+  <div class="container">
+    <div class="mb-3">
+      <a href="{{ url_for('accounts.add') }}">Add new account</a>
+    </div>
+    <form action="{{ url_for('accounts.index') }}" method="get">
+      <div class="mb-3">
+        <input type="text"
+               class="form-control"
+               name="search"
+               placeholder="Type account name">
+      </div>
+      <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+    </form>
+    {% if accounts %}
+    <table class="table table-borderless">
+      <thead>
+        <tr>
+          <th>Account name</th>
+          <th>Currency</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for account in accounts: %}
+          <tr>
+            <td>{{ account["account_name"] }}</td>
+            <td>{{ account["currency"] }}</td>
+            <td>
+              <form action="{{ url_for('accounts.edit', account_id=account['account_id']) }}"
+                    method="get">
+                <button type="submit" class="btn btn-primary">Edit Account</button>
+              </form>
+            </td>
+            <td>
+              <form action="{{ url_for('accounts.delete', account_id=account['account_id']) }}"
+                    method="post">
+                <button type="submit" class="btn btn-primary">Delete account</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+{% endblock main %}

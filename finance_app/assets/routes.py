@@ -12,16 +12,16 @@ assets_bp = Blueprint("assets", __name__, template_folder="templates")
 def index():
     """Show list of assets in account."""
 
-    if not accounts.get_all_accounts():
-        return redirect(url_for("accounts.index"))
+    asset_search = request.args.get("search")
+    if not asset_search:
+        asset_search = ""
 
-    a = assets.get_all_assets()
+    all_assets = []
+    for asset in assets.get_all_assets():
+        if asset_search.upper() in asset["asset_name"].upper():
+            all_assets.append(asset)
 
-    if a:
-        return render_template("show_assets.html", assets=a)
-
-    flash("No assets to show. Must add asset first.")
-    return redirect(url_for("assets.add"))
+    return render_template("show_assets.html", assets=all_assets)
 
 
 @assets_bp.route("/assets/add", methods=["POST", "GET"])

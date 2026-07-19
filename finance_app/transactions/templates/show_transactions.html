@@ -3,86 +3,71 @@
   History
 {% endblock title %}
 {% block main %}
-  <div class="mb-3">
-    <a href="{{ url_for('transactions.add') }}">Add new transaction</a>
-  </div>
-  <div class="mb-3">
-    <input class="form-control"
-           type="text"
-           id="search-field"
-           onkeyup="filterTable()"
-           placeholder="Search for asset names..." />
-  </div>
-  <table class="table table-borderless" id="transactions-table">
-    <thead>
-      <tr>
-        <th>Account</th>
-        <th>Asset</th>
-        <th>Date</th>
-        <th>Shares</th>
-        <th>Price</th>
-        <th>Split Shares</th>
-        <th>Split Prices</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for t in transactions: %}
+  <div class="container">
+    <div class="mb-3">
+      <a href="{{ url_for('transactions.add') }}">Add new transaction</a>
+    </div>
+    <form action="{{ url_for('transactions.index') }}" method="get">
+      <div class="mb-3">
+        <input type="text"
+               class="form-control"
+               name="search"
+               placeholder="Type asset name">
+      </div>
+      <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+    </form>
+    {% if transactions %}
+    <table class="table table-borderless" id="transactions-table">
+      <thead>
         <tr>
-          <td>{{ t ["account_name"] }}</td>
-          <td>{{ t ["asset_name"] }}</td>
-          <td>{{ t["date"]| format_date }}</td>
-          <td>{{ "%.2f" | format(t["shares"]) }}</td>
-          <td>{{ t["price"] | format_currency(t["currency"]) }}</td>
-          {% if t["is_adjusted"] %}
-            <td>{{ "%.2f" | format(t["adj_shares"]) }}</td>
-            <td>{{ t["adj_price"] | format_currency(t["currency"]) }}</td>
-            <td>{{ (t["adj_price"] * t["adj_shares"]) | format_currency(t["currency"]) }}</td>
-          {% else %}
-            <td>-</td>
-            <td>-</td>
-            <td>{{ (t["price"] * t["shares"]) | format_currency(t["currency"]) }}</td>
-          {% endif %}
-          <td>
-            <form action="{{ url_for('transactions.edit', transaction_id=t['transaction_id']) }}"
-                  method="get">
-              <button type="submit" class="btn btn-primary">Edit</button>
-            </form>
-          </td>
-          <td>
-            <form action="{{ url_for('transactions.delete', transaction_id=t['transaction_id']) }}"
-                  method="post">
-              <button type="submit" class="btn btn-primary">Delete</button>
-            </form>
-          </td>
+          <th>Account</th>
+          <th>Asset</th>
+          <th>Date</th>
+          <th>Shares</th>
+          <th>Price</th>
+          <th>Split Shares</th>
+          <th>Split Prices</th>
+          <th>Total</th>
         </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        {% for transaction in transactions: %}
+          <tr>
+            <td>{{ transaction["account_name"] }}</td>
+            <td>{{ transaction["asset_name"] }}</td>
+            <td>{{ transaction["date"]| format_date }}</td>
+            <td>{{ "%.2f" | format(transaction["shares"]) }}</td>
+            <td>{{ transaction["price"] | format_currency(transaction["currency"]) }}</td>
+            {% if transaction["is_adjusted"] %}
+              <td>{{ "%.2f" | format(transaction["adj_shares"]) }}</td>
+              <td>{{ transaction["adj_price"] | format_currency(transaction["currency"]) }}</td>
+              <td>
+                {{ (transaction["adj_price"] * transaction["adj_shares"])
+                | format_currency(transaction["currency"]) }}
+              </td>
+            {% else %}
+              <td>-</td>
+              <td>-</td>
+              <td>{{ (transaction["price"] * transaction["shares"]) | format_currency(transaction["currency"]) }}</td>
+            {% endif %}
+            <td>
+              <form action="{{ url_for('transactions.edit', transaction_id=transaction['transaction_id']) }}"
+                    method="get">
+                <button type="submit" class="btn btn-primary">Edit</button>
+              </form>
+            </td>
+            <td>
+              <form action="{{ url_for('transactions.delete', transaction_id=transaction['transaction_id']) }}"
+                    method="post">
+                <button type="submit" class="btn btn-primary">Delete</button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
 {% endblock main %}
-{% block javascript %}
-  <script>
-    function filterTable() {
-
-      const input = document.getElementById('search-field');
-      const table = document.getElementById('transactions-table');
-      const tr = table.getElementsByTagName('tr');
-      const filter = input.value.toUpperCase();
-
-      for (let i = 0; i < tr.length; i++ )
-      {
-        let td = tr[i].getElementsByTagName('td')[1];
-        if (td)
-        {
-          let txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
-
-  </script>
-{% endblock javascript %}

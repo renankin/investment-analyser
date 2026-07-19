@@ -10,13 +10,16 @@ accounts_bp = Blueprint("accounts", __name__, template_folder="templates")
 def index():
     """Show all accounts."""
 
-    a = accounts.get_all_accounts()
+    account_search = request.args.get("search")
+    if not account_search:
+        account_search = ""
 
-    if a:
-        return render_template("accounts.html", accounts=a)
+    all_accounts = []
+    for account in accounts.get_all_accounts():
+        if account_search.upper() in account["account_name"].upper():
+            all_accounts.append(account)
 
-    flash("No accounts to show. Must add account first.")
-    return redirect(url_for("accounts.add"))
+    return render_template("show_accounts.html", accounts=all_accounts)
 
 
 @accounts_bp.route("/accounts/add", methods=["GET", "POST"])

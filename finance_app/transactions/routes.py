@@ -10,21 +10,18 @@ transactions_bp = Blueprint("transactions", __name__, template_folder="templates
 
 @transactions_bp.route("/transactions")
 def index():
-    """Shows a list of all transactions."""
+    """List all transactions."""
 
-    if not accounts.get_all_accounts():
-        return redirect(url_for("accounts.index"))
+    asset_search = request.args.get("search")
+    if not asset_search:
+        asset_search = ""
 
-    if not assets.get_all_assets():
-        return redirect(url_for("assets.index"))
+    all_transactions = []
+    for transaction in transactions.get_all_transactions():
+        if asset_search.upper() in transaction["asset_name"].upper():
+            all_transactions.append(transaction)
 
-    t = transactions.get_all_transactions()
-
-    if t:
-        return render_template("show_transactions.html", transactions=t)
-
-    flash("No transactions to show. Must add transaction first.")
-    return redirect(url_for("transactions.add"))
+    return render_template("show_transactions.html", transactions=all_transactions)
 
 
 @transactions_bp.route("/transactions/add", methods=["GET", "POST"])
@@ -73,6 +70,8 @@ def edit(transaction_id):
 
     t = transactions.get_transaction(transaction_id)
 
+    asset = assets.get_asset(t["asset_id"])
+
     if not t:
         flash("Transaction invalid.")
         return redirect(url_for("transactions.index"))
@@ -87,4 +86,4 @@ def edit(transaction_id):
         flash("Transaction updated.")
         return redirect(url_for("transactions.index"))
 
-    return render_template("edit_transaction.html", transaction=t)
+    return render_template("edit_transaction.html", transaction=t, asset=asset)
