@@ -1,5 +1,5 @@
 from finance_app.db import query_db, execute_db
-from finance_app.market import market
+from finance_app.market import stock_splits
 
 
 def delete_transaction(transaction_id: int):
@@ -57,7 +57,7 @@ def get_adjusted_transaction(transaction_id: int) -> dict:
 
     t = get_transaction(transaction_id)
 
-    s = market.get_stock_splits(t["asset_id"])
+    s = stock_splits.get_stock_splits(t["asset_id"])
 
     new_t = t
     t["is_adjusted"] = False

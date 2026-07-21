@@ -58,7 +58,7 @@ def edit(account_id):
 def delete(account_id):
     """Delete account."""
 
-    a = assets.get_assets(account_id)
+    a = accounts.get_assets(account_id)
 
     if a:
         flash("Account not deleted. Must delete its transactions first.")

@@ -2,7 +2,7 @@ from flask import Blueprint, flash, request, redirect, render_template, url_for
 
 from finance_app.accounts import accounts
 from finance_app.assets import assets
-from finance_app.market import market
+from finance_app.market import dividends, prices, stock_splits
 from finance_app.transactions import transactions
 
 assets_bp = Blueprint("assets", __name__, template_folder="templates")
@@ -28,51 +28,50 @@ def index():
 def add():
     """Add new asset for account."""
 
-    a = accounts.get_all_accounts()
+    all_accounts = accounts.get_all_accounts()
 
-    s = market.get_all_sources()
-
-    if not a:
+    if not all_accounts:
         flash("No accounts. Must add account first.")
         return redirect(url_for("accounts.add"))
 
     if request.method == "POST":
         account_id = request.form.get("account_id", type=int)
         asset_name = request.form.get("asset_name")
-        market_source_id = request.form.get("market_source_id", type=int)
-        still_open = request.form.get("still_open", type=int)
+        asset_type = request.form.get("asset_type")
+        still_open = request.form.get("still_open", type=bool)
 
-        assets.insert_asset(account_id, asset_name, market_source_id, still_open)
+        if not still_open:
+            still_open = False
+
+        assets.insert_asset(account_id, asset_name, asset_type, still_open)
         flash("Asset added.")
         return redirect(url_for("assets.index"))
 
-    return render_template("add_asset.html", accounts=a, sources=s)
+    return render_template("add_asset.html", accounts=all_accounts)
 
 
 @assets_bp.route("/assets/edit/<int:asset_id>", methods=["POST", "GET"])
 def edit(asset_id):
     """Edit asset."""
 
-    a = assets.get_asset(asset_id)
-
-    s = market.get_all_sources()
+    a = assets.get_asset_by_id(asset_id)
 
     if request.method == "POST":
         account_id = request.form.get("account_id", type=int)
         asset_name = request.form.get("asset_name")
-        market_source_id = request.form.get("market_source_id", type=int)
+        asset_type = request.form.get("asset_type")
         still_open = request.form.get("still_open", type=bool)
 
         if not still_open:
             still_open = False
 
         assets.update_asset(
-            asset_id, account_id, asset_name, market_source_id, still_open
+            asset_id, account_id, asset_name, asset_type, still_open
         )
         flash("Asset updated.")
         return redirect(url_for("assets.index"))
 
-    return render_template("edit_asset.html", asset=a, market_sources=s)
+    return render_template("edit_asset.html", asset=a)
 
 
 @assets_bp.route("/assets/<int:asset_id>/delete", methods=["POST"])
@@ -83,15 +82,15 @@ def delete(asset_id):
         flash("Must delete transactions first.")
         return redirect(url_for("assets.index"))
 
-    if market.get_prices(asset_id):
+    if prices.get_prices(asset_id):
         flash("Must delete prices first.")
         return redirect(url_for("assets.index"))
 
-    if market.get_dividends(asset_id):
+    if dividends.get_dividends(asset_id):
         flash("Must delete dividends first.")
         return redirect(url_for("assets.index"))
 
-    if market.get_stock_splits(asset_id):
+    if stock_splits.get_stock_splits(asset_id):
         flash("Must delete splits first.")
         return redirect(url_for("assets.index"))
 
@@ -107,7 +106,7 @@ def show_dividends(asset_id):
 
     dividends = assets.get_dividends_received(asset_id)
 
-    asset = assets.get_asset(asset_id)
+    asset = assets.get_asset_by_id(asset_id)
 
     account = accounts.get_account(asset["account_id"])
 

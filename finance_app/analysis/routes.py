@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, json, redirect, request, render_template, url_for
+from flask import Blueprint, flash, json, request, render_template
 
 from finance_app.accounts import accounts
 from finance_app.assets import assets
@@ -15,8 +15,7 @@ def show_return():
     a = roi.get_all_return()
 
     if not a:
-        flash("No assets to show. Must add asset first.")
-        return redirect(url_for("assets.add"))
+        flash("No data to show.")
 
     return render_template("show_return.html", assets=a)
 
@@ -33,30 +32,26 @@ def portfolio_evolution():
         title_label = accounts.get_account(account_id)["account_name"]
     elif asset_id:
         hist = capital_evolution.get_asset_history(asset_id)
-        title_label = assets.get_asset(asset_id)["asset_name"]
+        title_label = assets.get_asset_by_id(asset_id)["asset_name"]
     else:
         hist = capital_evolution.get_all_accounts_history()
         title_label = "All accounts"
 
-    if not hist.empty:
-        index = json.dumps(hist.index.tolist())
-        values = json.dumps(hist.values.tolist())
-        title = json.dumps(title_label)
+    if hist.empty:
+        flash("No data to show.")
 
-        current_value = {"date": hist.index.max(), "value": hist.iloc[-1]}
+    index = json.dumps(hist.index.tolist())
+    values = json.dumps(hist.values.tolist())
+    title = json.dumps(title_label)
 
-        return render_template(
-            "plot_evolution.html",
-            labels=index,
-            data=values,
-            title=title,
-            current_value=current_value,
-            accounts=accounts.get_all_accounts(),
-            assets=assets.get_all_assets(),
-        )
-
-    flash("No data to plot.")
-    return redirect(url_for("analysis.portfolio_evolution"))
+    return render_template(
+        "plot_evolution.html",
+        labels=index,
+        data=values,
+        title=title,
+        accounts=accounts.get_all_accounts(),
+        assets=assets.get_all_assets(),
+    )
 
 
 @analysis_bp.route("/analysis/etf-screener")

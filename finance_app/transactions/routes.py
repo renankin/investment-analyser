@@ -40,6 +40,18 @@ def add():
         shares = request.form.get("shares", type=float)
         price = request.form.get("price", type=float)
 
+        if not date:
+            flash("Must provide date.")
+            return redirect(url_for("transactions.add"))
+
+        if not shares:
+            flash("Must provide shares")
+            return redirect(url_for("transactions.add"))
+
+        if not price:
+            flash("Must provide price.")
+            return redirect(url_for("transactions.add"))
+
         transactions.insert_transaction(asset_id, date, shares, price)
         flash("Transaction added.")
         return redirect(url_for("transactions.index"))
@@ -70,7 +82,7 @@ def edit(transaction_id):
 
     t = transactions.get_transaction(transaction_id)
 
-    asset = assets.get_asset(t["asset_id"])
+    asset = assets.get_asset_by_id(t["asset_id"])
 
     if not t:
         flash("Transaction invalid.")
@@ -81,6 +93,18 @@ def edit(transaction_id):
         date = request.form.get("date")
         shares = request.form.get("shares", type=float)
         price = request.form.get("price", type=float)
+
+        if not date:
+            flash("Must provide date.")
+            return redirect(url_for("transactions.edit", transaction_id))
+
+        if not shares:
+            flash("Must provide shares")
+            return redirect(url_for("transactions.edit", transaction_id))
+
+        if not price:
+            flash("Must provide price.")
+            return redirect(url_for("transactions.edit", transaction_id))
 
         transactions.update_transaction(transaction_id, asset_id, date, shares, price)
         flash("Transaction updated.")

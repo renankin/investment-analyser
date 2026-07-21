@@ -18,17 +18,26 @@
                value="{{ asset['asset_name'] }}" />
       </div>
       <div class="mb-3">
-        <label class="form-label" for="marketSourceInput">Market Source</label>
-        <select name="market_source_id" class="form-select">
-          {% for source in market_sources %}
-            <option value="{{ source['source_id'] }}">{{ source["display_name"] }}</option>
-          {% endfor %}
+        <label class="form-label" for="assetNameInput">Asset type</label>
+        <select class="form-select" name="asset_type">
+          <option value="Stock"
+                  {% if asset["asset_type"] == "Stock" %}selected{% endif %}>
+            Stock
+          </option>
+          <option value="ETF" {% if asset["asset_type"] == "ETF" %}selected{% endif %}>
+            ETF
+          </option>
+          <option value="Brazilian bond"
+                  {% if asset["asset_type"] == "Brazilian bond" %}selected{% endif %}>
+            Brazilian bond
+          </option>
         </select>
       </div>
       <div class="mb-3">
         <div class="form-check">
           <input name="still_open"
                  type="checkbox"
+                 value="1"
                  class="form-check-input"
                  {% if asset["still_open"] %}checked{% endif %} />
           <label class="form-check-label">Position open</label>

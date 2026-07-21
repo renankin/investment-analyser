@@ -6,16 +6,14 @@
   <div>
     <canvas id="myChart"></canvas>
   </div>
-  <p>
-    Current value: {{ current_value["value"] }}
-    ({{ current_value["date"] | format_date }})
-  </p>
   <div>
     Plot for account:
     <form action="{{ url_for('analysis.portfolio_evolution') }}" method="get">
       <select name="account_id" class="form-select">
         {% for account in accounts %}
-          <option value="{{ account['account_id'] }}">{{ account["account_name"] }}</option>
+          <option value="{{ account['account_id'] }}">
+            {{ account["account_name"] }}
+          </option>
         {% endfor %}
       </select>
       <button class="btn btn-primary">Plot</button>
@@ -25,7 +23,9 @@
     Plot for asset:
     <form action="{{ url_for('analysis.portfolio_evolution') }}" method="get">
       <select name="asset_id" class="form-select">
-        {% for asset in assets %}<option value="{{ asset['asset_id'] }}">{{ asset["asset_name"] }}</option>{% endfor %}
+        {% for asset in assets %}
+          <option value="{{ asset['asset_id'] }}">{{ asset["asset_name"] }}</option>
+        {% endfor %}
       </select>
       <button class="btn btn-primary">Plot</button>
     </form>

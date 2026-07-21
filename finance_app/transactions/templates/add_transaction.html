@@ -3,15 +3,38 @@
   Add new transaction
 {% endblock title %}
 {% block main %}
-  <form action="{{ url_for('transactions.add') }}" method="post">
-    <select name="asset_id">
-      {% for asset in assets: %}
-        <option value="{{ asset['asset_id'] }}">{{ asset['asset_name'] }}</option>
-      {% endfor %}
-    </select>
-    <input name="date" type="date" placeholder="Date" />
-    <input name="shares" type="text" placeholder="Shares" />
-    <input name="price" type="text" placeholder="Price" />
-    <button type="input" class="btn btn-primary">Add</button>
-  </form>
+  <div class="container">
+    <form action="{{ url_for('transactions.add') }}" method="post">
+      <div class="mb-3">
+        <label class="form-label" for="assetNameSelect">Asset name</label>
+        <select class="form-select" name="asset_id" id="assetNameSelect">
+          {% for asset in assets: %}
+            <option value="{{ asset['asset_id'] }}">{{ asset['asset_name'] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="dateInput">Transaction date</label>
+        <input class="form-control" name="date" type="date" placeholder="Date" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="sharesInput">Shares</label>
+        <input class="form-control"
+               id="sharesInput"
+               name="shares"
+               type="number"
+               step="1" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="priceInput">Price</label>
+        <input class="form-control"
+               id="priceInput"
+               name="price"
+               type="number"
+               step="0.01"
+               min="0" />
+      </div>
+      <button type="input" class="btn btn-primary">Add</button>
+    </form>
+  </div>
 {% endblock main %}

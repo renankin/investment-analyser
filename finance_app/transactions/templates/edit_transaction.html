@@ -27,17 +27,20 @@
       <div class="mb-3">
         <label class="form-label" for="sharesInput">Shares</label>
         <input name="shares"
-               type="text"
+               type="number"
                class="form-control"
                id="sharesInput"
+               step="0.01"
                value="{{ transaction['shares'] }}" />
       </div>
       <div class="mb-3">
         <label class="form-label" for="priceInput">Price</label>
         <input name="price"
-               type="text"
+               type="number"
                class="form-control"
                id="priceInput"
+               step="0.01"
+               min="0"
                value="{{ transaction['price'] }}" />
       </div>
       <div class="mb-3">

@@ -1,22 +1,18 @@
--- Accounts
 CREATE TABLE IF NOT EXISTS  accounts (
     account_id INTEGER PRIMARY KEY,
     account_name TEXT NOT NULL UNIQUE,
     currency TEXT NOT NULL
 );
 
--- Assets
 CREATE TABLE IF NOT EXISTS assets (
     asset_id INTEGER PRIMARY KEY,
     asset_name TEXT NOT NULL UNIQUE,
-    market_source_id INTEGER NOT NULL,
+    asset_type TEXT NOT NULL,
     account_id INTEGER NOT NULL,
     still_open INTEGER NOT NULL,
     FOREIGN KEY (account_id) REFERENCES accounts(account_id)
-    FOREIGN KEY (market_source_id) REFERENCES market_source(market_source_id)
 );
 
--- Transactions
 CREATE TABLE IF NOT EXISTS transactions (
     transaction_id INTEGER PRIMARY KEY,
     asset_id INTEGER NOT NULL,
@@ -25,21 +21,6 @@ CREATE TABLE IF NOT EXISTS transactions (
     price REAL NOT NULL,
     FOREIGN KEY (asset_id) REFERENCES assets(asset_id)
 );
-
--- Market data
-CREATE TABLE IF NOT EXISTS market_sources (
-    source_id INTEGER PRIMARY KEY,
-    display_name TEXT NOT NULL UNIQUE,
-    source_key TEXT NOT NULL UNIQUE,
-
-    -- Capabilities
-    supports_prices INTEGER DEFAULT 1,
-    supports_dividends INTEGER DEFAULT 0,
-    supports_stock_splits INTEGER DEFAULT 0
-);
-
-INSERT INTO market_sources VALUES (1, 'yFinance', 'yfinance', 1, 1, 1);
-INSERT INTO market_sources VALUES (2, 'tesouro_website', 'Tesouro Direto', 1, 0, 0);
 
 CREATE TABLE IF NOT EXISTS dividends (
     date DATE NOT NULL,

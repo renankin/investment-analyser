@@ -81,12 +81,14 @@ def query_db(query: str, args=(), one=False):
     res = cur.fetchall()
     cur.close()
 
-    if res:
-        if one:
+    if one:
+        if res:
             return res[0]
+        return {}
+    
+    if res:
         return res
-
-    return None
+    return []
 
 
 def init_app(app):

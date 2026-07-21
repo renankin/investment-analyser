@@ -3,9 +3,25 @@
   Add new account
 {% endblock title %}
 {% block main %}
-  <form action="{{ url_for('accounts.add') }}" method="post">
-    <input name="account_name" type="text" placeholder="Account name" />
-    <input name="currency" type="text" placeholder="Currency" />
-    <button type="input" class="btn btn-primary">Add</button>
-  </form>
+  <div class="container">
+    <form action="{{ url_for('accounts.add') }}" method="post">
+      <div class="mb-3">
+      <label class="form-label" for="accountNameSelect">Account</label>
+        <input class="form-select"
+               name="account_name"
+               id="accountNameSelect"
+               type="text"
+               placeholder="Account name" />
+      </div>
+      <div class="mb-3">
+      <label class="form-label" for="currencySelect">Currency</label>
+        <input class="form-select"
+               name="currency"
+               id="currencySelect"
+               type="text"
+               placeholder="Currency" />
+      </div>
+      <button type="input" class="btn btn-primary">Add</button>
+    </form>
+  </div>
 {% endblock main %}
