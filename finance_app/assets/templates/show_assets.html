@@ -19,48 +19,61 @@
       </div>
     </form>
     {% if assets %}
-      <table class="table table-borderless">
-        <thead>
-          <tr>
-            <th>Asset name</th>
-            <th>Account name</th>
-            <th>Asset type</th>
-            <th>Position open</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for asset in assets: %}
+      <div class="table-responsive">
+        <table class="table">
+          <thead>
             <tr>
-              <td>{{ asset["asset_name"] }}</td>
-              <td>{{ asset["account_name"] }}</td>
-              <td>{{ asset["asset_type"] }}</td>
-              <td>
-                <input type="checkbox"
-                       disabled
-                       {% if asset["still_open"] %}checked{% endif %} />
-              </td>
-              <td>
-                <form action="{{ url_for('assets.show_dividends', asset_id=asset['asset_id']) }}"
-                      method="get">
-                  <button type="submit" class="btn btn-primary">Show Dividends</button>
-                </form>
-              </td>
-              <td>
-                <form action="{{ url_for('assets.edit', asset_id=asset['asset_id']) }}"
-                      method="get">
-                  <button type="submit" class="btn btn-primary">Edit asset</button>
-                </form>
-              </td>
-              <td>
-                <form action="{{ url_for('assets.delete', asset_id=asset['asset_id']) }}"
-                      method="post">
-                  <button type="submit" class="btn btn-primary">Delete asset</button>
-                </form>
-              </td>
+              <th>Asset symbol</th>
+              <th>Asset name</th>
+              <th>Account name</th>
+              <th>Asset type</th>
+              <th>Benchmark index</th>
+              <th>Expense ratio</th>
+              <th>Total assets</th>
+              <th>Position open</th>
+              <th>..</th>
+              <th>..</th>
+              <th>..</th>
             </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {% for asset in assets: %}
+              <tr>
+                <td>{{ asset["asset_symbol"] }}</td>
+                <td>{{ asset["asset_name"] }}</td>
+                <td>{{ asset["account_name"] }}</td>
+                <td>{{ asset["asset_type"] }}</td>
+                <td>{{ asset["benchmark_index"] }}</td>
+                <td>{{ asset["expense_ratio"] | format_percent(in_percent=True) }}</td>
+                <td>{{ asset["total_assets"] | format_currency(asset["currency"]) }}</td>
+                <td>
+                  <input type="checkbox"
+                         disabled
+                         {% if asset["still_open"] %}checked{% endif %} />
+                </td>
+                <td>
+                  <form action="{{ url_for('assets.show_dividends', asset_id=asset['asset_id']) }}"
+                        method="get">
+                    <button type="submit" class="btn btn-primary">Show Dividends</button>
+                  </form>
+                </td>
+                <td>
+                  <form action="{{ url_for('assets.edit') }}" method="get">
+                    <input type="hidden" value="{{ asset['asset_id'] }}" name="asset_id">
+                    <button type="submit" class="btn btn-primary">Edit asset</button>
+                  </form>
+                </td>
+                <td>
+                  <form action="{{ url_for('assets.delete', asset_id=asset['asset_id']) }}"
+                        method="post">
+                    <button type="submit" class="btn btn-primary">Delete asset</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     {% endif %}
   </div>
 {% endblock main %}

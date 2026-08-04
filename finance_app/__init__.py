@@ -1,4 +1,5 @@
 import os
+
 from flask import Flask
 
 from finance_app import db, filters
@@ -6,6 +7,7 @@ from finance_app.accounts.routes import accounts_bp
 from finance_app.analysis.routes import analysis_bp
 from finance_app.assets.routes import assets_bp
 from finance_app.market.routes import market_bp
+from finance_app.market_analysis.routes import market_analysis_bp
 from finance_app.transactions.routes import transactions_bp
 
 
@@ -23,11 +25,13 @@ def create_app():
 
     app.jinja_env.filters["format_currency"] = filters.format_currency
     app.jinja_env.filters["format_date"] = filters.format_date
+    app.jinja_env.filters["format_percent"] = filters.format_percent
 
     app.register_blueprint(accounts_bp)
     app.register_blueprint(analysis_bp)
     app.register_blueprint(assets_bp)
     app.register_blueprint(market_bp)
+    app.register_blueprint(market_analysis_bp)
     app.register_blueprint(transactions_bp)
 
     return app

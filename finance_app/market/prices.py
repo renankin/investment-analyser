@@ -1,9 +1,9 @@
 from pandas import Series
 
-from finance_app.db import execute_db, query_db
 from finance_app.assets import assets
-from finance_app.market.fetchers.yfinance_fetcher import Fetcher
+from finance_app.db import execute_db, query_db
 from finance_app.market.fetchers import tesouro_fetcher
+from finance_app.market.fetchers.yfinance_fetcher import YFetcher
 
 
 def get_prices(asset_id: int) -> list:
@@ -54,13 +54,13 @@ def delete_prices(asset_id: int) -> bool:
 def insert_prices(asset_id: int) -> bool:
     """Insert prices for asset in database and returns True if successful."""
 
-    asset = assets.get_asset_by_id(asset_id)
+    asset = assets.get_asset(asset_id)
     
     prices = Series()
-    if asset["asset_type"] == ("Stock" or "ETF"):
-        prices = Fetcher(asset["asset_name"]).get_prices()
+    if asset["asset_type"] in ["Stock", "ETF"]:
+        prices = YFetcher(asset["asset_symbol"]).get_prices()
     if asset["asset_type"] == "Brazilian bond":
-        prices = tesouro_fetcher.get_prices(asset["asset_name"])
+        prices = tesouro_fetcher.get_prices(asset["asset_symbol"])
  
     if not prices.empty:
         args = []

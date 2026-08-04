@@ -1,9 +1,7 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from finance_app.accounts import accounts as accounts
-from finance_app.assets import assets as assets
-from finance_app.transactions import transactions as transactions
-
+from finance_app.assets import assets
+from finance_app.transactions import transactions
 
 transactions_bp = Blueprint("transactions", __name__, template_folder="templates")
 
@@ -18,7 +16,7 @@ def index():
 
     all_transactions = []
     for transaction in transactions.get_all_transactions():
-        if asset_search.upper() in transaction["asset_name"].upper():
+        if asset_search.upper() in transaction["asset_symbol"].upper():
             all_transactions.append(transaction)
 
     return render_template("show_transactions.html", transactions=all_transactions)
@@ -82,7 +80,7 @@ def edit(transaction_id):
 
     t = transactions.get_transaction(transaction_id)
 
-    asset = assets.get_asset_by_id(t["asset_id"])
+    asset = assets.get_asset(t["asset_id"])
 
     if not t:
         flash("Transaction invalid.")

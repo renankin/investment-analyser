@@ -10,11 +10,11 @@ def delete_transaction(transaction_id: int):
 
 def get_all_transactions() -> list:
     """Fetch all transactions from database and returns a list of dictionaries
-    containing `transaction_id`, `account_name`, `asset_name`, `date`, `currency`,
+    containing `transaction_id`, `account_name`, `asset_symbol`, `date`, `currency`,
     `shares`, `adj_shares`, `price` and `adj_price`."""
 
     query = (
-        "SELECT accounts.account_name, accounts.currency, assets.asset_name,"
+        "SELECT accounts.account_name, accounts.currency, assets.asset_symbol,"
         " transactions.transaction_id, transactions.date, transactions.shares, "
         " transactions.price"
         " FROM transactions"

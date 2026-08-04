@@ -9,9 +9,27 @@
         <label class="form-label" for="accountNameSelect">Account</label>
         <select class="form-select" id="accountNameSelect" name="account_id">
           {% for account in accounts %}
-            <option value="{{ account['account_id'] }}">{{ account["account_name"] }}</option>
+            <option value="{{ account['account_id'] }}">
+              {{ account["account_name"] }}
+            </option>
           {% endfor %}
         </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="assetSymbolInput">Asset symbol</label>
+        <input type="text"
+               class="form-control"
+               id="assetSymbolInput"
+               placeholder="Asset symbol"
+               name="asset_symbol">
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="assetNameInput">Asset Name</label>
+        <input class="form-control"
+               name="asset_name"
+               type="text"
+               id="assetNameInput"
+               placeholder="Asset name" />
       </div>
       <div class="mb-3">
         <label class="form-label" for="assetTypeSelect">Asset type</label>
@@ -22,12 +40,31 @@
         </select>
       </div>
       <div class="mb-3">
-        <label class="form-label" for="assetNameInput">Asset Name</label>
-        <input class="form-control"
-               name="asset_name"
-               type="text"
-               id="assetNameInput"
-               placeholder="Asset name" />
+        <label class="form-label" for="benchmarkIndexInput">Benchmark index</label>
+        <input type="text"
+               class="form-control"
+               id="benchmarkIndexInput"
+               placeholder="Benchmark index"
+               name="benchmark_index">
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="expenseRatioInput">Expense ratio (%)</label>
+        <input type="number"
+               class="form-control"
+               id="expenseRatioInput"
+               step="0.01"
+               placeholder="Expense ratio"
+               name="expense_ratio">
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="fundSizeInput">
+          Total assets (in local currency)
+        </label>
+        <input type="number"
+               class="form-control"
+               id="totalAssetsInput"
+               placeholder="Total assets"
+               name="total_assets">
       </div>
       <div class="form-check mb-3">
         <input class="form-check-input"

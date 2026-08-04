@@ -100,7 +100,7 @@ def show_prices(asset_id):
     data = json.dumps([price["unit_price"] for price in p])
     labels = json.dumps([price["date"] for price in p])
 
-    a = assets.get_asset_by_id(asset_id)
+    a = assets.get_asset(asset_id)
 
     asset_name = json.dumps(a["asset_name"])
 

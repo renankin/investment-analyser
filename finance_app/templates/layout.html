@@ -15,62 +15,71 @@
     </title>
   </head>
   <body>
-    <header>
-      <nav class="navbar navbar-expand-md">
-        <ul class="navbar-nav">
-          <li class="nav-item">
-            <a class="nav-link active" href="{{ url_for('accounts.index') }}">Accounts</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{{ url_for('assets.index') }}">Assets</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link active" href="{{ url_for('transactions.index') }}">Transactions</a>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle"
-               role="button"
-               data-bs-toggle="dropdown">Market data</a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class="dropdown-item" href="{{ url_for('market.get_prices') }}">Prices</a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('market.get_dividends') }}">Dividends</a>
-              </li>
-              <li>
-                <a class="dropdown-item" href="{{ url_for('market.get_splits') }}">Splits</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle"
-               role="button"
-               data-bs-toggle="dropdown">Portfolio analysis</a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class="dropdown-item" href="{{ url_for('analysis.show_return') }}">ROI</a>
-              </li>
-              <li>
-                <a class="dropdown-item"
-                   href="{{ url_for('analysis.portfolio_evolution') }}">Evolution</a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle"
-               role="button"
-               data-bs-toggle="dropdown">Market analysis</a>
-            <ul class="dropdown-menu">
-              <li>
-                <a class="dropdown-item" href="{{ url_for('analysis.etf_screener') }}">Screen ETFs</a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-      </nav>
-      {% if get_flashed_messages(): %}<p>{{ get_flashed_messages() | join(" ") }}</p>{% endif %}
-    </header>
+    <div class="container">
+      <header>
+        <nav class="navbar navbar-expand-md">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link active" href="{{ url_for('accounts.index') }}">Accounts</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="{{ url_for('assets.index') }}">Assets</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link active" href="{{ url_for('transactions.index') }}">Transactions</a>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle"
+                 role="button"
+                 data-bs-toggle="dropdown">Market data</a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('market.get_prices') }}">Prices</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('market.get_dividends') }}">Dividends</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('market.get_splits') }}">Splits</a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle"
+                 role="button"
+                 data-bs-toggle="dropdown">Portfolio analysis</a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('analysis.show_return') }}">ROI</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                     href="{{ url_for('analysis.portfolio_evolution') }}">Evolution</a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle"
+                 role="button"
+                 data-bs-toggle="dropdown">Market analysis</a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a class="dropdown-item"
+                     href="{{ url_for('market_analysis.search_etf') }}">Screen ETFs</a>
+                </li>
+                <li>
+                  <a class="dropdown-item"
+                     href="{{ url_for('market_analysis.compare_etfs') }}">Compare ETFs</a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        {% if get_flashed_messages(): %}
+          <p>{{ get_flashed_messages() | join(" ") }}</p>
+        {% endif %}
+      </header>
+    </div>
     <main>
       {% block main %}
       {% endblock main %}

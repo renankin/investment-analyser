@@ -1,8 +1,8 @@
 from pandas import Series
 
-from finance_app.db import execute_db, query_db
 from finance_app.assets import assets
-from finance_app.market.fetchers.yfinance_fetcher import Fetcher
+from finance_app.db import execute_db, query_db
+from finance_app.market.fetchers.yfinance_fetcher import YFetcher
 
 
 def get_stock_splits(asset_id: int) -> list:
@@ -34,11 +34,11 @@ def delete_stock_splits(asset_id: int) -> bool:
 def insert_stock_splits(asset_id: int) -> bool:
     """Insert stock splits in database and returns True if successful."""
 
-    asset = assets.get_asset_by_id(asset_id)
+    asset = assets.get_asset(asset_id)
 
     splits = Series()
     if asset["asset_type"] == "Stock":
-        splits = Fetcher(asset["asset_name"]).get_stock_splits()
+        splits = YFetcher(asset["asset_name"]).get_stock_splits()
 
     if not splits.empty:
         args = []

@@ -6,10 +6,14 @@ CREATE TABLE IF NOT EXISTS  accounts (
 
 CREATE TABLE IF NOT EXISTS assets (
     asset_id INTEGER PRIMARY KEY,
-    asset_name TEXT NOT NULL UNIQUE,
+    asset_ticker TEXT NOT NULL UNIQUE,
+    asset_name TEXT NOT NULL,
     asset_type TEXT NOT NULL,
     account_id INTEGER NOT NULL,
     still_open INTEGER NOT NULL,
+    benchmark_index TEXT,
+    expense_ratio FLOAT,
+    fund_size FLOAT,
     FOREIGN KEY (account_id) REFERENCES accounts(account_id)
 );
 
@@ -45,3 +49,4 @@ CREATE TABLE IF NOT EXISTS stock_splits (
     FOREIGN KEY (asset_id) REFERENCES assets(asset_id),
     UNIQUE (date, asset_id)
 );
+

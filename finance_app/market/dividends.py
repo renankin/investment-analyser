@@ -1,8 +1,8 @@
 from pandas import Series
 
-from finance_app.db import execute_db, query_db
 from finance_app.assets import assets
-from finance_app.market.fetchers.yfinance_fetcher import Fetcher
+from finance_app.db import execute_db, query_db
+from finance_app.market.fetchers.yfinance_fetcher import YFetcher
 
 
 def get_dividends(asset_id: int) -> list:
@@ -36,11 +36,11 @@ def delete_dividends(asset_id: int) -> bool:
 def insert_dividends(asset_id: int) -> bool:
     """Insert dividends for stock in database and returns True if successful."""
 
-    asset = assets.get_asset_by_id(asset_id)
+    asset = assets.get_asset(asset_id)
 
     dividends = Series()
     if asset["asset_type"] == "Stock":
-        dividends = Fetcher(asset["asset_name"]).get_dividends()
+        dividends = YFetcher(asset["asset_name"]).get_dividends()
 
     if not dividends.empty:
         args = []

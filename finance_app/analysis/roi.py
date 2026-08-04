@@ -1,5 +1,6 @@
-from scipy import optimize
 import datetime as dt
+
+from scipy import optimize
 
 from finance_app.assets import assets
 from finance_app.market import prices
@@ -79,7 +80,7 @@ def get_irr(asset_id: int) -> float | None:
             cashflow.append(div["amount_received"])
             dates.append(div["date"])
 
-    a = assets.get_asset_by_id(asset_id)
+    a = assets.get_asset(asset_id)
     if a["still_open"]:
         p = prices.get_most_recent_price(asset_id)
         if p:

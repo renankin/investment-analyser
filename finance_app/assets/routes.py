@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, request, redirect, render_template, url_for
+from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from finance_app.accounts import accounts
 from finance_app.assets import assets
@@ -18,7 +18,7 @@ def index():
 
     all_assets = []
     for asset in assets.get_all_assets():
-        if asset_search.upper() in asset["asset_name"].upper():
+        if asset_search.upper() in asset["asset_symbol"].upper():
             all_assets.append(asset)
 
     return render_template("show_assets.html", assets=all_assets)
@@ -36,42 +36,66 @@ def add():
 
     if request.method == "POST":
         account_id = request.form.get("account_id", type=int)
+        asset_symbol = request.form.get("asset_symbol")
         asset_name = request.form.get("asset_name")
+        benchmark_index = request.form.get("benchmark_index")
+        expense_ratio = request.form.get("expense_ratio", type=float)
+        total_assets = request.form.get("total_assets", type=float)
         asset_type = request.form.get("asset_type")
         still_open = request.form.get("still_open", type=bool)
 
         if not still_open:
             still_open = False
 
-        assets.insert_asset(account_id, asset_name, asset_type, still_open)
+        assets.insert_asset(
+            account_id,
+            asset_symbol,
+            asset_name,
+            benchmark_index,
+            expense_ratio,
+            total_assets,
+            asset_type,
+            still_open,
+        )
         flash("Asset added.")
         return redirect(url_for("assets.index"))
 
     return render_template("add_asset.html", accounts=all_accounts)
 
 
-@assets_bp.route("/assets/edit/<int:asset_id>", methods=["POST", "GET"])
-def edit(asset_id):
+@assets_bp.route("/assets/edit", methods=["POST", "GET"])
+def edit():
     """Edit asset."""
 
-    a = assets.get_asset_by_id(asset_id)
+    asset_id = request.args.get("asset_id")
+    asset = assets.get_asset(asset_id)
 
     if request.method == "POST":
-        account_id = request.form.get("account_id", type=int)
+        asset_symbol = request.form.get("asset_symbol")
         asset_name = request.form.get("asset_name")
+        benchmark_index = request.form.get("benchmark_index")
+        expense_ratio = request.form.get("expense_ratio", type=float)
+        total_assets = request.form.get("total_assets", type=float)
         asset_type = request.form.get("asset_type")
         still_open = request.form.get("still_open", type=bool)
 
         if not still_open:
             still_open = False
 
-        assets.update_asset(
-            asset_id, account_id, asset_name, asset_type, still_open
+        assets.edit_asset(
+            asset_id,
+            asset_symbol,
+            asset_name,
+            benchmark_index,
+            expense_ratio,
+            total_assets,
+            asset_type,
+            still_open,
         )
         flash("Asset updated.")
         return redirect(url_for("assets.index"))
 
-    return render_template("edit_asset.html", asset=a)
+    return render_template("edit_asset.html", asset=asset)
 
 
 @assets_bp.route("/assets/<int:asset_id>/delete", methods=["POST"])
@@ -106,7 +130,7 @@ def show_dividends(asset_id):
 
     dividends = assets.get_dividends_received(asset_id)
 
-    asset = assets.get_asset_by_id(asset_id)
+    asset = assets.get_asset(asset_id)
 
     account = accounts.get_account(asset["account_id"])
 

@@ -1,5 +1,4 @@
 from finance_app.db import execute_db, query_db
-
 from finance_app.market import dividends
 from finance_app.transactions import transactions
 
@@ -12,11 +11,13 @@ def delete_asset(asset_id: int):
 
 def get_all_assets() -> list:
     """Returns a list of dictionaries containing
-    `asset_id`, `asset_name`, `account_name`, `asset_type`, `still_open`, `currency`."""
+    `asset_id`, `asset_symbol`, `asset_name`, `account_name`, `benchmark_index, `total_assets`
+    `asset_type`, `still_open`, `currency`."""
 
     query = (
-        "SELECT assets.asset_id, assets.asset_name, assets.asset_type,"
-        " assets.still_open, accounts.account_name, accounts.currency"
+        "SELECT assets.asset_id, assets.asset_symbol, assets.asset_name, assets.asset_type,"
+        " assets.still_open, assets.benchmark_index, assets.total_assets, assets.expense_ratio,"
+        " accounts.account_name, accounts.currency"
         " FROM assets"
         " JOIN accounts ON assets.account_id = accounts.account_id"
     )
@@ -24,17 +25,25 @@ def get_all_assets() -> list:
     return query_db(query)
 
 
-def get_asset_by_id(asset_id: int) -> dict:
-    """Returns a dictionary containing `account_id`, `asset_id`, `asset_name`,
-    `asset_type` and `still_open`."""
+def get_asset(asset_id: int | None = None, asset_symbol: str | None = None) -> dict:
+    """Returns a dictionary containing `account_id`, `asset_id`, `asset_symbol`, `asset_name`,
+    `asset_type`, `still_open`, `benchmark_index`, `expense_ratio` and `total_assets`."""
 
     query = (
-        "SELECT account_id, asset_id, asset_name, asset_type, still_open"
+        "SELECT account_id, asset_id, asset_symbol, asset_name, asset_type, still_open,"
+        " benchmark_index, expense_ratio, total_assets"
         " FROM assets"
-        " WHERE asset_id = ?"
     )
 
-    return query_db(query, (asset_id,), one=True)
+    if asset_id:
+        query += " WHERE asset_id = ?"
+        param = asset_id
+
+    if asset_symbol:
+        query += " WHERE asset_symbol = ?"
+        param = asset_symbol
+
+    return query_db(query, (param,), one=True)
 
 
 def get_dividends_received(asset_id: int) -> list[dict]:
@@ -47,7 +56,7 @@ def get_dividends_received(asset_id: int) -> list[dict]:
     divs_received = []
     if t:
         for div in market_divs:
-            a = get_asset_by_id(asset_id)
+            a = get_asset(asset_id)
             if not a["still_open"]:
                 last_date = max([transaction["date"] for transaction in t])
                 if div["date"] >= last_date:
@@ -68,30 +77,69 @@ def get_dividends_received(asset_id: int) -> list[dict]:
     return divs_received
 
 
-def insert_asset(account_id: int, asset_name: str, asset_type: str, still_open: int):
-    """Insert into assets."""
+def insert_asset(
+    account_id: int,
+    asset_symbol: str,
+    asset_name: str,
+    benchmark_index: str,
+    expense_ratio: float,
+    total_assets: float,
+    asset_type: str,
+    still_open: int,
+):
+    """Insert into assets table."""
 
     query = (
-        "INSERT INTO assets (account_id, asset_name, asset_type, still_open)"
-        " VALUES (?, ?, ?, ?)"
+        "INSERT INTO assets"
+        " (account_id, asset_symbol, asset_name, asset_type, still_open,"
+        " benchmark_index, expense_ratio, total_assets )"
+        " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
     )
 
-    execute_db(query, (account_id, asset_name, asset_type, still_open))
+    execute_db(
+        query,
+        (
+            account_id,
+            asset_symbol,
+            asset_name,
+            asset_type,
+            still_open,
+            benchmark_index,
+            expense_ratio,
+            total_assets,
+        ),
+    )
 
 
-def update_asset(
+def edit_asset(
     asset_id: int,
-    account_id: int,
+    asset_symbol: str,
     asset_name: str,
+    benchmark_index: str,
+    expense_ratio: float,
+    total_assets: float,
     asset_type: str,
-    still_open: bool,
+    still_open: int,
 ):
     """Update asset."""
 
     query = (
         "UPDATE assets"
-        " SET asset_name = ?, account_id = ?, asset_type = ?, still_open = ?"
+        " SET asset_symbol = ?, asset_name = ?, asset_type = ?, still_open = ?,"
+        " benchmark_index = ?, expense_ratio = ?, total_assets = ?"
         " WHERE asset_id = ?"
     )
 
-    execute_db(query, (asset_name, account_id, asset_type, still_open, asset_id))
+    execute_db(
+        query,
+        (
+            asset_symbol,
+            asset_name,
+            asset_type,
+            still_open,
+            benchmark_index,
+            expense_ratio,
+            total_assets,
+            asset_id,
+        ),
+    )

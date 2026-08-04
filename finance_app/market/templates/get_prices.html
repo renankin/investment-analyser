@@ -6,7 +6,7 @@
   <table class="table table-borderless">
     {% for asset in assets %}
       <tr>
-        <td>{{ asset["asset_name"] }}</td>
+        <td>{{ asset["asset_symbol"] }}</td>
         <td>
           <form action="{{ url_for('market.show_prices', asset_id=asset['asset_id']) }}"
                 method="get">
