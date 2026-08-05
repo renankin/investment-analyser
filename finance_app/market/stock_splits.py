@@ -38,7 +38,7 @@ def insert_stock_splits(asset_id: int) -> bool:
 
     splits = Series()
     if asset["asset_type"] == "Stock":
-        splits = YFetcher(asset["asset_name"]).get_stock_splits()
+        splits = YFetcher(asset["asset_symbol"]).get_stock_splits()
 
     if not splits.empty:
         args = []

@@ -63,11 +63,10 @@ def add():
     return render_template("add_asset.html", accounts=all_accounts)
 
 
-@assets_bp.route("/assets/edit", methods=["POST", "GET"])
-def edit():
+@assets_bp.route("/assets/<int:asset_id>/edit", methods=["POST", "GET"])
+def edit(asset_id):
     """Edit asset."""
 
-    asset_id = request.args.get("asset_id")
     asset = assets.get_asset(asset_id)
 
     if request.method == "POST":
