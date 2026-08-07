@@ -1,10 +1,10 @@
 from pandas import Series
 
-from finance_app.assets import assets
-from finance_app.filters import format_currency, format_percent
-from finance_app.market import prices
-from finance_app.market.fetchers.yfinance_fetcher import YFetcher
-from finance_app.market_analysis.price_analyser import calculate_price_change
+from investment_analyser.assets import assets
+from investment_analyser.filters import format_currency, format_percent
+from investment_analyser.market import prices
+from investment_analyser.market.fetchers.yfinance_fetcher import YFetcher
+from investment_analyser.market_analysis.price_analyser import calculate_price_change
 
 
 def format_etf_table(symbol: str) -> dict:

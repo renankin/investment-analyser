@@ -1,8 +1,8 @@
 import pandas as pd
 
-from finance_app.accounts import accounts
-from finance_app.market import prices
-from finance_app.transactions import transactions
+from investment_analyser.accounts import accounts
+from investment_analyser.market import prices
+from investment_analyser.transactions import transactions
 
 
 def get_all_accounts_history() -> pd.Series:

@@ -1,6 +1,6 @@
 ## About
 
-`finance_app` is a web app written in Python with Flask and it is meant to keep track of stocks across different accounts.
+`investment_analyser` is a web app written in Python with Flask and it is meant to keep track of stocks across different accounts.
 
 It uses `yfinance` in the background for fetching the current price and stock splits to give an overview of current balance. The SQLite database runs locally inside the `instance/` folder which is created upon initialisation.
 
@@ -16,7 +16,7 @@ pip install -r "requirements.txt"
 
 After that you should be able to run it with:
 ```bash
-flask --app finance_app run
+flask --app investment_analyser run
 ```
 
 ## Current functionatilies

@@ -2,13 +2,13 @@ import os
 
 from flask import Flask
 
-from finance_app import db, filters
-from finance_app.accounts.routes import accounts_bp
-from finance_app.analysis.routes import analysis_bp
-from finance_app.assets.routes import assets_bp
-from finance_app.market.routes import market_bp
-from finance_app.market_analysis.routes import market_analysis_bp
-from finance_app.transactions.routes import transactions_bp
+from investment_analyser import db, filters
+from investment_analyser.accounts.routes import accounts_bp
+from investment_analyser.analysis.routes import analysis_bp
+from investment_analyser.assets.routes import assets_bp
+from investment_analyser.market.routes import market_bp
+from investment_analyser.market_analysis.routes import market_analysis_bp
+from investment_analyser.transactions.routes import transactions_bp
 
 
 def create_app():

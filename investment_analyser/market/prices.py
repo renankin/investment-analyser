@@ -1,9 +1,9 @@
 from pandas import Series
 
-from finance_app.assets import assets
-from finance_app.db import execute_db, query_db
-from finance_app.market.fetchers import tesouro_fetcher
-from finance_app.market.fetchers.yfinance_fetcher import YFetcher
+from investment_analyser.assets import assets
+from investment_analyser.db import execute_db, query_db
+from investment_analyser.market.fetchers import tesouro_fetcher
+from investment_analyser.market.fetchers.yfinance_fetcher import YFetcher
 
 
 def get_prices(asset_id: int) -> list:

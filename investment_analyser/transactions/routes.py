@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from finance_app.assets import assets
-from finance_app.transactions import transactions
+from investment_analyser.assets import assets
+from investment_analyser.transactions import transactions
 
 transactions_bp = Blueprint("transactions", __name__, template_folder="templates")
 

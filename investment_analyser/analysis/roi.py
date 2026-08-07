@@ -2,9 +2,9 @@ import datetime as dt
 
 from scipy import optimize
 
-from finance_app.assets import assets
-from finance_app.market import prices
-from finance_app.transactions import transactions
+from investment_analyser.assets import assets
+from investment_analyser.market import prices
+from investment_analyser.transactions import transactions
 
 
 def get_all_return() -> list[dict]:

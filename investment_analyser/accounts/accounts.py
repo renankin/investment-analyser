@@ -1,4 +1,4 @@
-from finance_app.db import execute_db, query_db
+from investment_analyser.db import execute_db, query_db
 
 
 def delete_account(account_id):

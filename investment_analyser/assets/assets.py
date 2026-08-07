@@ -1,6 +1,6 @@
-from finance_app.db import execute_db, query_db
-from finance_app.market import dividends
-from finance_app.transactions import transactions
+from investment_analyser.db import execute_db, query_db
+from investment_analyser.market import dividends
+from investment_analyser.transactions import transactions
 
 
 def delete_asset(asset_id: int):

@@ -1,9 +1,9 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from finance_app.accounts import accounts
-from finance_app.assets import assets
-from finance_app.market import dividends, prices, stock_splits
-from finance_app.transactions import transactions
+from investment_analyser.accounts import accounts
+from investment_analyser.assets import assets
+from investment_analyser.market import dividends, prices, stock_splits
+from investment_analyser.transactions import transactions
 
 assets_bp = Blueprint("assets", __name__, template_folder="templates")
 

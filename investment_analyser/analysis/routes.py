@@ -1,8 +1,8 @@
 from flask import Blueprint, flash, json, request, render_template
 
-from finance_app.accounts import accounts
-from finance_app.assets import assets
-from finance_app.analysis import roi, capital_evolution
+from investment_analyser.accounts import accounts
+from investment_analyser.assets import assets
+from investment_analyser.analysis import roi, capital_evolution
 
 analysis_bp = Blueprint("analysis", __name__, template_folder="templates")
 
