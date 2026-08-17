@@ -11,9 +11,6 @@ CREATE TABLE IF NOT EXISTS assets (
     asset_type TEXT NOT NULL,
     account_id INTEGER NOT NULL,
     still_open INTEGER NOT NULL,
-    benchmark_index TEXT,
-    expense_ratio FLOAT,
-    fund_size FLOAT,
     FOREIGN KEY (account_id) REFERENCES accounts(account_id)
 );
 
@@ -50,3 +47,11 @@ CREATE TABLE IF NOT EXISTS stock_splits (
     UNIQUE (date, asset_id)
 );
 
+CREATE TABLE IF NOT EXISTS etf_metadata (
+    asset_id INTEGER NOT NULL,
+    benchmark_index TEXT,
+    expense_ratio FLOAT,
+    fund_size FLOAT,
+    underlying_etf_symbol TEXT,
+    FOREIGN KEY (asset_id) REFERENCES assets(asset_id)
+)

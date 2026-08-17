@@ -51,9 +51,9 @@ def format_etf_table(symbol: str) -> dict:
 
     sector_weighting = {}
     i = 1
-    for _, row in fetcher.get_sector_weighting().iterrows():
+    for (sector_key, sector_weight) in fetcher.get_sector_weighting().items():
         sector_weighting[f"sector_{i}"] = (
-            f"{row['Name']} ({format_percent(row['Holding Percent'])})"
+            f"{sector_key} ({format_percent(sector_weight)})"
         )
         i += 1
 

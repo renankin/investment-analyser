@@ -57,52 +57,40 @@ class YFetcher:
 
         return splits
 
-    def get_top_holdings(self) -> DataFrame:
+    def get_top_holdings(self) -> DataFrame | None:
         """Returns a Dataframe with columns `Name` and `Holding Percent`
         which is indexed with `Symbol`. The DataFrame is sorted by holding percent."""
 
-        if self.is_etf():
+        if self.ticker and self.is_etf():
             return self.ticker.funds_data.top_holdings.sort_values(
                 "Holding Percent", ascending=False
             )
 
         return None
 
-    def get_sector_weighting(self) -> DataFrame:
-        """Returns as DataFrame with columns `Holding Percent` and `Name` for each sector.
-        The DataFrame is sorted by holding percent."""
+    def get_sector_weighting(self) -> dict:
+        """Returns a dictionary contianing sector key and sector weight for the asset
+        sorted by ascending order.
+        """
 
-        if self.is_etf():
-            sector_map = {
-                "realestate": "Real estate",
-                "consumer_cyclical": "Consumer",
-                "basic_materials": "Basic materials",
-                "technology": "Technology",
-                "communication_services": "Communication",
-                "financial_services": "Financial",
-                "utilities": "Utilities",
-                "industrials": "Industrials",
-                "energy": "Energy",
-                "healthcare": "Healthcare",
-            }
+        if self.ticker:
+            if self.is_etf():
+                sector_weightings = self.ticker.funds_data.sector_weightings
 
-            df1 = DataFrame(
-                data=self.ticker.funds_data.sector_weightings.values(),
-                index=self.ticker.funds_data.sector_weightings.keys(),
-                columns=["Holding Percent"],
-            )
+                sorted_list = sorted(
+                    sector_weightings.items(), key=lambda item: item[1], reverse=True
+                )
 
-            df2 = DataFrame(
-                data=sector_map.values(),
-                index=sector_map.keys(),
-                columns=["Name"],
-            )
+                return {
+                    sector_key: sector_weight
+                    for (sector_key, sector_weight) in sorted_list
+                }
 
-            return merge(
-                left=df1, right=df2, right_index=True, left_index=True
-            ).sort_values("Holding Percent", ascending=False)
+            if self.is_stock():
+                sector_key = self.get_info("sectorKey")
+                return {sector_key: 1}
 
-        return None
+        return {}
 
     def get_info(self, key: str):
         """Returns the info requested via the `key` parameter from the `Ticker` class
@@ -115,9 +103,10 @@ class YFetcher:
         * `longName`
         * `netAssets`
         * `netExpenseRatio`
+        * `sectorKey`
         """
 
         if not self.ticker:
-            return {}
+            return None
 
         return self.info.get(key)

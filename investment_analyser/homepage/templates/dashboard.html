@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block main %}
+  <div class="container">
+    <div class="row">
+      <div class="col">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Asset symbol</th>
+              <th>Distribution</th>
+              <th>Shares</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for (index, row) in portfolio_df.iterrows() %}
+              <tr>
+                <td>{{ row["asset_symbol"] }}</td>
+                <td>{{ row["weight_percent"] | format_percent }}</td>
+                <td>{{ row["shares"] }}</td>
+                <td>{{ row["price"] | format_currency(row["currency"]) }}</td>
+                <td>{{ row["total"] | format_currency(row["currency"]) }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot class="table-group-divider">
+            <tr>
+              <th scope="row" colspan="4" class="text-end">Total</th>
+              <td>
+                {{ portfolio_df["total"].sum() | format_currency(portfolio_df["currency"].iloc[1]) }}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <table class="table table-striped">
+          <thead>
+            <th>Sector</th>
+            <th>Distribution</th>
+          </thead>
+          <tbody>
+            {% for sector_key in sector_distribution %}
+              <tr>
+                <td>{{ sector_key }}</td>
+                <td>{{ sector_distribution[sector_key] | format_percent }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock main %}

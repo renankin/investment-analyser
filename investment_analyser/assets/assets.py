@@ -77,6 +77,19 @@ def get_dividends_received(asset_id: int) -> list[dict]:
     return divs_received
 
 
+def get_etf_data(asset_id: int) -> dict:
+    """Get the data from the ETF for an asset and return as a dictionary with keys 
+    `benchmark_index`, `expense_ratio`, `fund_size` and `underlying_etf_symbol`"""
+
+    query = (
+        "SELECT benchmark_index, expense_ratio, fund_size, underlying_etf_symbol"
+        " FROM etf_metadata"
+        " WHERE asset_id = ?"
+    )
+
+    return query_db(query, (asset_id,), one=True)
+
+
 def insert_asset(
     account_id: int,
     asset_symbol: str,
