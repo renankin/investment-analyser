@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template
 
-from investment_analyser.analysis.services.portfolio_distribution import (
+from investment_analyser.portfolio_analysis.services.portfolio_distribution import (
     get_asset_allocation,
     get_sector_distribution,
 )

@@ -1,13 +1,13 @@
-from flask import Blueprint, flash, json, request, render_template
+from flask import Blueprint, flash, json, render_template, request
 
 from investment_analyser.accounts import accounts
 from investment_analyser.assets import assets
-from investment_analyser.analysis import roi, capital_evolution
+from investment_analyser.portfolio_analysis.services import capital_evolution, roi
 
-analysis_bp = Blueprint("analysis", __name__, template_folder="templates")
+portfolio_analysis_bp = Blueprint("portfolio_analysis", __name__, template_folder="templates")
 
 
-@analysis_bp.route("/analysis/return")
+@portfolio_analysis_bp.route("/portfolio-analysis/return")
 def show_return():
     """Displays the return on investiment for each asset own."""
 
@@ -19,12 +19,12 @@ def show_return():
     return render_template("show_return.html", assets=a)
 
 
-@analysis_bp.route("/analysis/evolution")
+@portfolio_analysis_bp.route("/portfolio-analysis/evolution")
 def portfolio_evolution():
     """Plots the portfolio evolution accross all accounts and assets."""
 
-    account_id = request.args.get("account_id")
-    asset_id = request.args.get("asset_id")
+    account_id = request.args.get("account_id", type=int)
+    asset_id = request.args.get("asset_id", type=int)
 
     if account_id:
         hist = capital_evolution.get_account_history(account_id)

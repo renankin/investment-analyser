@@ -8,7 +8,7 @@
   </div>
   <div>
     Plot for account:
-    <form action="{{ url_for('analysis.portfolio_evolution') }}" method="get">
+    <form action="{{ url_for('portfolio_analysis.portfolio_evolution') }}" method="get">
       <select name="account_id" class="form-select">
         {% for account in accounts %}
           <option value="{{ account['account_id'] }}">
@@ -21,7 +21,7 @@
   </div>
   <div>
     Plot for asset:
-    <form action="{{ url_for('analysis.portfolio_evolution') }}" method="get">
+    <form action="{{ url_for('portfolio_analysis.portfolio_evolution') }}" method="get">
       <select name="asset_id" class="form-select">
         {% for asset in assets %}
           <option value="{{ asset['asset_id'] }}">{{ asset["asset_name"] }}</option>

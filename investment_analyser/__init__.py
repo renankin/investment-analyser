@@ -4,11 +4,11 @@ from flask import Flask
 
 from investment_analyser import db, filters
 from investment_analyser.accounts.routes import accounts_bp
-from investment_analyser.analysis.routes import analysis_bp
 from investment_analyser.assets.routes import assets_bp
 from investment_analyser.homepage.routes import homepage_bp
 from investment_analyser.market.routes import market_bp
 from investment_analyser.market_analysis.routes import market_analysis_bp
+from investment_analyser.portfolio_analysis.routes import portfolio_analysis_bp
 from investment_analyser.transactions.routes import transactions_bp
 
 
@@ -29,7 +29,7 @@ def create_app():
     app.jinja_env.filters["format_percent"] = filters.format_percent
 
     app.register_blueprint(accounts_bp)
-    app.register_blueprint(analysis_bp)
+    app.register_blueprint(portfolio_analysis_bp)
     app.register_blueprint(assets_bp)
     app.register_blueprint(homepage_bp)
     app.register_blueprint(market_bp)

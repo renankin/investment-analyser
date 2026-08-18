@@ -1,4 +1,4 @@
-import datetime as dt
+from datetime import UTC, datetime
 
 from scipy import optimize
 
@@ -90,7 +90,7 @@ def get_irr(asset_id: int) -> float | None:
             return None
 
     elapsed_years = [(date - min(dates)).days / 365 for date in dates]
-    holding_period = (dt.datetime.now().date() - min(dates)).days
+    holding_period = (datetime.now(tz=UTC).date() - min(dates)).days
     if holding_period < 365:
         return None
     else:
