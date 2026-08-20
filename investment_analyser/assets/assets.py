@@ -1,5 +1,5 @@
 from investment_analyser.db import execute_db, query_db
-from investment_analyser.market import dividends
+from investment_analyser.market_data.repository import dividends
 from investment_analyser.transactions import transactions
 
 

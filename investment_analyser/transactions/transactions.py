@@ -1,5 +1,5 @@
-from investment_analyser.db import query_db, execute_db
-from investment_analyser.market import stock_splits
+from investment_analyser.db import execute_db, query_db
+from investment_analyser.market_data.repository import stock_splits
 
 
 def delete_transaction(transaction_id: int):

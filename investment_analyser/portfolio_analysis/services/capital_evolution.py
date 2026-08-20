@@ -1,7 +1,7 @@
 from pandas import DataFrame, Series, concat
 
 from investment_analyser.accounts import accounts
-from investment_analyser.market import prices
+from investment_analyser.market_data.repository import prices
 from investment_analyser.transactions import transactions
 
 

@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, json, redirect, render_template, url_for
 
 from investment_analyser.assets import assets
-from investment_analyser.market import dividends, prices, stock_splits
+from investment_analyser.market_data.repository import dividends, prices, stock_splits
 
 market_bp = Blueprint("market", __name__, template_folder="templates")
 

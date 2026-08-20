@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from scipy import optimize
 
 from investment_analyser.assets import assets
-from investment_analyser.market import prices
+from investment_analyser.market_data.repository import prices
 from investment_analyser.transactions import transactions
 
 
@@ -29,7 +29,7 @@ def get_all_return() -> list[dict]:
             p = prices.get_most_recent_price(asset["asset_id"])
             if p:
                 total_shares = sum(t["shares"] for t in trans)
-                market_value = total_shares * p["price"]
+                market_value = total_shares * p["unit_price"]
 
         total_return = market_value + total_sold + total_divs
         if total_invested > 0 and total_return > 0:
@@ -84,7 +84,7 @@ def get_irr(asset_id: int) -> float | None:
     if a["still_open"]:
         p = prices.get_most_recent_price(asset_id)
         if p:
-            cashflow.append(p["price"] * total_shares)
+            cashflow.append(p["unit_price"] * total_shares)
             dates.append(p["date"])
         else:
             return None

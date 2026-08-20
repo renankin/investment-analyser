@@ -1,4 +1,4 @@
-from pandas import DataFrame, Series, merge
+from pandas import DataFrame, Series
 from yfinance import Ticker
 from yfinance.exceptions import YFException
 
@@ -23,15 +23,18 @@ class YFetcher:
 
     def get_dividends(self) -> Series:
 
-        if not self.is_stock():
-            return Series()
+        if self.ticker:
+            if not self.is_stock():
+                return Series()
 
-        divs = self.ticker.dividends
+            divs = self.ticker.dividends
 
-        if divs.empty:
-            return Series()
+            if divs.empty:
+                return Series()
 
-        return divs
+            return divs
+
+        return Series()
 
     def get_prices(self) -> Series:
 
@@ -47,15 +50,18 @@ class YFetcher:
 
     def get_stock_splits(self) -> Series:
 
-        if not self.is_stock():
-            return Series()
+        if self.ticker:
+            if not self.is_stock():
+                return Series()
 
-        splits = self.ticker.splits
+            splits = self.ticker.splits
 
-        if splits.empty:
-            return Series()
+            if splits.empty:
+                return Series()
 
-        return splits
+            return splits
+
+        return Series()
 
     def get_top_holdings(self) -> DataFrame | None:
         """Returns a Dataframe with columns `Name` and `Holding Percent`

@@ -1,8 +1,8 @@
-from flask import Blueprint, flash, redirect, render_template, request, url_for
+from flask import Blueprint, flash, render_template, request
 
 from investment_analyser.assets import assets
-from investment_analyser.market.fetchers.yfinance_fetcher import YFetcher
 from investment_analyser.market_analysis import table_formatter
+from investment_analyser.market_data.fetchers.yfinance import YFetcher
 
 market_analysis_bp = Blueprint("market_analysis", __name__, template_folder="templates")
 

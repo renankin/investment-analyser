@@ -19,7 +19,9 @@
                 <td>{{ row["asset_symbol"] }}</td>
                 <td>{{ row["weight_percent"] | format_percent }}</td>
                 <td>{{ row["shares"] }}</td>
-                <td>{{ row["price"] | format_currency(row["currency"]) }}</td>
+                <td>
+                  {{ row["unit_price"] | format_currency(row["currency"]) }} ({{ row["price_date"] | format_date }})
+                </td>
                 <td>{{ row["total"] | format_currency(row["currency"]) }}</td>
               </tr>
             {% endfor %}

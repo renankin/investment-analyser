@@ -2,8 +2,8 @@ from pandas import Series
 
 from investment_analyser.assets import assets
 from investment_analyser.db import execute_db, query_db
-from investment_analyser.market.fetchers import tesouro_fetcher
-from investment_analyser.market.fetchers.yfinance_fetcher import YFetcher
+from investment_analyser.market_data.fetchers import tesouro_direto
+from investment_analyser.market_data.fetchers.yfinance import YFetcher
 
 
 def get_prices(asset_id: int) -> list:
@@ -23,20 +23,13 @@ def get_prices(asset_id: int) -> list:
 
 
 def get_most_recent_price(asset_id: int) -> dict:
-    """Returns the most recent price for asset and returns a dictionary
-    containing `price` and `date` key."""
+    """Returns the most recent price for asset as dictionary with keys `unit_price` and `date`."""
 
-    p = get_prices(asset_id)
+    query = (
+        "SELECT unit_price, date FROM prices WHERE asset_id = ? ORDER BY date DESC LIMIT 1"
+    )
 
-    if p:
-        price_date = max([price["date"] for price in p])
-        price_value = [
-            price["unit_price"] for price in p if price["date"] == price_date
-        ]
-
-        return {"date": price_date, "price": price_value[0]}
-
-    return {}
+    return query_db(query, (asset_id,), one=True)
 
 
 def delete_prices(asset_id: int) -> bool:
@@ -60,7 +53,7 @@ def insert_prices(asset_id: int) -> bool:
     if asset["asset_type"] in ["Stock", "ETF"]:
         prices = YFetcher(asset["asset_symbol"]).get_prices()
     if asset["asset_type"] == "Brazilian bond":
-        prices = tesouro_fetcher.get_prices(asset["asset_symbol"])
+        prices = tesouro_direto.get_prices(asset["asset_symbol"])
  
     if not prices.empty:
         args = []

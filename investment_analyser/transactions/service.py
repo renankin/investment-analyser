@@ -1,4 +1,4 @@
-from investment_analyser.market.stock_splits import get_stock_splits
+from investment_analyser.market_data.repository.stock_splits import get_stock_splits
 
 
 def get_split_adjusted_transactions(transactions: list[dict]) -> list[dict]:

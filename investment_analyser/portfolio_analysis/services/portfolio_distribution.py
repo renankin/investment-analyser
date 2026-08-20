@@ -1,9 +1,9 @@
-from pandas import DataFrame
+from pandas import DataFrame, Series
 from yfinance import Ticker
 
 from investment_analyser.assets.assets import get_etf_data
-from investment_analyser.market.fetchers.yfinance_fetcher import YFetcher
-from investment_analyser.market.repository import get_most_recent_price
+from investment_analyser.market_data.fetchers.yfinance import YFetcher
+from investment_analyser.market_data.repository.prices import get_most_recent_price
 from investment_analyser.transactions.repository import get_transactions_for_open_assets
 from investment_analyser.transactions.service import get_split_adjusted_transactions
 
@@ -19,7 +19,8 @@ def get_asset_allocation() -> DataFrame:
     - `asset_type`
     - `currency`
     - `shares`
-    - `price`
+    - `unit_price`
+    - `price_date`
     - `total`
     - `weight_percent`
     """
@@ -31,11 +32,13 @@ def get_asset_allocation() -> DataFrame:
         ["asset_id", "asset_symbol", "asset_type", "currency"],
         as_index=False,
     )[["shares"]].sum()
-    grouped_df["price"] = grouped_df["asset_id"].apply(get_most_recent_price)
-    grouped_df[["price", "currency"]] = grouped_df[["price", "currency"]].apply(
+    grouped_df[["unit_price", "price_date"]] = (
+        grouped_df["asset_id"].apply(get_most_recent_price).apply(Series)
+    )
+    grouped_df[["unit_price", "currency"]] = grouped_df[["unit_price", "currency"]].apply(
         convert_currency, axis=1
     )
-    grouped_df["total"] = grouped_df["price"] * grouped_df["shares"]
+    grouped_df["total"] = grouped_df["unit_price"] * grouped_df["shares"]
     grouped_df["weight_percent"] = grouped_df["total"] / grouped_df["total"].sum(axis=0)
 
     return grouped_df
@@ -45,7 +48,7 @@ def convert_currency(row):
 
     if row["currency"] == "BRL":
         df = Ticker("GBPBRL=X").history(period="1d")
-        row["price"] /= df["Close"].iloc[0]
+        row["unit_price"] /= df["Close"].iloc[0]
         row["currency"] = "GBP"
 
     return row

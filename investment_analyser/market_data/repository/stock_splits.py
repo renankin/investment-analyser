@@ -2,7 +2,7 @@ from pandas import Series
 
 from investment_analyser.assets import assets
 from investment_analyser.db import execute_db, query_db
-from investment_analyser.market.fetchers.yfinance_fetcher import YFetcher
+from investment_analyser.market_data.fetchers.yfinance import YFetcher
 
 
 def get_stock_splits(asset_id: int) -> list:
