@@ -1,10 +1,22 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
+from decimal import Decimal
+from typing import TypedDict
 
 from scipy import optimize
 
 from investment_analyser.assets import assets
+from investment_analyser.assets.services.dividends import Dividend
 from investment_analyser.market_data.repository import prices
+from investment_analyser.market_data.services.prices import Price
 from investment_analyser.transactions import transactions
+from investment_analyser.transactions.service import Transaction
+
+
+class Cashflow(TypedDict):
+    """Contains `date` and `value`."""
+
+    date: date
+    value: Decimal
 
 
 def get_all_return() -> list[dict]:
@@ -97,6 +109,60 @@ def get_irr(asset_id: int) -> float | None:
         return compute_irr(cashflow, elapsed_years)
 
 
+def build_dividend_cashflows(dividends: list[Dividend]) -> list[Cashflow]:
+    """
+    Build cashflow with dividends.
+    """
+
+    cashflows: list[Cashflow] = []
+
+    for dividend in dividends:
+        cashflow: Cashflow = {"value": dividend["value"], "date": dividend["date"]}
+
+        cashflows.append(cashflow)
+
+    return cashflows
+
+
+def build_transaction_cashflows(transactions: list[Transaction]) -> list[Cashflow]:
+    """
+    Builds cashflow with transactions.
+    """
+
+    cashflows: list[Cashflow] = []
+
+    for transaction in transactions:
+        cashflow: Cashflow = {
+            "value": -1 * transaction["price"] * transaction["shares"],
+            "date": transaction["date"],
+        }
+
+        cashflows.append(cashflow)
+
+    return cashflows
+
+
+def build_cashflows(
+    transactions: list[Transaction],
+    dividends: list[Dividend],
+    current_price: Price,
+    open_shares: Decimal,
+) -> list[Cashflow]:
+    """
+    Builds cashflows
+    """
+
+    transaction_cashflows: list[Cashflow] = build_transaction_cashflows(transactions)
+
+    dividend_cashflows: list[Cashflow] = build_dividend_cashflows(dividends)
+
+    price_cashflow = Cashflow(
+        date=current_price["date"], value=current_price["value"] * open_shares
+    )
+
+    return transaction_cashflows + dividend_cashflows + [price_cashflow]
+
+
 def compute_irr(
     transaction_values: list, elapsed_time: list, initial_guess=0
 ) -> float | None:
@@ -118,3 +184,28 @@ def compute_irr(
         return None
 
     return solver.x[0]
+
+
+def calculate_irr(cashflows: list[Cashflow], initial_guess=0.1) -> float | None:
+    """
+    Returns the internal rate of return (IRR) by taking a list of Cashflow.
+    """
+
+    if not cashflows:
+        return None
+
+    transaction_values = [float(cashflow["value"]) for cashflow in cashflows]
+    dates = [cashflow["date"] for cashflow in cashflows]
+    elapsed_time = [(date - min(dates)).days / 365 for date in dates]
+
+    # IRR is found when the sum of net present value equals 0
+    solver = optimize.root(
+        lambda irr: sum(transaction_values / (1 + irr) ** elapsed_time),
+        x0=initial_guess,
+    )
+
+    if not solver.success:
+        print(solver.message)
+        return None
+
+    return float(solver.x[0])

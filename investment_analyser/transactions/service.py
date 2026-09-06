@@ -6,6 +6,7 @@ from investment_analyser.market_data.repository.stock_splits import get_stock_sp
 
 
 class Transaction(TypedDict):
+    """Contains `date`, `shares` and `price`."""
     date: date
     shares: Decimal
     price: Decimal
