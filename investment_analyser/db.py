@@ -1,8 +1,9 @@
 import datetime as dt
-import pandas as pd
-import sqlite3
+from sqlite3 import PARSE_DECLTYPES, Row, connect, register_adapter, register_converter
+from typing import Any
 
 import click
+import pandas as pd
 from flask import current_app, g
 
 
@@ -10,9 +11,9 @@ def adapt_date_iso(val):
     """Adapt datetime.date to ISO 8601 date."""
     return val.isoformat()
 
+
 def adapt_date_pandas(val):
     """Adapt DateTimeIndex to ISO 8601 date."""
-
     return val.strftime("%Y-%m-%d")
 
 
@@ -21,56 +22,47 @@ def convert_date(val):
     return dt.date.fromisoformat(val.decode())
 
 
-sqlite3.register_converter("date", convert_date)
-sqlite3.register_adapter(dt.date, adapt_date_iso)
-sqlite3.register_adapter(pd.Timestamp, adapt_date_pandas)
-
-
-def dict_factory(cursor, row):
-    fields = [column[0] for column in cursor.description]
-    return {key: value for key, value in zip(fields, row)}
+register_converter("date", convert_date)
+register_adapter(dt.date, adapt_date_iso)
+register_adapter(pd.Timestamp, adapt_date_pandas)
 
 
 def get_db():
     if "db" not in g:
-        g.db = sqlite3.connect(
-            current_app.config["DATABASE"], detect_types=sqlite3.PARSE_DECLTYPES
-        )
-        g.db.row_factory = dict_factory
-
+        g.db = connect(current_app.config["DATABASE"], detect_types=PARSE_DECLTYPES)
+        g.db.row_factory = Row
     return g.db
 
 
 def close_db(e=None):
     db = g.pop("db", None)
-
     if db is not None:
         db.close()
+
 
 @click.command("init-db")
 def init_db():
     """Instantiate a database from CLI."""
-
     db = get_db()
     with current_app.open_resource("schema.sql", mode="r") as f:
         db.executescript(f.read())
     db.commit()
-
     click.echo("Database initialised.")
 
 
-def execute_db(query: str, args=()):
-    """Insert a command in the database. If args is a list it will insert all entries
-    into database."""
-
+def execute_db(query: str, args: tuple[Any, ...] = ()):
+    """Execute a command in the database with a single argument."""
     db = get_db()
+    cursor = db.execute(query, args)
+    cursor.close()
+    db.commit()
 
-    if isinstance(args, list):
-        cur = db.executemany(query, args)
-    else:
-        cur = db.execute(query, args)
 
-    cur.close()
+def executemany_db(query: str, args: list[tuple[Any, ...]]):
+    """Execute a command with a list of arguments in the database."""
+    db = get_db()
+    cursor = db.executemany(query, args)
+    cursor.close()
     db.commit()
 
 
@@ -85,10 +77,28 @@ def query_db(query: str, args=(), one=False):
         if res:
             return res[0]
         return {}
-    
+
     if res:
         return res
     return []
+
+
+def fetch_single_record(query: str, args: tuple[Any, ...] = ()) -> Row | None:
+    database = get_db()
+    cursor = database.execute(query, args)
+    record = cursor.fetchone()
+    cursor.close()
+
+    return record
+
+
+def fetch_multiple_records(query: str, args: tuple[Any, ...] = ()) -> list[Row]:
+    database = get_db()
+    cursor = database.execute(query, args)
+    records = cursor.fetchall()
+    cursor.close()
+
+    return records
 
 
 def init_app(app):
