@@ -28,7 +28,7 @@ def get_split_adjusted_transactions(transactions: list[dict]) -> list[dict]:
 
     adj_transactions = []
     for transaction in transactions:
-        adj_transaction = transaction
+        adj_transaction = dict(transaction)
 
         adj_transaction["is_adjusted"] = False
     

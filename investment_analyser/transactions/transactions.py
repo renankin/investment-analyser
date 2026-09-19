@@ -23,7 +23,7 @@ def get_all_transactions() -> list:
         " ORDER BY transactions.date DESC"
     )
 
-    transactions = query_db(query)
+    transactions = [dict(transaction) for transaction in query_db(query)]
 
     if transactions:
         for t in transactions:
@@ -59,8 +59,8 @@ def get_adjusted_transaction(transaction_id: int) -> dict:
 
     s = stock_splits.get_stock_splits(t["asset_id"])
 
-    new_t = t
-    t["is_adjusted"] = False
+    new_t = dict(t)
+    new_t["is_adjusted"] = False
 
     for split in s:
         if t["date"] <= split["date"]:
