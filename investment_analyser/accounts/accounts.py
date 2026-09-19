@@ -1,4 +1,10 @@
-from investment_analyser.db import execute_db, query_db
+from typing import Any
+
+from investment_analyser.db import (
+    execute_db,
+    fetch_multiple_records,
+    fetch_single_record,
+)
 
 
 def delete_account(account_id):
@@ -7,46 +13,38 @@ def delete_account(account_id):
     execute_db("DELETE FROM accounts WHERE account_id = ?", (account_id,))
 
 
-def get_all_accounts() -> list:
+def get_all_accounts() -> list[dict[str, Any]]:
     """Fetches all accounts from database and returns a list of dictionaries containing
     `account_id`, `account_name` and `currency`."""
 
-    accounts = query_db("SELECT account_id, account_name, currency FROM accounts")
+    query = "SELECT account_id, account_name, currency FROM accounts"
 
-    if accounts:
-        return accounts
-
-    return []
+    return [dict(row) for row in fetch_multiple_records(query)]
 
 
-def get_account(account_id: int) -> dict:
+def get_account(account_id: int) -> dict[str, Any]:
     """Fetch account from database based on the id and returns a dictionary containing
     `account_id`, `account_name` and `currency`."""
 
-    account = query_db(
-        "SELECT account_id, account_name, currency FROM accounts WHERE account_id = ?",
-        (account_id,),
-        one=True,
+    query = (
+        "SELECT account_id, account_name, currency FROM accounts WHERE account_id = ?"
     )
 
-    if account:
-        return account
+    result = fetch_single_record(query, (account_id,))
+
+    if result:
+        return dict(result)
 
     return {}
 
 
-def get_assets(account_id: int) -> list:
+def get_assets(account_id: int) -> list[dict[str, Any]]:
     """Get all assets from a given account and returns a list of dictionaries
     containing `asset_id` and `asset_name` keys."""
 
     query = "SELECT asset_id, asset_name FROM assets WHERE account_id = ?"
 
-    assets = query_db(query, (account_id,))
-
-    if assets:
-        return assets
-
-    return []
+    return [dict(row) for row in fetch_multiple_records(query, (account_id,))]
 
 
 def insert_account(account_name: str, currency: str):
