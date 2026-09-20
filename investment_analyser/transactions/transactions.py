@@ -1,4 +1,10 @@
-from investment_analyser.db import execute_db, query_db
+from typing import Any
+
+from investment_analyser.db import (
+    execute_db,
+    fetch_multiple_records,
+    fetch_single_record,
+)
 from investment_analyser.market_data.repository import stock_splits
 
 
@@ -8,7 +14,7 @@ def delete_transaction(transaction_id: int):
     execute_db("DELETE FROM transactions WHERE transaction_id = ?", (transaction_id,))
 
 
-def get_all_transactions() -> list:
+def get_all_transactions() -> list[dict[str, Any]]:
     """Fetch all transactions from database and returns a list of dictionaries
     containing `transaction_id`, `account_name`, `asset_symbol`, `date`, `currency`,
     `shares`, `adj_shares`, `price` and `adj_price`."""
@@ -23,7 +29,7 @@ def get_all_transactions() -> list:
         " ORDER BY transactions.date DESC"
     )
 
-    transactions = [dict(transaction) for transaction in query_db(query)]
+    transactions = [dict(transaction) for transaction in fetch_multiple_records(query)]
 
     if transactions:
         for t in transactions:
@@ -37,7 +43,7 @@ def get_all_transactions() -> list:
     return []
 
 
-def get_adjusted_transactions(asset_id: int) -> list:
+def get_adjusted_transactions(asset_id: int) -> list[dict[str, Any]]:
     """Adjust cashflow for assets when there are stock splits and returns a list of
     dictionaries containing `date`, `shares`, `price` and `adjusted`."""
 
@@ -51,7 +57,7 @@ def get_adjusted_transactions(asset_id: int) -> list:
     return new_t
 
 
-def get_adjusted_transaction(transaction_id: int) -> dict:
+def get_adjusted_transaction(transaction_id: int) -> dict[str, Any]:
     """Adjust transaction when there is a stock split and returns a dictionary containing
     `asset_id`, `transaction_id`, `shares`, `price`, `date` and `is_adjusted`"""
 
@@ -71,7 +77,7 @@ def get_adjusted_transaction(transaction_id: int) -> dict:
     return new_t
 
 
-def get_transaction(transaction_id: int) -> dict:
+def get_transaction(transaction_id: int) -> dict[str, Any]:
     """Returns a dictionary containing `asset_id`, `transaction_id`,
     `shares`, `price` and `date` keys"""
 
@@ -81,15 +87,15 @@ def get_transaction(transaction_id: int) -> dict:
         " WHERE transaction_id = ?"
     )
 
-    transaction = query_db(query, (transaction_id,), one=True)
+    transaction = fetch_single_record(query, (transaction_id,))
 
     if transaction:
-        return transaction
+        return dict(transaction)
 
     return {}
 
 
-def get_transactions(asset_id: int) -> list:
+def get_transactions(asset_id: int) -> list[dict[str, Any]]:
     """Fetch all transactions of an asset and return as list of dictionaries
     with `transaction_id`, `asset_id`, `date`, `price` and `shares`."""
 
@@ -99,12 +105,7 @@ def get_transactions(asset_id: int) -> list:
         " WHERE asset_id = ?"
     )
 
-    transactions = query_db(query, (asset_id,))
-
-    if transactions:
-        return transactions
-
-    return []
+    return [dict(row) for row in fetch_multiple_records(query, (asset_id,))]
 
 
 def insert_transaction(asset_id: int, date: str, shares: float, price: float):
