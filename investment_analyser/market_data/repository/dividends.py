@@ -1,11 +1,17 @@
+from typing import Any
+
 from pandas import Series
 
 from investment_analyser.assets import assets
-from investment_analyser.db import execute_db, query_db
+from investment_analyser.db import (
+    execute_db,
+    executemany_db,
+    fetch_multiple_records,
+)
 from investment_analyser.market_data.fetchers.yfinance import YFetcher
 
 
-def get_dividends(asset_id: int) -> list:
+def get_dividends(asset_id: int) -> list[dict[str, Any]]:
     """Fetch dividends from database and return them as a list of dictionaries
     containing "date" and "dividend_value" keys."""
 
@@ -17,7 +23,7 @@ def get_dividends(asset_id: int) -> list:
         " ORDER BY dividends.date DESC"
     )
 
-    return query_db(query, (asset_id,))
+    return [dict(row) for row in fetch_multiple_records(query, (asset_id,))]
 
 
 
@@ -47,7 +53,7 @@ def insert_dividends(asset_id: int) -> bool:
         for date, div in dividends.items():
             args.append((asset_id, date, div))
 
-        execute_db(
+        executemany_db(
             "INSERT INTO dividends (asset_id, date, dividend_value)"
             " VALUES (?, ?, ?)"
             " ON CONFLICT (date, asset_id) DO NOTHING",
