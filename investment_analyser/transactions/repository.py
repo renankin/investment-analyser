@@ -1,7 +1,9 @@
-from investment_analyser.db import query_db
+from typing import Any
+
+from investment_analyser.db import fetch_multiple_records
 
 
-def get_transactions_for_open_assets() -> list[dict]:
+def get_transactions_for_open_assets() -> list[dict[str, Any]]:
     """Returns a list of dicts with keys `asset_id`, `asset_name`, `asset_type`,
     `date`, `shares`, `price` and `currency`"""
 
@@ -15,4 +17,4 @@ def get_transactions_for_open_assets() -> list[dict]:
         " WHERE assets.still_open = 1"
     )
 
-    return query_db(query)
+    return [dict(row) for row in fetch_multiple_records(query)]

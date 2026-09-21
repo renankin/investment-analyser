@@ -1,4 +1,10 @@
-from investment_analyser.db import execute_db, query_db
+from typing import Any
+
+from investment_analyser.db import (
+    execute_db,
+    fetch_multiple_records,
+    fetch_single_record,
+)
 from investment_analyser.market_data.repository import dividends
 from investment_analyser.transactions import transactions
 
@@ -9,9 +15,9 @@ def delete_asset(asset_id: int):
     execute_db("DELETE FROM assets WHERE asset_id = ?", (asset_id,))
 
 
-def get_all_assets() -> list:
+def get_all_assets() -> list[dict[str, Any]]:
     """Returns a list of dictionaries containing
-    `asset_id`, `asset_symbol`, `asset_name`, `account_name`, `benchmark_index, `total_assets`
+    `asset_id`, `asset_symbol`, `asset_name`, `account_name`, `benchmark_index`, `total_assets`
     `asset_type`, `still_open`, `currency`."""
 
     query = (
@@ -22,10 +28,12 @@ def get_all_assets() -> list:
         " JOIN accounts ON assets.account_id = accounts.account_id"
     )
 
-    return query_db(query)
+    return [dict(row) for row in fetch_multiple_records(query)]
 
 
-def get_asset(asset_id: int | None = None, asset_symbol: str | None = None) -> dict:
+def get_asset(
+    asset_id: int | None = None, asset_symbol: str | None = None
+) -> dict[str, Any]:
     """Returns a dictionary containing `account_id`, `asset_id`, `asset_symbol`, `asset_name`,
     `asset_type`, `still_open`, `benchmark_index`, `expense_ratio` and `total_assets`."""
 
@@ -35,6 +43,7 @@ def get_asset(asset_id: int | None = None, asset_symbol: str | None = None) -> d
         " FROM assets"
     )
 
+    param = ()
     if asset_id:
         query += " WHERE asset_id = ?"
         param = asset_id
@@ -43,10 +52,14 @@ def get_asset(asset_id: int | None = None, asset_symbol: str | None = None) -> d
         query += " WHERE asset_symbol = ?"
         param = asset_symbol
 
-    return query_db(query, (param,), one=True)
+    result = fetch_single_record(query, (param,))
+    if result:
+        return dict(result)
+
+    return {}
 
 
-def get_dividends_received(asset_id: int) -> list[dict]:
+def get_dividends_received(asset_id: int) -> list[dict[str, Any]]:
     """Get the dividends received for asset. Returns a list of dictionaries
     containing `date` and `amount_received`."""
 
@@ -77,8 +90,8 @@ def get_dividends_received(asset_id: int) -> list[dict]:
     return divs_received
 
 
-def get_etf_data(asset_id: int) -> dict:
-    """Get the data from the ETF for an asset and return as a dictionary with keys 
+def get_etf_data(asset_id: int) -> dict[str, Any]:
+    """Get the data from the ETF for an asset and return as a dictionary with keys
     `benchmark_index`, `expense_ratio`, `fund_size` and `underlying_etf_symbol`"""
 
     query = (
@@ -86,8 +99,10 @@ def get_etf_data(asset_id: int) -> dict:
         " FROM etf_metadata"
         " WHERE asset_id = ?"
     )
-
-    return query_db(query, (asset_id,), one=True)
+    result = fetch_single_record(query, (asset_id,))
+    if result:
+        return dict(result)
+    return {}
 
 
 def insert_asset(

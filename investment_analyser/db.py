@@ -66,23 +66,6 @@ def executemany_db(query: str, args: list[tuple[Any, ...]]):
     db.commit()
 
 
-def query_db(query: str, args=(), one=False):
-    """Returns a dictionary with queried database if `One` is True. Otherwise, returns a list of dictionaries if `One` is False."""
-
-    cur = get_db().execute(query, args)
-    res = cur.fetchall()
-    cur.close()
-
-    if one:
-        if res:
-            return res[0]
-        return {}
-
-    if res:
-        return res
-    return []
-
-
 def fetch_single_record(query: str, args: tuple[Any, ...] = ()) -> Row | None:
     database = get_db()
     cursor = database.execute(query, args)

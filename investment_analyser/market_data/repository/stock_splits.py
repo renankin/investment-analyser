@@ -1,11 +1,17 @@
+from typing import Any
+
 from pandas import Series
 
 from investment_analyser.assets import assets
-from investment_analyser.db import execute_db, query_db
+from investment_analyser.db import (
+    execute_db,
+    executemany_db,
+    fetch_multiple_records,
+)
 from investment_analyser.market_data.fetchers.yfinance import YFetcher
 
 
-def get_stock_splits(asset_id: int) -> list:
+def get_stock_splits(asset_id: int) -> list[dict[str, Any]]:
     """Fetch splits from database and returns a list of dictionaries containing `date`
     and `split_ratio`."""
 
@@ -15,8 +21,7 @@ def get_stock_splits(asset_id: int) -> list:
         " ORDER BY date DESC"
     )
 
-    return query_db(query, (asset_id,))
-
+    return [dict(row) for row in fetch_multiple_records(query, (asset_id,))]
 
 
 def delete_stock_splits(asset_id: int) -> bool:
@@ -45,7 +50,7 @@ def insert_stock_splits(asset_id: int) -> bool:
         for date, split in splits.items():
             args.append((asset_id, date, split))
 
-        execute_db(
+        executemany_db(
             "INSERT INTO stock_splits (asset_id, date, split_ratio)"
             " VALUES (?, ?, ?)"
             " ON CONFLICT (date, asset_id) DO NOTHING",
