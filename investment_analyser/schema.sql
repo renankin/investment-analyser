@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS  accounts (
 
 CREATE TABLE IF NOT EXISTS assets (
     asset_id INTEGER PRIMARY KEY,
-    asset_ticker TEXT NOT NULL UNIQUE,
+    asset_symbol TEXT NOT NULL UNIQUE,
     asset_name TEXT NOT NULL,
     asset_type TEXT NOT NULL,
     account_id INTEGER NOT NULL,
