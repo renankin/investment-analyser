@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from investment_analyser.accounts import accounts
+from investment_analyser.accounts.repository import get_account, get_all_accounts
 from investment_analyser.assets import assets
 from investment_analyser.market_data.repository import dividends, prices, stock_splits
 from investment_analyser.transactions import transactions
@@ -28,7 +28,7 @@ def index():
 def add():
     """Add new asset for account."""
 
-    all_accounts = accounts.get_all_accounts()
+    all_accounts = get_all_accounts()
 
     if not all_accounts:
         flash("No accounts. Must add account first.")
@@ -131,7 +131,7 @@ def show_dividends(asset_id):
 
     asset = assets.get_asset(asset_id)
 
-    account = accounts.get_account(asset["account_id"])
+    account = get_account(asset["account_id"])
 
     if not dividends:
         flash("No dividends to show.")

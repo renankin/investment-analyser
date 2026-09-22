@@ -1,6 +1,6 @@
 from pandas import DataFrame, Series, concat
 
-from investment_analyser.accounts import accounts
+from investment_analyser.accounts.repository import get_all_accounts, get_assets
 from investment_analyser.market_data.repository import prices
 from investment_analyser.transactions import transactions
 
@@ -8,7 +8,7 @@ from investment_analyser.transactions import transactions
 def get_all_accounts_history() -> Series:
     """Returns Series"""
 
-    all_accounts = accounts.get_all_accounts()
+    all_accounts = get_all_accounts()
 
     df = DataFrame()
 
@@ -23,7 +23,7 @@ def get_all_accounts_history() -> Series:
 def get_account_history(account_id: int) -> Series:
     """Returns a Series with `values` for the account history."""
 
-    all_assets = accounts.get_assets(account_id)
+    all_assets = get_assets(account_id)
 
     df = DataFrame()
 
