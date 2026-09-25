@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, json, render_template, request
 
 from investment_analyser.accounts.repository import get_account, get_all_accounts
-from investment_analyser.assets import assets
+from investment_analyser.assets import repository
 from investment_analyser.portfolio_analysis.services import capital_evolution, roi
 
 portfolio_analysis_bp = Blueprint("portfolio_analysis", __name__, template_folder="templates")
@@ -31,7 +31,7 @@ def portfolio_evolution():
         title_label = get_account(account_id)["account_name"]
     elif asset_id:
         hist = capital_evolution.get_asset_history(asset_id)
-        title_label = assets.get_asset(asset_id)["asset_name"]
+        title_label = repository.get_asset(asset_id)["asset_name"]
     else:
         hist = capital_evolution.get_all_accounts_history()
         title_label = "All accounts"
@@ -49,5 +49,5 @@ def portfolio_evolution():
         data=values,
         title=title,
         accounts=get_all_accounts(),
-        assets=assets.get_all_assets(),
+        assets=repository.get_all_assets(),
     )

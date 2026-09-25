@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from investment_analyser.assets import assets
+from investment_analyser.assets import repository
 from investment_analyser.transactions import transactions
 
 transactions_bp = Blueprint("transactions", __name__, template_folder="templates")
@@ -26,7 +26,7 @@ def index():
 def add():
     """Adds new transaction into database"""
 
-    a = assets.get_all_assets()
+    a = repository.get_all_assets()
 
     if not a:
         flash("No assets to show. Must add asset first.")
@@ -80,7 +80,7 @@ def edit(transaction_id):
 
     t = transactions.get_transaction(transaction_id)
 
-    asset = assets.get_asset(t["asset_id"])
+    asset = repository.get_asset(t["asset_id"])
 
     if not t:
         flash("Transaction invalid.")

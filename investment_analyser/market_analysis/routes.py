@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, render_template, request
 
-from investment_analyser.assets import assets
+from investment_analyser.assets import repository
 from investment_analyser.market_analysis import table_formatter
 from investment_analyser.market_data.fetchers.yfinance import YFetcher
 
@@ -12,7 +12,7 @@ def compare_etfs():
     """Compares the ETF saved in the watchlist."""
 
     all_etfs = []
-    for asset in assets.get_all_assets():
+    for asset in repository.get_all_assets():
         if asset["asset_type"] == "ETF":
             all_etfs.append(table_formatter.format_etf_table(asset["asset_symbol"]))
 

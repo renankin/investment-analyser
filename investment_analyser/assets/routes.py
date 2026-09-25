@@ -1,7 +1,14 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from investment_analyser.accounts.repository import get_account, get_all_accounts
-from investment_analyser.assets import assets
+from investment_analyser.assets.repository import (
+    delete_asset,
+    edit_asset,
+    get_all_assets,
+    get_asset,
+    insert_asset,
+)
+from investment_analyser.assets.services.dividends import get_dividends_received
 from investment_analyser.market_data.repository import dividends, prices, stock_splits
 from investment_analyser.transactions import transactions
 
@@ -17,7 +24,7 @@ def index():
         asset_search = ""
 
     all_assets = []
-    for asset in assets.get_all_assets():
+    for asset in get_all_assets():
         if asset_search.upper() in asset["asset_symbol"].upper():
             all_assets.append(asset)
 
@@ -47,7 +54,7 @@ def add():
         if not still_open:
             still_open = False
 
-        assets.insert_asset(
+        insert_asset(
             account_id,
             asset_symbol,
             asset_name,
@@ -67,7 +74,7 @@ def add():
 def edit(asset_id):
     """Edit asset."""
 
-    asset = assets.get_asset(asset_id)
+    asset = get_asset(asset_id)
 
     if request.method == "POST":
         asset_symbol = request.form.get("asset_symbol")
@@ -81,7 +88,7 @@ def edit(asset_id):
         if not still_open:
             still_open = False
 
-        assets.edit_asset(
+        edit_asset(
             asset_id,
             asset_symbol,
             asset_name,
@@ -117,7 +124,7 @@ def delete(asset_id):
         flash("Must delete splits first.")
         return redirect(url_for("assets.index"))
 
-    assets.delete_asset(asset_id)
+    delete_asset(asset_id)
     flash("Asset deleted.")
 
     return redirect(url_for("assets.index"))
@@ -127,9 +134,9 @@ def delete(asset_id):
 def show_dividends(asset_id):
     """Show dividends received for asset."""
 
-    dividends = assets.get_dividends_received(asset_id)
+    dividends = get_dividends_received(asset_id)
 
-    asset = assets.get_asset(asset_id)
+    asset = get_asset(asset_id)
 
     account = get_account(asset["account_id"])
 

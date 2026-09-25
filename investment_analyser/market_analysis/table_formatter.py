@@ -1,6 +1,6 @@
 from pandas import Series
 
-from investment_analyser.assets import assets
+from investment_analyser.assets import repository
 from investment_analyser.filters import format_currency, format_percent
 from investment_analyser.market_analysis.price_analyser import calculate_price_change
 from investment_analyser.market_data.fetchers.yfinance import YFetcher
@@ -11,9 +11,9 @@ def format_etf_table(symbol: str) -> dict:
     """Include something here."""
 
     fetcher = YFetcher(symbol)
-    watchlist = assets.get_asset(asset_symbol=symbol)
+    watchlist = repository.get_asset(asset_symbol=symbol)
     if not fetcher.is_etf():
-        underlying_symbol = assets.get_etf_data(watchlist["asset_id"])["underlying_etf_symbol"]
+        underlying_symbol = repository.get_etf_data(watchlist["asset_id"])["underlying_etf_symbol"]
         fetcher = YFetcher(underlying_symbol)
 
     basic_info = {}

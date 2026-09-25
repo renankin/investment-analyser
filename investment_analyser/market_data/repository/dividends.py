@@ -2,7 +2,7 @@ from typing import Any
 
 from pandas import Series
 
-from investment_analyser.assets import assets
+from investment_analyser.assets import repository
 from investment_analyser.db import (
     execute_db,
     executemany_db,
@@ -42,7 +42,7 @@ def delete_dividends(asset_id: int) -> bool:
 def insert_dividends(asset_id: int) -> bool:
     """Insert dividends for stock in database and returns True if successful."""
 
-    asset = assets.get_asset(asset_id)
+    asset = repository.get_asset(asset_id)
 
     dividends = Series()
     if asset["asset_type"] == "Stock":

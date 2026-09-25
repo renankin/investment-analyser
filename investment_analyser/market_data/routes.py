@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, json, redirect, render_template, url_for
 
-from investment_analyser.assets import assets
+from investment_analyser.assets import repository
 from investment_analyser.market_data.repository import dividends, prices, stock_splits
 
 market_bp = Blueprint("market", __name__, template_folder="templates")
@@ -76,7 +76,7 @@ def show_prices(asset_id):
     data = json.dumps([price["unit_price"] for price in p])
     labels = json.dumps([price["date"] for price in p])
 
-    a = assets.get_asset(asset_id)
+    a = repository.get_asset(asset_id)
 
     asset_name = json.dumps(a["asset_name"])
 
