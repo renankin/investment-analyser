@@ -4,7 +4,8 @@ from typing import Any, TypedDict
 
 from investment_analyser.assets.repository import get_asset
 from investment_analyser.market_data.repository import dividends
-from investment_analyser.transactions import transactions
+from investment_analyser.transactions.repository import get_transactions
+from investment_analyser.transactions.service import get_split_adjusted_transactions
 
 
 class Dividend(TypedDict):
@@ -19,7 +20,7 @@ def get_dividends_received(asset_id: int) -> list[dict[str, Any]]:
     containing `date` and `amount_received`."""
 
     market_divs = dividends.get_dividends(asset_id)
-    t = transactions.get_adjusted_transactions(asset_id)
+    t = get_split_adjusted_transactions(transactions=get_transactions(asset_id))
 
     divs_received = []
     if t:

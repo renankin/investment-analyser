@@ -10,7 +10,7 @@ from investment_analyser.assets.repository import (
 )
 from investment_analyser.assets.services.dividends import get_dividends_received
 from investment_analyser.market_data.repository import dividends, prices, stock_splits
-from investment_analyser.transactions import transactions
+from investment_analyser.transactions.repository import get_transactions
 
 assets_bp = Blueprint("assets", __name__, template_folder="templates")
 
@@ -108,7 +108,7 @@ def edit(asset_id):
 def delete(asset_id):
     """Delete asset."""
 
-    if transactions.get_transactions(asset_id):
+    if get_transactions(asset_id):
         flash("Must delete transactions first.")
         return redirect(url_for("assets.index"))
 

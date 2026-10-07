@@ -11,8 +11,11 @@ from investment_analyser.assets.services.dividends import (
 )
 from investment_analyser.market_data.repository import prices
 from investment_analyser.market_data.services.prices import Price
-from investment_analyser.transactions import transactions
-from investment_analyser.transactions.service import Transaction
+from investment_analyser.transactions.repository import get_transactions
+from investment_analyser.transactions.service import (
+    Transaction,
+    get_split_adjusted_transactions,
+)
 
 
 class Cashflow(TypedDict):
@@ -35,7 +38,7 @@ def get_all_return() -> list[dict]:
         divs = get_dividends_received(asset["asset_id"])
         total_divs = sum(div["amount_received"] for div in divs)
 
-        trans = transactions.get_adjusted_transactions(asset["asset_id"])
+        trans = get_split_adjusted_transactions(transactions=get_transactions(asset["asset_id"]))
         total_invested = sum(t["price"] * t["shares"] for t in trans if t["shares"] > 0)
         total_sold = sum(t["price"] * -t["shares"] for t in trans if t["shares"] < 0)
 
@@ -76,7 +79,7 @@ def get_irr(asset_id: int) -> float | None:
     dividends and current valuation if position is still open.
     If holding period is less than a year returns `None`."""
 
-    t = transactions.get_adjusted_transactions(asset_id)
+    t = get_split_adjusted_transactions(transactions=get_transactions(asset_id))
 
     if not t:
         return None

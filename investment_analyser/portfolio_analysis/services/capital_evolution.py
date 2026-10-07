@@ -2,7 +2,8 @@ from pandas import DataFrame, Series, concat
 
 from investment_analyser.accounts.repository import get_all_accounts, get_assets
 from investment_analyser.market_data.repository import prices
-from investment_analyser.transactions import transactions
+from investment_analyser.transactions.repository import get_transactions
+from investment_analyser.transactions.service import get_split_adjusted_transactions
 
 
 def get_all_accounts_history() -> Series:
@@ -39,7 +40,7 @@ def get_asset_history(asset_id: int) -> Series:
     """Returns a Series with `values` for the asset history."""
 
     # Get the cummulative sum of shares
-    t = transactions.get_adjusted_transactions(asset_id)
+    t = get_split_adjusted_transactions(transactions=get_transactions(asset_id))
     if not t:
         return Series()
     
