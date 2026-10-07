@@ -1,10 +1,30 @@
-from pandas import Series
+from pandas import Series, Timedelta
 
 from investment_analyser.assets import repository
 from investment_analyser.filters import format_currency, format_percent
-from investment_analyser.market_analysis.price_analyser import calculate_price_change
 from investment_analyser.market_data.fetchers.yfinance import YFetcher
 from investment_analyser.market_data.repository import prices
+
+
+def calculate_price_change(prices: Series, years: float) -> float | None:
+    """Returns the price change for the asset as specified in `years`."""
+
+    total_days = (prices.index[-1] - prices.index[0]).days
+    min_days = years * 365
+    while min_days < total_days:
+        min_date = prices.index[-1] - Timedelta(days=min_days)
+        prices_since = prices[prices.index >= min_date]
+
+        if (prices_since.index[-1] - prices_since.index[0]).days >= min_days:
+            price_change = (
+                prices_since.iloc[-1] - prices_since.iloc[0]
+            ) / prices_since.iloc[0]
+            return float(price_change)
+
+        else:
+            min_days += 1
+
+    return None
 
 
 def format_etf_table(symbol: str) -> dict:
@@ -13,7 +33,9 @@ def format_etf_table(symbol: str) -> dict:
     fetcher = YFetcher(symbol)
     watchlist = repository.get_asset(asset_symbol=symbol)
     if not fetcher.is_etf():
-        underlying_symbol = repository.get_etf_data(watchlist["asset_id"])["underlying_etf_symbol"]
+        underlying_symbol = repository.get_etf_data(watchlist["asset_id"])[
+            "underlying_etf_symbol"
+        ]
         fetcher = YFetcher(underlying_symbol)
 
     basic_info = {}
@@ -54,12 +76,11 @@ def format_etf_table(symbol: str) -> dict:
 
     sector_weighting = {}
     i = 1
-    for (sector_key, sector_weight) in fetcher.get_sector_weighting().items():
+    for sector_key, sector_weight in fetcher.get_sector_weighting().items():
         sector_weighting[f"sector_{i}"] = (
             f"{sector_key} ({format_percent(sector_weight)})"
         )
         i += 1
-
 
     top_holdings = {}
     i = 1
