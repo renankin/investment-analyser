@@ -2,15 +2,13 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from investment_analyser.accounts.repository import get_account, get_all_accounts
 from investment_analyser.assets.repository import (
-    delete_asset,
     edit_asset,
     get_all_assets,
     get_asset,
     insert_asset,
 )
+from investment_analyser.assets.services.deletion import delete_asset_if_unused
 from investment_analyser.assets.services.dividends import get_dividends_received
-from investment_analyser.market_data.repository import dividends, prices, stock_splits
-from investment_analyser.transactions.repository import get_transactions
 
 assets_bp = Blueprint("assets", __name__, template_folder="templates")
 
@@ -108,24 +106,14 @@ def edit(asset_id):
 def delete(asset_id):
     """Delete asset."""
 
-    if get_transactions(asset_id):
-        flash("Must delete transactions first.")
-        return redirect(url_for("assets.index"))
-
-    if prices.get_prices(asset_id):
-        flash("Must delete prices first.")
-        return redirect(url_for("assets.index"))
-
-    if dividends.get_dividends(asset_id):
-        flash("Must delete dividends first.")
-        return redirect(url_for("assets.index"))
-
-    if stock_splits.get_stock_splits(asset_id):
-        flash("Must delete splits first.")
-        return redirect(url_for("assets.index"))
-
-    delete_asset(asset_id)
-    flash("Asset deleted.")
+    deletion_blocker = delete_asset_if_unused(asset_id)
+    messages = {
+        "transactions": "Must delete transactions first.",
+        "prices": "Must delete prices first.",
+        "dividends": "Must delete dividends first.",
+        "splits": "Must delete splits first.",
+    }
+    flash(messages[deletion_blocker] if deletion_blocker else "Asset deleted.")
 
     return redirect(url_for("assets.index"))
 

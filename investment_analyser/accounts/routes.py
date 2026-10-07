@@ -1,13 +1,12 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from investment_analyser.accounts.repository import (
-    delete_account,
     get_account,
     get_all_accounts,
-    get_assets,
     insert_account,
     update_account,
 )
+from investment_analyser.accounts.service import delete_account_if_empty
 
 accounts_bp = Blueprint("accounts", __name__, template_folder="templates")
 
@@ -64,12 +63,9 @@ def edit(account_id):
 def delete(account_id):
     """Delete account."""
 
-    a = get_assets(account_id)
-
-    if a:
+    if not delete_account_if_empty(account_id):
         flash("Account not deleted. Must delete its transactions first.")
     else:
-        delete_account(account_id)
         flash("Account deleted.")
 
     return redirect(url_for("accounts.index"))
