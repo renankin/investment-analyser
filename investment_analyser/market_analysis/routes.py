@@ -1,8 +1,9 @@
 from flask import Blueprint, flash, render_template, request
 
-from investment_analyser.assets import repository
-from investment_analyser.market_analysis.service import format_etf_table
-from investment_analyser.market_data.fetchers.yfinance import YFetcher
+from investment_analyser.market_analysis.services.etfs import (
+    get_etf_search_result,
+    get_etfs_for_comparison,
+)
 
 market_analysis_bp = Blueprint("market_analysis", __name__, template_folder="templates")
 
@@ -11,12 +12,7 @@ market_analysis_bp = Blueprint("market_analysis", __name__, template_folder="tem
 def compare_etfs():
     """Compares the ETF saved in the watchlist."""
 
-    all_etfs = []
-    for asset in repository.get_all_assets():
-        if asset["asset_type"] == "ETF":
-            all_etfs.append(format_etf_table(asset["asset_symbol"]))
-
-    return render_template("compare_etf.html", all_etfs=all_etfs)
+    return render_template("compare_etf.html", all_etfs=get_etfs_for_comparison())
 
 
 @market_analysis_bp.route("/market-analysis/watchlist/search")
@@ -25,13 +21,9 @@ def search_etf():
 
     ticker = request.args.get("ticker")
     if ticker:
-        fetcher = YFetcher(ticker)
-        if fetcher.is_etf():
-            rows = format_etf_table(fetcher.get_info("symbol"))
-
-            return render_template(
-                "search_etf.html", symbol=fetcher.get_info("symbol"), rows=rows
-            )
+        result = get_etf_search_result(ticker)
+        if result:
+            return render_template("search_etf.html", symbol=ticker, rows=result)
 
         flash("Failed to load fund data.")
 

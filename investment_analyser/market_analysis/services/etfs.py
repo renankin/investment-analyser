@@ -28,7 +28,7 @@ def calculate_price_change(prices: Series, years: float) -> float | None:
 
 
 def format_etf_table(symbol: str) -> dict:
-    """Include something here."""
+    """Format ETF data for display in the comparison and search views."""
 
     fetcher = YFetcher(symbol)
     watchlist = repository.get_asset(asset_symbol=symbol)
@@ -91,3 +91,23 @@ def format_etf_table(symbol: str) -> dict:
         i += 1
 
     return basic_info | performance | sector_weighting | top_holdings
+
+
+def get_etfs_for_comparison() -> list[dict]:
+    """Return formatted data for each ETF in the watchlist."""
+
+    return [
+        format_etf_table(asset["asset_symbol"])
+        for asset in repository.get_all_assets()
+        if asset["asset_type"] == "ETF"
+    ]
+
+
+def get_etf_search_result(ticker: str) -> dict | None:
+    """Return the formatted search result if the ticker identifies an ETF."""
+
+    fetcher = YFetcher(ticker)
+    if not fetcher.is_etf():
+        return None
+
+    return format_etf_table(ticker)
