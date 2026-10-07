@@ -4,12 +4,18 @@ from typing import TypedDict
 
 from scipy import optimize
 
-from investment_analyser.assets import assets
-from investment_analyser.assets.services.dividends import Dividend
+from investment_analyser.assets.repository import get_all_assets, get_asset
+from investment_analyser.assets.services.dividends import (
+    Dividend,
+    get_dividends_received,
+)
 from investment_analyser.market_data.repository import prices
 from investment_analyser.market_data.services.prices import Price
-from investment_analyser.transactions import transactions
-from investment_analyser.transactions.service import Transaction
+from investment_analyser.transactions.repository import get_transactions
+from investment_analyser.transactions.service import (
+    Transaction,
+    get_split_adjusted_transactions,
+)
 
 
 class Cashflow(TypedDict):
@@ -24,15 +30,15 @@ def get_all_return() -> list[dict]:
     including `asset_name`, `currency`, `still_open`, `total_invested`,
     `total_sold`, `total_dividends`,`irr` and `net_return`"""
 
-    all_assets = assets.get_all_assets()
+    all_assets = get_all_assets()
 
     all_stats = []
 
     for asset in all_assets:
-        divs = assets.get_dividends_received(asset["asset_id"])
+        divs = get_dividends_received(asset["asset_id"])
         total_divs = sum(div["amount_received"] for div in divs)
 
-        trans = transactions.get_adjusted_transactions(asset["asset_id"])
+        trans = get_split_adjusted_transactions(transactions=get_transactions(asset["asset_id"]))
         total_invested = sum(t["price"] * t["shares"] for t in trans if t["shares"] > 0)
         total_sold = sum(t["price"] * -t["shares"] for t in trans if t["shares"] < 0)
 
@@ -73,7 +79,7 @@ def get_irr(asset_id: int) -> float | None:
     dividends and current valuation if position is still open.
     If holding period is less than a year returns `None`."""
 
-    t = transactions.get_adjusted_transactions(asset_id)
+    t = get_split_adjusted_transactions(transactions=get_transactions(asset_id))
 
     if not t:
         return None
@@ -86,13 +92,13 @@ def get_irr(asset_id: int) -> float | None:
         dates.append(transaction["date"])
         total_shares += transaction["shares"]
 
-    dividends = assets.get_dividends_received(asset_id)
+    dividends = get_dividends_received(asset_id)
     if dividends:
         for div in dividends:
             cashflow.append(div["amount_received"])
             dates.append(div["date"])
 
-    a = assets.get_asset(asset_id)
+    a = get_asset(asset_id)
     if a["still_open"]:
         p = prices.get_most_recent_price(asset_id)
         if p:
