@@ -1,14 +1,10 @@
+from datetime import date
 from typing import Any
 
-from pandas import Series
-
-from investment_analyser.assets import repository
 from investment_analyser.db import (
     execute_db,
-    executemany_db,
     fetch_multiple_records,
 )
-from investment_analyser.market_data.fetchers.yfinance import YFetcher
 
 
 def get_dividends(asset_id: int) -> list[dict[str, Any]]:
@@ -26,7 +22,6 @@ def get_dividends(asset_id: int) -> list[dict[str, Any]]:
     return [dict(row) for row in fetch_multiple_records(query, (asset_id,))]
 
 
-
 def delete_dividends(asset_id: int) -> bool:
     """Deletes dividends from database and returns True if successful"""
 
@@ -39,27 +34,11 @@ def delete_dividends(asset_id: int) -> bool:
     return False
 
 
-def insert_dividends(asset_id: int) -> bool:
-    """Insert dividends for stock in database and returns True if successful."""
+def insert_dividend(asset_id: int, date: date, dividend_value: float) -> None:
 
-    asset = repository.get_asset(asset_id)
-
-    dividends = Series()
-    if asset["asset_type"] == "Stock":
-        dividends = YFetcher(asset["asset_symbol"]).get_dividends()
-
-    if not dividends.empty:
-        args = []
-        for date, div in dividends.items():
-            args.append((asset_id, date, div))
-
-        executemany_db(
-            "INSERT INTO dividends (asset_id, date, dividend_value)"
-            " VALUES (?, ?, ?)"
-            " ON CONFLICT (date, asset_id) DO NOTHING",
-            args,
-        )
-
-        return True
-
-    return False
+    execute_db(
+        "INSERT INTO dividends (asset_id, date, dividend_value)"
+        " VALUES (?, ?, ?)"
+        " ON CONFLICT (date, asset_id) DO NOTHING",
+        (asset_id, date, dividend_value),
+    )

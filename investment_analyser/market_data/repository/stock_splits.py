@@ -1,14 +1,10 @@
+from datetime import date
 from typing import Any
 
-from pandas import Series
-
-from investment_analyser.assets import repository
 from investment_analyser.db import (
     execute_db,
-    executemany_db,
     fetch_multiple_records,
 )
-from investment_analyser.market_data.fetchers.yfinance import YFetcher
 
 
 def get_stock_splits(asset_id: int) -> list[dict[str, Any]]:
@@ -36,27 +32,11 @@ def delete_stock_splits(asset_id: int) -> bool:
     return False
 
 
-def insert_stock_splits(asset_id: int) -> bool:
-    """Insert stock splits in database and returns True if successful."""
+def insert_stock_split(asset_id: int, date: date, split_ratio: float) -> None:
 
-    asset = repository.get_asset(asset_id)
-
-    splits = Series()
-    if asset["asset_type"] == "Stock":
-        splits = YFetcher(asset["asset_symbol"]).get_stock_splits()
-
-    if not splits.empty:
-        args = []
-        for date, split in splits.items():
-            args.append((asset_id, date, split))
-
-        executemany_db(
-            "INSERT INTO stock_splits (asset_id, date, split_ratio)"
-            " VALUES (?, ?, ?)"
-            " ON CONFLICT (date, asset_id) DO NOTHING",
-            args,
-        )
-
-        return True
-
-    return False
+    execute_db(
+        "INSERT INTO stock_splits (asset_id, date, split_ratio)"
+        " VALUES (?, ?, ?)"
+        " ON CONFLICT (date, asset_id) DO NOTHING",
+        (asset_id, date, split_ratio),
+    )
