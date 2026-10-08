@@ -5,27 +5,28 @@ from investment_analyser.db import (
     fetch_multiple_records,
     fetch_single_record,
 )
+from investment_analyser.domain.models import Account
 
 
-def delete_account(account_id):
-    """Delete account."""
+def delete_account(account_id) -> None:
 
     execute_db("DELETE FROM accounts WHERE account_id = ?", (account_id,))
 
 
-def get_all_accounts() -> list[dict[str, Any]]:
-    """Fetches all accounts from database and returns a list of dictionaries containing
-    `account_id`, `account_name` and `currency`."""
-
+def get_all_accounts() -> list[Account]:
     query = "SELECT account_id, account_name, currency FROM accounts"
 
-    return [dict(row) for row in fetch_multiple_records(query)]
+    return [
+        Account(
+            id=row["account_id"],
+            name=row["account_name"],
+            currency=row["currency"],
+        )
+        for row in fetch_multiple_records(query)
+    ]
 
 
-def get_account(account_id: int) -> dict[str, Any]:
-    """Fetch account from database based on the id and returns a dictionary containing
-    `account_id`, `account_name` and `currency`."""
-
+def get_account(account_id: int) -> Account | None:
     query = (
         "SELECT account_id, account_name, currency FROM accounts WHERE account_id = ?"
     )
@@ -33,18 +34,26 @@ def get_account(account_id: int) -> dict[str, Any]:
     result = fetch_single_record(query, (account_id,))
 
     if result:
-        return dict(result)
+        return Account(
+            id=result["account_id"],
+            name=result["account_name"],
+            currency=result["account_currency"],
+        )
 
-    return {}
+    return None
 
 
-def get_assets(account_id: int) -> list[dict[str, Any]]:
-    """Get all assets from a given account and returns a list of dictionaries
-    containing `asset_id` and `asset_name` keys."""
-
+def get_assets(account_id: int) -> list[Account]:
     query = "SELECT asset_id, asset_name FROM assets WHERE account_id = ?"
 
-    return [dict(row) for row in fetch_multiple_records(query, (account_id,))]
+    return [
+        Account(
+            id=row["account_id"],
+            name=row["account_name"],
+            currency=row["currency"],
+        )
+        for row in fetch_multiple_records(query, (account_id,))
+    ]
 
 
 def insert_account(account_name: str, currency: str):
@@ -56,7 +65,7 @@ def insert_account(account_name: str, currency: str):
     )
 
 
-def update_account(account_id: int, account_name: str, currency: str):
+def update_account(account_id: int, account_name: str, currency: str) -> None:
     """Update account."""
 
     execute_db(
