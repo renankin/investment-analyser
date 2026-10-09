@@ -1,6 +1,9 @@
 from pandas import DataFrame, Series, concat
 
-from investment_analyser.accounts.repository import get_all_accounts, get_assets
+from investment_analyser.accounts.repository import (
+    get_all_accounts,
+    get_assets_from_account,
+)
 from investment_analyser.market_data.repository import prices
 from investment_analyser.transactions.repository import get_transactions
 from investment_analyser.transactions.service import get_split_adjusted_transactions
@@ -14,7 +17,7 @@ def get_all_accounts_history() -> Series:
     df = DataFrame()
 
     for account in all_accounts:
-        ser = get_account_history(account["account_id"])
+        ser = get_account_history(account.id)
 
         df = concat([df, ser], axis=1).sort_index()
 
@@ -24,12 +27,12 @@ def get_all_accounts_history() -> Series:
 def get_account_history(account_id: int) -> Series:
     """Returns a Series with `values` for the account history."""
 
-    all_assets = get_assets(account_id)
+    all_assets = get_assets_from_account(account_id)
 
     df = DataFrame()
 
     for asset in all_assets:
-        ser = get_asset_history(asset["asset_id"])
+        ser = get_asset_history(asset.id)
 
         df = concat([df, ser], axis=1).sort_index()
 

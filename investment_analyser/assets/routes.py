@@ -135,6 +135,6 @@ def show_dividends(asset_id):
     return render_template(
         "show_dividends_received.html",
         dividends=dividends,
-        currency=account["currency"],
+        currency=account.currency,
         asset_id=asset_id,
     )

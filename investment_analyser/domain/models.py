@@ -3,7 +3,7 @@ from datetime import date
 from decimal import Decimal
 
 
-@dataclass(frozen=True)
+@dataclass
 class Account:
     id: int
     name: str
@@ -14,7 +14,9 @@ class Account:
 class Asset:
     id: int
     symbol: str
+    name: str
     type: str
+    account_id: int
     still_open: bool
 
 
