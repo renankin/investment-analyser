@@ -4,7 +4,7 @@ from investment_analyser.accounts.repository import get_account, get_all_account
 from investment_analyser.assets.repository import (
     edit_asset,
     get_all_assets,
-    get_asset,
+    get_asset_by_id,
     insert_asset,
 )
 from investment_analyser.assets.services.deletion import delete_asset_if_unused
@@ -23,7 +23,7 @@ def index():
 
     all_assets = []
     for asset in get_all_assets():
-        if asset_search.upper() in asset["asset_symbol"].upper():
+        if asset_search.upper() in asset.info.symbol.upper():
             all_assets.append(asset)
 
     return render_template("show_assets.html", assets=all_assets)
@@ -43,26 +43,16 @@ def add():
         account_id = request.form.get("account_id", type=int)
         asset_symbol = request.form.get("asset_symbol")
         asset_name = request.form.get("asset_name")
-        benchmark_index = request.form.get("benchmark_index")
-        expense_ratio = request.form.get("expense_ratio", type=float)
-        total_assets = request.form.get("total_assets", type=float)
         asset_type = request.form.get("asset_type")
         still_open = request.form.get("still_open", type=bool)
 
         if not still_open:
             still_open = False
 
-        insert_asset(
-            account_id,
-            asset_symbol,
-            asset_name,
-            benchmark_index,
-            expense_ratio,
-            total_assets,
-            asset_type,
-            still_open,
-        )
-        flash("Asset added.")
+        if account_id and asset_symbol and asset_name and asset_type:
+            insert_asset(account_id, asset_symbol, asset_name, asset_type, still_open)
+            flash("Asset added.")
+
         return redirect(url_for("assets.index"))
 
     return render_template("add_asset.html", accounts=all_accounts)
@@ -72,30 +62,24 @@ def add():
 def edit(asset_id):
     """Edit asset."""
 
-    asset = get_asset(asset_id)
+    asset = get_asset_by_id(asset_id)
 
     if request.method == "POST":
         asset_symbol = request.form.get("asset_symbol")
         asset_name = request.form.get("asset_name")
-        benchmark_index = request.form.get("benchmark_index")
-        expense_ratio = request.form.get("expense_ratio", type=float)
-        total_assets = request.form.get("total_assets", type=float)
         asset_type = request.form.get("asset_type")
         still_open = request.form.get("still_open", type=bool)
 
         if not still_open:
             still_open = False
+            asset.still_open = still_open
 
-        edit_asset(
-            asset_id,
-            asset_symbol,
-            asset_name,
-            benchmark_index,
-            expense_ratio,
-            total_assets,
-            asset_type,
-            still_open,
-        )
+        if asset_symbol and asset_name and asset_type:
+            asset.info.symbol = asset_symbol
+            asset.info.name = asset_name
+            asset.info.type = asset_type
+
+        edit_asset(asset)
         flash("Asset updated.")
         return redirect(url_for("assets.index"))
 
@@ -124,9 +108,9 @@ def show_dividends(asset_id):
 
     dividends = get_dividends_received(asset_id)
 
-    asset = get_asset(asset_id)
+    asset = get_asset_by_id(asset_id)
 
-    account = get_account(asset["account_id"])
+    account = get_account(asset.account.id)
 
     if not dividends:
         flash("No dividends to show.")

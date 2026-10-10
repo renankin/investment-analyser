@@ -10,14 +10,19 @@ class Account:
     currency: str
 
 
-@dataclass(frozen=True)
-class Asset:
-    id: int
+@dataclass
+class AssetInfo:
     symbol: str
     name: str
     type: str
-    account_id: int
+
+
+@dataclass
+class AssetPosition:
+    id: int
+    info: AssetInfo
     still_open: bool
+    account: Account
 
 
 @dataclass(frozen=True)
@@ -49,3 +54,12 @@ class Transaction:
     date: date
     type: str
     price: Decimal
+
+
+@dataclass
+class EtfInfo:
+    asset_info: AssetInfo
+    benchmark_index: str
+    expense_ratio: Decimal
+    fund_size: Decimal
+    underlying_etf_symbol: str

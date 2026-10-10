@@ -3,7 +3,7 @@ from investment_analyser.db import (
     fetch_multiple_records,
     fetch_single_record,
 )
-from investment_analyser.domain.models import Account, Asset
+from investment_analyser.models.models import Account, AssetPosition
 
 
 def delete_account(account_id) -> None:
@@ -36,23 +36,6 @@ def get_account(account_id: int) -> Account:
         name=result["account_name"],
         currency=result["currency"],
     )
-
-
-def get_assets_from_account(account_id: int) -> list[Asset]:
-
-    query = "SELECT * FROM assets WHERE account_id = ?"
-
-    return [
-        Asset(
-            id=row["asset_id"],
-            symbol=row["asset_symbol"],
-            name=row["asset_name"],
-            type=row["asset_type"],
-            account_id=row["account_id"],
-            still_open=row["still_open"],
-        )
-        for row in fetch_multiple_records(query, (account_id,))
-    ]
 
 
 def create_account(account_name: str, account_currency: str) -> None:

@@ -2,7 +2,7 @@ from datetime import date
 from decimal import Decimal
 from typing import Any, TypedDict
 
-from investment_analyser.assets.repository import get_asset
+from investment_analyser.assets.repository import get_asset_by_id
 from investment_analyser.market_data.repository import dividends
 from investment_analyser.transactions.repository import get_transactions
 from investment_analyser.transactions.service import get_split_adjusted_transactions
@@ -25,8 +25,8 @@ def get_dividends_received(asset_id: int) -> list[dict[str, Any]]:
     divs_received = []
     if t:
         for div in market_divs:
-            a = get_asset(asset_id)
-            if not a["still_open"]:
+            asset = get_asset_by_id(asset_id)
+            if not asset.still_open:
                 last_date = max([transaction["date"] for transaction in t])
                 if div["date"] >= last_date:
                     continue

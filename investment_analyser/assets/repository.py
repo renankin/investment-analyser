@@ -5,136 +5,168 @@ from investment_analyser.db import (
     fetch_multiple_records,
     fetch_single_record,
 )
+from investment_analyser.models.models import Account, AssetInfo, AssetPosition, EtfInfo
+
+ALL_ASSETS_QUERY = (
+    "SELECT assets.account_id, assets.asset_id, assets.asset_symbol, assets.asset_name,"
+    " assets.asset_type, assets.still_open, accounts.account_name, accounts.currency"
+    " FROM assets"
+    " JOIN accounts ON assets.account_id = accounts.account_id"
+)
 
 
-def delete_asset(asset_id: int):
+def delete_asset(asset_id: int) -> None:
     """Delete asset."""
 
     execute_db("DELETE FROM assets WHERE asset_id = ?", (asset_id,))
 
 
-def get_all_assets() -> list[dict[str, Any]]:
-    """Returns a list of dictionaries containing
-    `asset_id`, `asset_symbol`, `asset_name`, `account_name`, `benchmark_index`, `total_assets`
-    `asset_type`, `still_open`, `currency`."""
+def get_all_assets() -> list[AssetPosition]:
 
-    query = (
-        "SELECT assets.asset_id, assets.asset_symbol, assets.asset_name, assets.asset_type,"
-        " assets.still_open, assets.benchmark_index, assets.total_assets, assets.expense_ratio,"
-        " accounts.account_name, accounts.currency"
-        " FROM assets"
-        " JOIN accounts ON assets.account_id = accounts.account_id"
+    return [
+        AssetPosition(
+            id=row["asset_id"],
+            info=AssetInfo(
+                symbol=row["asset_symbol"],
+                name=row["asset_name"],
+                type=row["asset_type"],
+            ),
+            still_open=row["still_open"],
+            account=Account(
+                id=row["account_id"], name=row["account_name"], currency=row["currency"]
+            ),
+        )
+        for row in fetch_multiple_records(ALL_ASSETS_QUERY)
+    ]
+
+
+def get_asset_by_id(asset_id: int) -> AssetPosition:
+
+    record = fetch_single_record(
+        ALL_ASSETS_QUERY + " WHERE assets.asset_id = ?",
+        (asset_id,),
     )
 
-    return [dict(row) for row in fetch_multiple_records(query)]
-
-
-def get_asset(
-    asset_id: int | None = None, asset_symbol: str | None = None
-) -> dict[str, Any]:
-    """Returns a dictionary containing `account_id`, `asset_id`, `asset_symbol`, `asset_name`,
-    `asset_type`, `still_open`, `benchmark_index`, `expense_ratio` and `total_assets`."""
-
-    query = (
-        "SELECT account_id, asset_id, asset_symbol, asset_name, asset_type, still_open,"
-        " benchmark_index, expense_ratio, total_assets"
-        " FROM assets"
+    return AssetPosition(
+        id=record["asset_id"],
+        info=AssetInfo(
+            symbol=record["asset_symbol"],
+            name=record["asset_name"],
+            type=record["asset_type"],
+        ),
+        still_open=record["still_open"],
+        account=Account(
+            id=record["account_id"],
+            name=record["account_name"],
+            currency=record["currency"],
+        ),
     )
 
-    param = ()
-    if asset_id:
-        query += " WHERE asset_id = ?"
-        param = asset_id
 
-    if asset_symbol:
-        query += " WHERE asset_symbol = ?"
-        param = asset_symbol
+def get_asset_by_symbol(symbol: str) -> AssetPosition:
 
-    result = fetch_single_record(query, (param,))
-    if result:
-        return dict(result)
+    record = fetch_single_record(
+        ALL_ASSETS_QUERY + " WHERE assets.asset_symbol = ?",
+        (symbol,),
+    )
 
-    return {}
+    return AssetPosition(
+        id=record["asset_id"],
+        info=AssetInfo(
+            symbol=record["asset_symbol"],
+            name=record["asset_name"],
+            type=record["asset_type"],
+        ),
+        still_open=record["still_open"],
+        account=Account(
+            id=record["account_id"],
+            name=record["account_name"],
+            currency=record["currency"],
+        ),
+    )
 
 
-def get_etf_data(asset_id: int) -> dict[str, Any]:
-    """Get the data from the ETF for an asset and return as a dictionary with keys
-    `benchmark_index`, `expense_ratio`, `fund_size` and `underlying_etf_symbol`"""
+def get_assets_from_account(account_id: int) -> list[AssetPosition]:
 
-    query = (
-        "SELECT benchmark_index, expense_ratio, fund_size, underlying_etf_symbol"
+    return [
+        AssetPosition(
+            id=row["asset_id"],
+            info=AssetInfo(
+                symbol=row["asset_symbol"],
+                name=row["asset_name"],
+                type=row["asset_type"],
+            ),
+            still_open=row["still_open"],
+            account=Account(
+                id=row["account_id"], name=row["account_name"], currency=row["currency"]
+            ),
+        )
+        for row in fetch_multiple_records(
+            ALL_ASSETS_QUERY + " WHERE accounts.account_id = ?", (account_id,)
+        )
+    ]
+
+
+def get_etf_data(asset_id: int) -> EtfInfo:
+
+    record = fetch_single_record(
+        "SELECT etf_metadata.benchmark_index, etf_metadata.expense_ratio, etf_metadata.fund_size,"
+        " etf_metadata.underlying_etf_symbol, assets.asset_name, assets.asset_symbol,"
+        " assets.asset_type"
         " FROM etf_metadata"
-        " WHERE asset_id = ?"
+        " JOIN assets ON assets.asset_id = etf_metadata.asset_id"
+        " WHERE etf_metadata.asset_id = ?",
+        (asset_id,),
     )
-    result = fetch_single_record(query, (asset_id,))
-    if result:
-        return dict(result)
-    return {}
+
+    return EtfInfo(
+        asset_info=AssetInfo(
+            symbol=record["asset_symbol"],
+            name=record["asset_name"],
+            type=record["asset_type"],
+        ),
+        benchmark_index=record["benchmark_index"],
+        expense_ratio=record["expense_ratio"],
+        fund_size=record["fund_size"],
+        underlying_etf_symbol=record["underlying_etf_symbol"],
+    )
 
 
 def insert_asset(
     account_id: int,
     asset_symbol: str,
     asset_name: str,
-    benchmark_index: str,
-    expense_ratio: float,
-    total_assets: float,
     asset_type: str,
-    still_open: int,
-):
-    """Insert into assets table."""
+    still_open: bool,
+) -> None:
 
     query = (
         "INSERT INTO assets"
-        " (account_id, asset_symbol, asset_name, asset_type, still_open,"
-        " benchmark_index, expense_ratio, total_assets )"
+        " (account_id, asset_symbol, asset_name, asset_type, still_open)"
         " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
     )
 
     execute_db(
         query,
-        (
-            account_id,
-            asset_symbol,
-            asset_name,
-            asset_type,
-            still_open,
-            benchmark_index,
-            expense_ratio,
-            total_assets,
-        ),
+        (account_id, asset_symbol, asset_name, asset_type, still_open),
     )
 
 
-def edit_asset(
-    asset_id: int,
-    asset_symbol: str,
-    asset_name: str,
-    benchmark_index: str,
-    expense_ratio: float,
-    total_assets: float,
-    asset_type: str,
-    still_open: int,
-):
-    """Update asset."""
+def edit_asset(asset_pos: AssetPosition) -> None:
 
     query = (
         "UPDATE assets"
-        " SET asset_symbol = ?, asset_name = ?, asset_type = ?, still_open = ?,"
-        " benchmark_index = ?, expense_ratio = ?, total_assets = ?"
+        " SET asset_symbol = ?, asset_name = ?, asset_type = ?, still_open = ?"
         " WHERE asset_id = ?"
     )
 
     execute_db(
         query,
         (
-            asset_symbol,
-            asset_name,
-            asset_type,
-            still_open,
-            benchmark_index,
-            expense_ratio,
-            total_assets,
-            asset_id,
+            asset_pos.info.symbol,
+            asset_pos.info.name,
+            asset_pos.info.type,
+            asset_pos.still_open,
+            asset_pos.id,
         ),
     )

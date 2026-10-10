@@ -66,12 +66,6 @@ def get_sector_distribution() -> dict:
     for _, portfolio_asset in portfolio_df.iterrows():
         asset_symbol = portfolio_asset["asset_symbol"]
 
-        if portfolio_asset["asset_type"] == "ETF":
-            etf_data = get_etf_data(portfolio_asset["asset_id"])
-
-            if "underlying_etf_symbol" in etf_data:
-                asset_symbol = etf_data["underlying_etf_symbol"]
-
         asset_sectors = YFetcher(asset_symbol).get_sector_weighting()
 
         for sector_key in asset_sectors:

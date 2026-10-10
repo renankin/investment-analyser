@@ -4,7 +4,7 @@ from typing import TypedDict
 
 from scipy import optimize
 
-from investment_analyser.assets.repository import get_all_assets, get_asset
+from investment_analyser.assets.repository import get_all_assets, get_asset_by_id
 from investment_analyser.assets.services.dividends import (
     Dividend,
     get_dividends_received,
@@ -35,16 +35,16 @@ def get_all_return() -> list[dict]:
     all_stats = []
 
     for asset in all_assets:
-        divs = get_dividends_received(asset["asset_id"])
+        divs = get_dividends_received(asset.id)
         total_divs = sum(div["amount_received"] for div in divs)
 
-        trans = get_split_adjusted_transactions(transactions=get_transactions(asset["asset_id"]))
+        trans = get_split_adjusted_transactions(transactions=get_transactions(asset.id))
         total_invested = sum(t["price"] * t["shares"] for t in trans if t["shares"] > 0)
         total_sold = sum(t["price"] * -t["shares"] for t in trans if t["shares"] < 0)
 
         market_value = 0
-        if asset["still_open"]:
-            p = prices.get_most_recent_price(asset["asset_id"])
+        if asset.still_open:
+            p = prices.get_most_recent_price(asset.id)
             if p:
                 total_shares = sum(t["shares"] for t in trans)
                 market_value = total_shares * p["unit_price"]
@@ -56,16 +56,15 @@ def get_all_return() -> list[dict]:
             roi = None
 
         if total_invested > 0:
-
             stats = {
-                "asset_name": asset["asset_name"],
-                "still_open": asset["still_open"],
-                "currency": asset["currency"],
+                "asset_name": asset.info.name,
+                "still_open": asset.still_open,
+                "currency": asset.account.currency,
                 "total_invested": total_invested,
                 "total_sold": total_sold,
                 "market_value": market_value,
                 "total_dividends": total_divs,
-                "irr": get_irr(asset["asset_id"]),
+                "irr": get_irr(asset.id),
                 "roi": roi,
             }
 
@@ -98,8 +97,8 @@ def get_irr(asset_id: int) -> float | None:
             cashflow.append(div["amount_received"])
             dates.append(div["date"])
 
-    a = get_asset(asset_id)
-    if a["still_open"]:
+    asset = get_asset_by_id(asset_id)
+    if asset.still_open:
         p = prices.get_most_recent_price(asset_id)
         if p:
             cashflow.append(p["unit_price"] * total_shares)

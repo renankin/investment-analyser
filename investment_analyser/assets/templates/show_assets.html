@@ -31,14 +31,14 @@
             {% for asset in assets: %}
               <tr>
                 <td>
-                  <a href="{{ url_for('assets.edit', asset_id=asset['asset_id']) }}">
-                    {{ asset["asset_symbol"] }}
+                  <a href="{{ url_for('assets.edit', asset_id=asset.id) }}">
+                    {{ asset.info.symbol }}
                   </a>
                 </td>
                 <td>
                   <input type="checkbox"
                          disabled
-                         {% if asset["still_open"] %}checked{% endif %} />
+                         {% if asset.still_open %}checked{% endif %} />
                 </td>
               </tr>
             {% endfor %}
