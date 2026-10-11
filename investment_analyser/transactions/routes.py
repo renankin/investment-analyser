@@ -4,7 +4,7 @@ from investment_analyser.assets import repository
 from investment_analyser.transactions.repository import (
     delete_transaction,
     get_all_transactions,
-    get_transaction,
+    get_transaction_by_id,
     insert_transaction,
     update_transaction,
 )
@@ -67,7 +67,7 @@ def add():
 def delete(transaction_id):
     """Deletes transaction"""
 
-    t = get_transaction(transaction_id)
+    t = get_transaction_by_id(transaction_id)
 
     if t:
         delete_transaction(transaction_id)
@@ -84,7 +84,7 @@ def delete(transaction_id):
 def edit(transaction_id):
     """Edit transaction"""
 
-    t = get_transaction(transaction_id)
+    t = get_transaction_by_id(transaction_id)
 
     asset = repository.get_asset(t["asset_id"])
 

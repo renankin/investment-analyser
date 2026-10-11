@@ -46,13 +46,12 @@ class StockSplit:
     split_ratio: float
 
 
-@dataclass(frozen=True)
-class Transaction:
+@dataclass
+class TransactionRecord:
     id: int
-    account_id: int
-    asset_id: int
+    asset: AssetPosition
     date: date
-    type: str
+    shares: Decimal
     price: Decimal
 
 

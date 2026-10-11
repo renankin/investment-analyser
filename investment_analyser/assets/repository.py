@@ -1,5 +1,3 @@
-from typing import Any
-
 from investment_analyser.db import (
     execute_db,
     fetch_multiple_records,
