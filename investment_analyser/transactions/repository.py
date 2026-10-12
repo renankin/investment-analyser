@@ -20,7 +20,6 @@ ALL_TRANSACTIONS_QUERY = (
     " FROM transactions"
     " JOIN assets ON transactions.asset_id = assets.asset_id"
     " JOIN accounts ON assets.account_id = accounts.account_id"
-    " ORDER BY transactions.date DESC"
 )
 
 
@@ -80,7 +79,8 @@ def get_transactions_for_open_assets() -> list[TransactionRecord]:
             price=row["price"],
         )
         for row in fetch_multiple_records(
-            ALL_TRANSACTIONS_QUERY + " WHERE assets.still_open = 1",
+            ALL_TRANSACTIONS_QUERY
+            + " WHERE assets.still_open = 1 ORDER BY transactions.date DESC",
         )
     ]
 
@@ -88,7 +88,8 @@ def get_transactions_for_open_assets() -> list[TransactionRecord]:
 def get_transaction_by_id(transaction_id: int) -> TransactionRecord:
 
     record = fetch_single_record(
-        ALL_TRANSACTIONS_QUERY + " WHERE transactions.transaction_id = ?",
+        ALL_TRANSACTIONS_QUERY
+        + " WHERE transactions.transaction_id = ? ORDER BY transactions.date DESC",
         (transaction_id,),
     )
 
@@ -137,7 +138,9 @@ def get_transactions_from_asset(asset_id: int) -> list[TransactionRecord]:
             price=row["price"],
         )
         for row in fetch_multiple_records(
-            ALL_TRANSACTIONS_QUERY + " WHERE assets.asset_id = ?", (asset_id,)
+            ALL_TRANSACTIONS_QUERY
+            + " WHERE assets.asset_id = ? ORDER BY transactions.date DESC",
+            (asset_id,),
         )
     ]
 

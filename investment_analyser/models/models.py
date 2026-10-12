@@ -56,6 +56,14 @@ class TransactionRecord:
 
 
 @dataclass
+class AdjustedTransaction:
+    transaction_record: TransactionRecord
+    is_adjusted: bool
+    shares: Decimal
+    price: Decimal
+
+
+@dataclass
 class EtfInfo:
     asset_info: AssetInfo
     benchmark_index: str

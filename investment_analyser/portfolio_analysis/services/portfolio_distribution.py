@@ -26,9 +26,10 @@ def get_asset_allocation() -> DataFrame:
     """
 
     raw_transactions = get_transactions_for_open_assets()
-    adjusted_transactions = DataFrame(get_split_adjusted_transactions(raw_transactions))
+    adjusted_transactions = get_split_adjusted_transactions(raw_transactions)
+    df = DataFrame(adjusted_transactions)
 
-    grouped_df = adjusted_transactions.groupby(
+    grouped_df = df.groupby(
         ["asset_id", "asset_symbol", "asset_type", "currency"],
         as_index=False,
     )[["shares"]].sum()

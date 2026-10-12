@@ -3,10 +3,12 @@ from decimal import Decimal
 from typing import TypedDict
 
 from investment_analyser.market_data.repository.stock_splits import get_stock_splits
+from investment_analyser.models.models import AdjustedTransaction, TransactionRecord
 
 
 class Transaction(TypedDict):
     """Contains `date`, `shares` and `price`."""
+
     date: date
     shares: Decimal
     price: Decimal
@@ -17,28 +19,29 @@ class StockSplit(TypedDict):
     split_ratio: Decimal
 
 
-def get_split_adjusted_transactions(transactions: list[dict]) -> list[dict]:
-    """Adjust cashflow for assets when there are stock splits.
-
-    The transactions must contain `date`, `shares` and `price` keys.
-
-    The returned list of dictionaries will contain the same keys as the input `transactions`
-    in addition to `is_adjusted` keys.
-    """
+def get_split_adjusted_transactions(
+    transactions: list[TransactionRecord],
+) -> list[AdjustedTransaction]:
 
     adj_transactions = []
     for transaction in transactions:
-        adj_transaction = dict(transaction)
+        for split in get_stock_splits(transaction.id):
+            if transaction.date <= split["date"]:
+                adj_transaction = AdjustedTransaction(
+                    transaction_record=transaction,
+                    is_adjusted=True,
+                    shares=transaction.shares * split["split_ratio"],
+                    price=transaction.price / split["split_ratio"],
+                )
+            else:
+                adj_transaction = AdjustedTransaction(
+                    transaction_record=transaction,
+                    is_adjusted=False,
+                    shares=transaction.shares,
+                    price=transaction.price,
+                )
 
-        adj_transaction["is_adjusted"] = False
-    
-        for split in get_stock_splits(transaction["asset_id"]):
-            if transaction["date"] <= split["date"]:
-                adj_transaction["shares"] *= split["split_ratio"]
-                adj_transaction["price"] /= split["split_ratio"]
-                adj_transaction["is_adjusted"] = True
-
-        adj_transactions.append(adj_transaction)
+            adj_transactions.append(adj_transaction)
 
     return adj_transactions
 
