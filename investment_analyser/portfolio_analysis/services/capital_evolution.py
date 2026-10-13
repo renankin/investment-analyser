@@ -45,7 +45,7 @@ def get_asset_history(asset_id: int) -> Series:
     if not t:
         return Series()
 
-    df1 = DataFrame(t)[["date", "shares"]]
+    df1 = DataFrame([{"date": item.transaction_record.date, "shares": item.shares} for item in t])
 
     # Combine transactions which are ocurring in the same date
     df1 = df1.groupby("date").sum()
@@ -62,7 +62,7 @@ def get_asset_history(asset_id: int) -> Series:
     df2 = df2[df2.index >= df1.first_valid_index()]
 
     # Include cumsum on the column of df2
-    df2 = df2.merge(df1, on="date", how="left")
+    df2 = df2.merge(df1, left_index=True, right_index=True, how="left")
 
     # Replace NaN values
     df2.ffill(inplace=True)

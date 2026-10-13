@@ -27,7 +27,7 @@ def get_dividends_received(asset_id: int) -> list[dict[str, Any]]:
         for div in market_divs:
             asset = get_asset_by_id(asset_id)
             if not asset.still_open:
-                last_date = max([transaction["date"] for transaction in t])
+                last_date = max([transaction.transaction_record.date for transaction in t])
                 if div["date"] >= last_date:
                     continue
 
@@ -35,9 +35,9 @@ def get_dividends_received(asset_id: int) -> list[dict[str, Any]]:
             shares = 0
             div_received = False
             for transaction in t:
-                if transaction["date"] <= div["date"]:
+                if transaction.transaction_record.date <= div["date"]:
                     div_received = True
-                    shares += transaction["shares"]
+                    shares += transaction.shares
 
             if div_received:
                 value = shares * div["dividend_value"]

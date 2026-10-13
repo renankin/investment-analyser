@@ -31,7 +31,7 @@ def portfolio_evolution():
         title_label = get_account(account_id).name
     elif asset_id:
         hist = capital_evolution.get_asset_history(asset_id)
-        title_label = repository.get_asset(asset_id)["asset_name"]
+        title_label = repository.get_asset_by_id(asset_id).info.name
     else:
         hist = capital_evolution.get_all_accounts_history()
         title_label = "All accounts"

@@ -25,6 +25,12 @@ def get_split_adjusted_transactions(
 
     adj_transactions = []
     for transaction in transactions:
+        adj_transaction = AdjustedTransaction(
+            transaction_record=transaction,
+            is_adjusted=False,
+            shares=transaction.shares,
+            price=transaction.price,
+        )
         for split in get_stock_splits(transaction.id):
             if transaction.date <= split["date"]:
                 adj_transaction = AdjustedTransaction(
@@ -33,15 +39,8 @@ def get_split_adjusted_transactions(
                     shares=transaction.shares * split["split_ratio"],
                     price=transaction.price / split["split_ratio"],
                 )
-            else:
-                adj_transaction = AdjustedTransaction(
-                    transaction_record=transaction,
-                    is_adjusted=False,
-                    shares=transaction.shares,
-                    price=transaction.price,
-                )
 
-            adj_transactions.append(adj_transaction)
+        adj_transactions.append(adj_transaction)
 
     return adj_transactions
 

@@ -39,14 +39,14 @@ def get_all_return() -> list[dict]:
         total_divs = sum(div["amount_received"] for div in divs)
 
         trans = get_split_adjusted_transactions(transactions=get_transactions_from_asset(asset.id))
-        total_invested = sum(t["price"] * t["shares"] for t in trans if t["shares"] > 0)
-        total_sold = sum(t["price"] * -t["shares"] for t in trans if t["shares"] < 0)
+        total_invested = sum(t.price * t.shares for t in trans if t.shares > 0)
+        total_sold = sum(t.price * -t.shares for t in trans if t.shares < 0)
 
         market_value = 0
         if asset.still_open:
             p = prices.get_most_recent_price(asset.id)
             if p:
-                total_shares = sum(t["shares"] for t in trans)
+                total_shares = sum(t.shares for t in trans)
                 market_value = total_shares * p["unit_price"]
 
         total_return = market_value + total_sold + total_divs
@@ -87,9 +87,9 @@ def get_irr(asset_id: int) -> float | None:
     dates = []
     total_shares = 0
     for transaction in t:
-        cashflow.append(-1 * transaction["price"] * transaction["shares"])
-        dates.append(transaction["date"])
-        total_shares += transaction["shares"]
+        cashflow.append(-1 * transaction.price * transaction.shares)
+        dates.append(transaction.transaction_record.date)
+        total_shares += transaction.shares
 
     dividends = get_dividends_received(asset_id)
     if dividends:

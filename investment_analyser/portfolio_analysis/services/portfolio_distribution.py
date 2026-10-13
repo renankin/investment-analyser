@@ -1,7 +1,6 @@
 from pandas import DataFrame, Series
 from yfinance import Ticker
 
-from investment_analyser.assets.repository import get_etf_data
 from investment_analyser.market_data.fetchers.yfinance import YFetcher
 from investment_analyser.market_data.repository.prices import get_most_recent_price
 from investment_analyser.transactions.repository import get_transactions_for_open_assets
@@ -27,7 +26,18 @@ def get_asset_allocation() -> DataFrame:
 
     raw_transactions = get_transactions_for_open_assets()
     adjusted_transactions = get_split_adjusted_transactions(raw_transactions)
-    df = DataFrame(adjusted_transactions)
+    df = DataFrame(
+        [
+            {
+                "asset_id": transaction.transaction_record.asset.id,
+                "asset_symbol": transaction.transaction_record.asset.info.symbol,
+                "asset_type": transaction.transaction_record.asset.info.type,
+                "currency": transaction.transaction_record.asset.account.currency,
+                "shares": transaction.shares,
+            }
+            for transaction in adjusted_transactions
+        ]
+    )
 
     grouped_df = df.groupby(
         ["asset_id", "asset_symbol", "asset_type", "currency"],
