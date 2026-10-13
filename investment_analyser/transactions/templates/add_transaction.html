@@ -9,7 +9,7 @@
         <label class="form-label" for="assetNameSelect">Asset name</label>
         <select class="form-select" name="asset_id" id="assetNameSelect">
           {% for asset in assets: %}
-            <option value="{{ asset['asset_id'] }}">{{ asset['asset_name'] }}</option>
+            <option value="{{ asset.id }}">{{ asset.info.name }}</option>
           {% endfor %}
         </select>
       </div>
