@@ -45,7 +45,7 @@ def get_all_return() -> list[dict]:
             p = prices.get_most_recent_price(asset.id)
             if p:
                 total_shares = sum(t.shares for t in trans)
-                market_value = total_shares * p["unit_price"]
+                market_value = total_shares * p.value
 
         total_return = market_value + total_sold + total_divs
         if total_invested > 0 and total_return > 0:
@@ -99,8 +99,8 @@ def get_irr(asset_id: int) -> float | None:
     if asset.still_open:
         p = prices.get_most_recent_price(asset_id)
         if p:
-            cashflow.append(p["unit_price"] * total_shares)
-            dates.append(p["date"])
+            cashflow.append(p.value * total_shares)
+            dates.append(p.date)
         else:
             return None
 

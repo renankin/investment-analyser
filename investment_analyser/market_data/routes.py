@@ -5,7 +5,7 @@ from investment_analyser.market_data.repository.dividends import (
     delete_dividends,
     get_dividends,
 )
-from investment_analyser.market_data.repository.prices import delete_prices, get_prices
+from investment_analyser.market_data.repository.prices import delete_prices, get_market_prices
 from investment_analyser.market_data.repository.stock_splits import (
     delete_stock_splits,
     get_stock_splits,
@@ -82,7 +82,7 @@ def del_prices(asset_id):
 def show_prices(asset_id):
     """Show prices for asset."""
 
-    p = get_prices(asset_id)
+    p = get_market_prices(asset_id)
 
     data = json.dumps([price["unit_price"] for price in p])
     labels = json.dumps([price["date"] for price in p])

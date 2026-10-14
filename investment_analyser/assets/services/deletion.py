@@ -2,7 +2,7 @@ from typing import Literal
 
 from investment_analyser.assets.repository import delete_asset
 from investment_analyser.market_data.repository.dividends import get_dividends
-from investment_analyser.market_data.repository.prices import get_prices
+from investment_analyser.market_data.repository.prices import get_market_prices
 from investment_analyser.market_data.repository.stock_splits import get_stock_splits
 from investment_analyser.transactions.repository import get_transactions_from_asset
 
@@ -15,7 +15,7 @@ def delete_asset_if_unused(asset_id: int) -> DeletionBlocker | None:
     if get_transactions_from_asset(asset_id):
         return "transactions"
 
-    if get_prices(asset_id):
+    if get_market_prices(asset_id):
         return "prices"
 
     if get_dividends(asset_id):

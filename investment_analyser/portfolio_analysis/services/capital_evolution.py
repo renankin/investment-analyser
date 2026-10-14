@@ -52,7 +52,7 @@ def get_asset_history(asset_id: int) -> Series:
     df1["shares_cumsum"] = df1["shares"].cumsum()
 
     # Get the prices for that asset
-    p = [dict(price) for price in prices.get_prices(asset_id)]
+    p = [price.value for price in prices.get_market_prices(asset_id)]
     if not p:
         return Series()
 

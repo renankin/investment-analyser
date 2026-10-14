@@ -1,6 +1,6 @@
 from investment_analyser.assets.repository import get_asset_by_id
 from investment_analyser.market_data.repository import dividends
-from investment_analyser.models.models import DividendReceived, Account
+from investment_analyser.models.models import Account, DividendReceived
 from investment_analyser.transactions.repository import get_transactions_from_asset
 from investment_analyser.transactions.service import get_split_adjusted_transactions
 
