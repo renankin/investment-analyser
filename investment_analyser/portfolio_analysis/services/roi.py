@@ -5,12 +5,10 @@ from typing import TypedDict
 from scipy import optimize
 
 from investment_analyser.assets.repository import get_all_assets, get_asset_by_id
-from investment_analyser.assets.services.dividends import (
-    Dividend,
-    get_dividends_received,
-)
+from investment_analyser.assets.services.dividends import get_dividends_received
 from investment_analyser.market_data.repository import prices
 from investment_analyser.market_data.services.prices import Price
+from investment_analyser.models.models import DividendReceived
 from investment_analyser.transactions.repository import get_transactions_from_asset
 from investment_analyser.transactions.service import (
     Transaction,
@@ -36,7 +34,7 @@ def get_all_return() -> list[dict]:
 
     for asset in all_assets:
         divs = get_dividends_received(asset.id)
-        total_divs = sum(div["amount_received"] for div in divs)
+        total_divs = sum(div.value for div in divs)
 
         trans = get_split_adjusted_transactions(transactions=get_transactions_from_asset(asset.id))
         total_invested = sum(t.price * t.shares for t in trans if t.shares > 0)
@@ -94,8 +92,8 @@ def get_irr(asset_id: int) -> float | None:
     dividends = get_dividends_received(asset_id)
     if dividends:
         for div in dividends:
-            cashflow.append(div["amount_received"])
-            dates.append(div["date"])
+            cashflow.append(div.value)
+            dates.append(div.date)
 
     asset = get_asset_by_id(asset_id)
     if asset.still_open:
@@ -114,7 +112,7 @@ def get_irr(asset_id: int) -> float | None:
         return compute_irr(cashflow, elapsed_years)
 
 
-def build_dividend_cashflows(dividends: list[Dividend]) -> list[Cashflow]:
+def build_dividend_cashflows(dividends: list[DividendReceived]) -> list[Cashflow]:
     """
     Build cashflow with dividends.
     """
@@ -122,7 +120,7 @@ def build_dividend_cashflows(dividends: list[Dividend]) -> list[Cashflow]:
     cashflows: list[Cashflow] = []
 
     for dividend in dividends:
-        cashflow: Cashflow = {"value": dividend["value"], "date": dividend["date"]}
+        cashflow: Cashflow = {"value": dividend.value, "date": dividend.date}
 
         cashflows.append(cashflow)
 
@@ -149,7 +147,7 @@ def build_transaction_cashflows(transactions: list[Transaction]) -> list[Cashflo
 
 def build_cashflows(
     transactions: list[Transaction],
-    dividends: list[Dividend],
+    dividends: list[DividendReceived],
     current_price: Price,
     open_shares: Decimal,
 ) -> list[Cashflow]:

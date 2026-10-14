@@ -11,11 +11,11 @@
       {% set ns = namespace(total=0, currency="") %}
       {% for div in dividends: %}
         <tr>
-          <td>{{ div["date"] | format_date }}</td>
-          <td>{{ div["amount_received"] | format_currency(currency) }}</td>
+          <td>{{ div.date | format_date }}</td>
+          <td>{{ div.value | format_currency(currency) }}</td>
         </tr>
-        {% set ns.total = ns.total + div["amount_received"] %}
-        {% set ns.currency = div["currency"] %}
+        {% set ns.total = ns.total + div.value %}
+        {% set ns.currency = div.account.currency %}
       {% endfor %}
     </tbody>
     <tfoot>

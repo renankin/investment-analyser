@@ -1,15 +1,13 @@
 from datetime import date
-from typing import Any
 
 from investment_analyser.db import (
     execute_db,
     fetch_multiple_records,
 )
+from investment_analyser.models.models import AssetInfo, MarketDividend
 
 
-def get_dividends(asset_id: int) -> list[dict[str, Any]]:
-    """Fetch dividends from database and return them as a list of dictionaries
-    containing "date" and "dividend_value" keys."""
+def get_dividends(asset_id: int) -> list[MarketDividend]:
 
     query = (
         "SELECT * FROM dividends"
@@ -19,19 +17,23 @@ def get_dividends(asset_id: int) -> list[dict[str, Any]]:
         " ORDER BY dividends.date DESC"
     )
 
-    return [dict(row) for row in fetch_multiple_records(query, (asset_id,))]
+    return [
+        MarketDividend(
+            date=row["date"],
+            asset=AssetInfo(
+                symbol=row["asset_symbol"],
+                name=row["asset_name"],
+                type=row["asset_type"],
+            ),
+            value=row["dividend_value"],
+        )
+        for row in fetch_multiple_records(query, (asset_id,))
+    ]
 
 
-def delete_dividends(asset_id: int) -> bool:
-    """Deletes dividends from database and returns True if successful"""
+def delete_dividends(asset_id: int) -> None:
 
-    dividends = get_dividends(asset_id)
-
-    if dividends:
-        execute_db("DELETE FROM dividends WHERE asset_id = ?", (asset_id,))
-        return True
-
-    return False
+    execute_db("DELETE FROM dividends WHERE asset_id = ?", (asset_id,))
 
 
 def insert_dividend(asset_id: int, date: date, dividend_value: float) -> None:

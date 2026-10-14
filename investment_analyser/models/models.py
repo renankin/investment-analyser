@@ -28,14 +28,20 @@ class AssetPosition:
 @dataclass(frozen=True)
 class MarketDividend:
     date: date
-    asset_id: int
+    asset: AssetInfo
     value: Decimal
+
+@dataclass
+class DividendReceived:
+    date: date
+    value: Decimal
+    account: Account
 
 
 @dataclass(frozen=True)
 class MarketPrice:
     date: date
-    asset_id: int
+    asset: AssetInfo
     value: Decimal
 
 
