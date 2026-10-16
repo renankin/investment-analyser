@@ -41,18 +41,25 @@ def get_asset_history(asset_id: int) -> Series:
     """Returns a Series with `values` for the asset history."""
 
     # Get the cummulative sum of shares
-    t = get_split_adjusted_transactions(transactions=get_transactions_from_asset(asset_id))
+    t = get_split_adjusted_transactions(
+        transactions=get_transactions_from_asset(asset_id)
+    )
     if not t:
         return Series()
 
-    df1 = DataFrame([{"date": item.transaction_record.date, "shares": item.shares} for item in t])
+    df1 = DataFrame(
+        [{"date": item.transaction_record.date, "shares": item.shares} for item in t]
+    )
 
     # Combine transactions which are ocurring in the same date
     df1 = df1.groupby("date").sum()
     df1["shares_cumsum"] = df1["shares"].cumsum()
 
     # Get the prices for that asset
-    p = [price.value for price in prices.get_market_prices(asset_id)]
+    p = [
+        {"unit_price": price.value, "date": price.date}
+        for price in prices.get_market_prices(asset_id)
+    ]
     if not p:
         return Series()
 

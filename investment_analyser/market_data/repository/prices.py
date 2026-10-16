@@ -1,5 +1,4 @@
 from datetime import date
-from typing import Any
 
 from investment_analyser.db import (
     execute_db,
@@ -20,13 +19,15 @@ def get_market_prices(asset_id: int) -> list[MarketPrice]:
             ),
             value=row["unit_price"],
         )
-        for row in fetch_multiple_records((
-        "SELECT * FROM prices"
-        " JOIN accounts ON accounts.account_id = "
-        " (SELECT account_id FROM assets WHERE asset_id = ?)"
-        " WHERE prices.asset_id = ?"
-        " ORDER BY prices.date"
-    ), (asset_id, asset_id))
+        for row in fetch_multiple_records(
+            (
+                "SELECT * FROM prices"
+                " JOIN assets ON assets.asset_id = prices.asset_id"
+                " JOIN accounts ON accounts.account_id = assets.account_id"
+                " WHERE prices.asset_id = ?"
+            ),
+            (asset_id,),
+        )
     ]
 
 

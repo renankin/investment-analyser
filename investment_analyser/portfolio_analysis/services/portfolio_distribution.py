@@ -43,12 +43,14 @@ def get_asset_allocation() -> DataFrame:
         ["asset_id", "asset_symbol", "asset_type", "currency"],
         as_index=False,
     )[["shares"]].sum()
-    grouped_df[["unit_price", "price_date"]] = (
-        grouped_df["asset_id"].apply(get_most_recent_price).apply(Series)
+    grouped_df[["unit_price", "price_date"]] = grouped_df["asset_id"].apply(
+        lambda asset_id: Series(
+            [get_most_recent_price(asset_id).value, get_most_recent_price(asset_id).date]
+        )
     )
-    grouped_df[["unit_price", "currency"]] = grouped_df[["unit_price", "currency"]].apply(
-        convert_currency, axis=1
-    )
+    grouped_df[["unit_price", "currency"]] = grouped_df[
+        ["unit_price", "currency"]
+    ].apply(convert_currency, axis=1)
     grouped_df["total"] = grouped_df["unit_price"] * grouped_df["shares"]
     grouped_df["weight_percent"] = grouped_df["total"] / grouped_df["total"].sum(axis=0)
 
