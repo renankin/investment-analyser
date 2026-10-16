@@ -48,8 +48,8 @@ class MarketPrice:
 @dataclass(frozen=True)
 class StockSplit:
     date: date
-    asset_id: int
-    split_ratio: float
+    asset: AssetInfo
+    split_ratio: Decimal
 
 
 @dataclass
