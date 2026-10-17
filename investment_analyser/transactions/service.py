@@ -32,12 +32,12 @@ def get_split_adjusted_transactions(
             price=transaction.price,
         )
         for split in get_stock_splits(transaction.id):
-            if transaction.date <= split["date"]:
+            if transaction.date <= split.date:
                 adj_transaction = AdjustedTransaction(
                     transaction_record=transaction,
                     is_adjusted=True,
-                    shares=transaction.shares * split["split_ratio"],
-                    price=transaction.price / split["split_ratio"],
+                    shares=transaction.shares * split.split_ratio,
+                    price=transaction.price / split.split_ratio,
                 )
 
         adj_transactions.append(adj_transaction)
