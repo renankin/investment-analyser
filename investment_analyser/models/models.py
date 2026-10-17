@@ -24,6 +24,11 @@ class AssetPosition:
     still_open: bool
     account: Account
 
+@dataclass
+class CashFlow:
+    date: date
+    value: Decimal
+
 
 @dataclass(frozen=True)
 class MarketDividend:

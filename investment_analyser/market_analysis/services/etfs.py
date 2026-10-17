@@ -95,8 +95,8 @@ def format_etf_table_for_existing_assets(symbol: str) -> dict:
         if asset:
             asset_prices = prices.get_market_prices(asset.id)
             prices_ser = Series(
-                data=[item["unit_price"] for item in asset_prices],
-                index=[item["date"] for item in asset_prices],
+                data=[item.value for item in asset_prices],
+                index=[item.date for item in asset_prices],
             )
             price_change = calculate_price_change(prices_ser, year)
         else:

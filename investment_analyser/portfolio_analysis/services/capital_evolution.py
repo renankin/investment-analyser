@@ -49,7 +49,7 @@ def get_asset_history(asset_id: int) -> Series:
 
     df1 = DataFrame(
         [{"date": item.transaction_record.date, "shares": item.shares} for item in t]
-    )
+    ).set_index("date").sort_values("date")
 
     # Combine transactions which are ocurring in the same date
     df1 = df1.groupby("date").sum()
@@ -63,7 +63,7 @@ def get_asset_history(asset_id: int) -> Series:
     if not p:
         return Series()
 
-    df2 = DataFrame(p).set_index("date")
+    df2 = DataFrame(p).set_index("date").sort_values("date")
 
     # Select dates which start from initial transaction
     df2 = df2[df2.index >= df1.first_valid_index()]

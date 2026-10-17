@@ -1,22 +1,9 @@
-from datetime import date
-from decimal import Decimal
-from typing import TypedDict
-
 from investment_analyser.market_data.repository.stock_splits import get_stock_splits
-from investment_analyser.models.models import AdjustedTransaction, TransactionRecord
-
-
-class Transaction(TypedDict):
-    """Contains `date`, `shares` and `price`."""
-
-    date: date
-    shares: Decimal
-    price: Decimal
-
-
-class StockSplit(TypedDict):
-    date: date
-    split_ratio: Decimal
+from investment_analyser.models.models import (
+    AdjustedTransaction,
+    StockSplit,
+    TransactionRecord,
+)
 
 
 def get_split_adjusted_transactions(
@@ -46,22 +33,23 @@ def get_split_adjusted_transactions(
 
 
 def adjust_transactions_for_splits(
-    transactions: list[Transaction], splits: list[StockSplit]
-) -> list[Transaction]:
+    transactions: list[TransactionRecord], splits: list[StockSplit]
+) -> list[AdjustedTransaction]:
     """Adjust transactions for stock splits occurring after each transaction date."""
 
     adj_transactions = []
     for transaction in transactions:
-        adj_transaction: Transaction = {
-            "date": transaction["date"],
-            "shares": transaction["shares"],
-            "price": transaction["price"],
-        }
-
+        adj_transaction = AdjustedTransaction(
+            transaction_record=transaction,
+            is_adjusted=False,
+            shares=transaction.shares,
+            price=transaction.price,
+        )
         for split in splits:
-            if transaction["date"] < split["date"]:
-                adj_transaction["shares"] *= split["split_ratio"]
-                adj_transaction["price"] /= split["split_ratio"]
+            if transaction.date < split.date:
+                adj_transaction.shares *= split.split_ratio
+                adj_transaction.price /= split.split_ratio
+                adj_transaction.is_adjusted = True
 
         adj_transactions.append(adj_transaction)
 

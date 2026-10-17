@@ -3,7 +3,7 @@ from investment_analyser.db import (
     fetch_multiple_records,
     fetch_single_record,
 )
-from investment_analyser.models.models import Account, AssetPosition
+from investment_analyser.models.models import Account
 
 
 def delete_account(account_id) -> None:

@@ -1,77 +1,96 @@
 from datetime import date
 from decimal import Decimal
 
-from investment_analyser.transactions.service import (
+from investment_analyser.models.models import (
+    Account,
+    AdjustedTransaction,
+    AssetInfo,
+    AssetPosition,
     StockSplit,
-    Transaction,
-    adjust_transactions_for_splits,
+    TransactionRecord,
+)
+from investment_analyser.transactions.service import adjust_transactions_for_splits
+
+ACCOUNT = Account(id=1, name="Account", currency="USD")
+ASSET_INFO = AssetInfo(symbol="APPL", name="Apple", type="Stock")
+ASSET_POS = AssetPosition(
+    id=1,
+    info=ASSET_INFO,
+    still_open=True,
+    account=ACCOUNT,
 )
 
 
-def test_single_split():
+def test_single_stock_split_adjustment():
 
-    transactions = [
-        Transaction(
-            date=date(2024, 1, 31),
-            shares=Decimal("10.00"),
-            price=Decimal("100.00"),
-        )
-    ]
-
-    stock_splits = [StockSplit(date=date(2025, 1, 31), split_ratio=Decimal("2.0"))]
-
-    adjusted_transactions = [
-        Transaction(
-            date=date(2024, 1, 31),
-            shares=Decimal("20.00"),
-            price=Decimal("50.00"),
-        )
-    ]
-
-    assert (
-        adjust_transactions_for_splits(transactions, stock_splits)
-        == adjusted_transactions
+    transaction_record = TransactionRecord(
+        id=1,
+        asset=ASSET_POS,
+        date=date(2024, 1, 31),
+        shares=Decimal("10.00"),
+        price=Decimal("100.00"),
     )
 
+    stock_split = StockSplit(
+        asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.0")
+    )
 
-def test_sequential_splits():
+    adjusted_transaction = AdjustedTransaction(
+        transaction_record=transaction_record,
+        shares=Decimal("20.00"),
+        price=Decimal("50.00"),
+        is_adjusted=True,
+    )
 
-    transactions = [
-        Transaction(
-            date=date(2024, 1, 31),
-            shares=Decimal("10.00"),
-            price=Decimal("60.00"),
-        )
+    assert adjust_transactions_for_splits([transaction_record], [stock_split]) == [
+        adjusted_transaction
     ]
+
+
+def test_sequential_stock_splits_adjustment():
+
+    transaction_record = TransactionRecord(
+        id=1,
+        asset=ASSET_POS,
+        date=date(2024, 1, 31),
+        shares=Decimal("10.00"),
+        price=Decimal("100.00"),
+    )
 
     stock_splits = [
-        StockSplit(date=date(2025, 1, 31), split_ratio=Decimal("2.0")),
-        StockSplit(date=date(2026, 1, 31), split_ratio=Decimal("3.0")),
+        StockSplit(
+            asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.0")
+        ),
+        StockSplit(
+            asset=ASSET_INFO, date=date(2026, 1, 31), split_ratio=Decimal("2.0")
+        ),
     ]
 
-    adjusted_transactions = [
-        Transaction(
-            date=date(2024, 1, 31),
-            shares=Decimal("60.00"),
-            price=Decimal("10.00"),
-        )
-    ]
-
-    assert (
-        adjust_transactions_for_splits(transactions, stock_splits)
-        == adjusted_transactions
+    adjusted_transaction = AdjustedTransaction(
+        transaction_record=transaction_record,
+        shares=Decimal("40.00"),
+        price=Decimal("25.00"),
+        is_adjusted=True,
     )
 
+    assert adjust_transactions_for_splits([transaction_record], stock_splits) == [
+        adjusted_transaction
+    ]
 
-def test_multiple_transactions():
+
+def test_adjusted_transactions_for_multiple_records():
 
     transactions = [
-        Transaction(
+        TransactionRecord(
+            id=1,
+            asset=ASSET_POS,
             date=date(2026, 1, 31),
             shares=Decimal("10.00"),
             price=Decimal("60.00"),
         ),
-        Transaction(
+        TransactionRecord(
+            id=2,
+            asset=ASSET_POS,
             date=date(2023, 1, 31),
             shares=Decimal("5.00"),
             price=Decimal("10.00"),
@@ -79,20 +98,26 @@ def test_multiple_transactions():
     ]
 
     stock_splits = [
-        StockSplit(date=date(2025, 1, 31), split_ratio=Decimal("2.0")),
-        StockSplit(date=date(2022, 1, 31), split_ratio=Decimal("10.0")),
+        StockSplit(
+            asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.0")
+        ),
+        StockSplit(
+            asset=ASSET_INFO, date=date(2022, 1, 31), split_ratio=Decimal("10.0")
+        ),
     ]
 
     adjusted_transactions = [
-        Transaction(
-            date=date(2026, 1, 31),
+        AdjustedTransaction(
+            transaction_record=transactions[0],
             shares=Decimal("10.00"),
             price=Decimal("60.00"),
+            is_adjusted=False,
         ),
-        Transaction(
-            date=date(2023, 1, 31),
+        AdjustedTransaction(
+            transaction_record=transactions[1],
             shares=Decimal("10.00"),
             price=Decimal("5.00"),
+            is_adjusted=True,
         ),
     ]
 
@@ -105,16 +130,27 @@ def test_multiple_transactions():
 def test_split_same_date():
 
     transactions = [
-        Transaction(
-            date=date(2023, 1, 31), shares=Decimal("5.00"), price=Decimal("10.00")
+        TransactionRecord(
+            id=3,
+            asset=ASSET_POS,
+            date=date(2023, 1, 31),
+            shares=Decimal("5.00"),
+            price=Decimal("10.00"),
         )
     ]
 
-    stock_splits = [StockSplit(date=date(2023, 1, 31), split_ratio=Decimal("2.0"))]
+    stock_splits = [
+        StockSplit(
+            asset=ASSET_INFO, date=date(2023, 1, 31), split_ratio=Decimal("2.0")
+        )
+    ]
 
     adjusted_transactions = [
-        Transaction(
-            date=date(2023, 1, 31), shares=Decimal("5.00"), price=Decimal("10.00")
+        AdjustedTransaction(
+            transaction_record=transactions[0],
+            is_adjusted=False,
+            shares=Decimal("5.00"),
+            price=Decimal("10.00"),
         )
     ]
 
@@ -132,19 +168,28 @@ def test_empty_inputs():
 def test_no_applicable_split():
 
     transactions = [
-        Transaction(
-            date=date(2024, 1, 31), shares=Decimal("10.00"), price=Decimal("100.00")
+        TransactionRecord(
+            id=4,
+            asset=ASSET_POS,
+            date=date(2024, 1, 31),
+            shares=Decimal("10.00"),
+            price=Decimal("100.00"),
         )
     ]
 
     stock_splits = [
-        StockSplit(date=date(2023, 1, 31), split_ratio=Decimal("2.0")),
-        StockSplit(date=date(2022, 1, 31), split_ratio=Decimal("3.0")),
+        StockSplit(
+            asset=ASSET_INFO, date=date(2023, 1, 31), split_ratio=Decimal("2.0")
+        ),
+        StockSplit(
+            asset=ASSET_INFO, date=date(2022, 1, 31), split_ratio=Decimal("3.0")
+        ),
     ]
 
     adjusted_transactions = [
-        Transaction(
-            date=date(2024, 1, 31),
+        AdjustedTransaction(
+            transaction_record=transactions[0],
+            is_adjusted=False,
             shares=Decimal("10.00"),
             price=Decimal("100.00"),
         )
@@ -157,18 +202,27 @@ def test_no_applicable_split():
 
 
 def test_decimal_precision():
-    
+
     transactions = [
-        Transaction(
-            date=date(2024, 1, 31), shares=Decimal("10.53"), price=Decimal("10.20")
+        TransactionRecord(
+            id=5,
+            asset=ASSET_POS,
+            date=date(2024, 1, 31),
+            shares=Decimal("10.53"),
+            price=Decimal("10.20"),
         )
     ]
 
-    stock_splits = [StockSplit(date=date(2025, 1, 31), split_ratio=Decimal("2.5"))]
+    stock_splits = [
+        StockSplit(
+            asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.5")
+        )
+    ]
 
     adjusted_transactions = [
-        Transaction(
-            date=date(2024, 1, 31),
+        AdjustedTransaction(
+            transaction_record=transactions[0],
+            is_adjusted=True,
             shares=Decimal("26.325"),
             price=Decimal("4.08"),
         )

@@ -1,20 +1,9 @@
-from datetime import date
-from decimal import Decimal
-from typing import TypedDict
-
 from pandas import Series
 
 from investment_analyser.assets.repository import get_asset_by_id
 from investment_analyser.market_data.fetchers import tesouro_direto
 from investment_analyser.market_data.fetchers.yfinance import YFetcher
 from investment_analyser.market_data.repository.prices import insert_price
-
-
-class Price(TypedDict):
-    """Contains `date` and `value`."""
-
-    date: date
-    value: Decimal
 
 
 def insert_prices(asset_id: int) -> bool:
