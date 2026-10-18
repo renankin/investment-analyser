@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, render_template, request
 
-from investment_analyser.services.etfs import (
+from app.services.etfs import (
     get_etf_search_result,
     get_etfs_for_comparison,
 )

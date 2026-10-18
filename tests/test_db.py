@@ -12,8 +12,8 @@ from flask import g
 from pandas import Timestamp
 from pytest import fixture, raises
 
-from investment_analyser import create_app
-from investment_analyser.db import connection
+from app import create_app
+from app.db import connection
 
 
 @fixture

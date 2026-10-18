@@ -1,5 +1,5 @@
-from investment_analyser.repository.accounts import delete_account
-from investment_analyser.repository.assets import get_assets_from_account
+from app.repository.accounts import delete_account
+from app.repository.assets import get_assets_from_account
 
 
 def delete_account_if_empty(account_id: int) -> bool:

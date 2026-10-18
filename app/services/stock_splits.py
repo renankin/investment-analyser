@@ -1,8 +1,8 @@
 from pandas import Series
 
-from investment_analyser.fetchers.yfinance import YFetcher
-from investment_analyser.repository.assets import get_asset_by_id
-from investment_analyser.repository.stock_splits import insert_stock_split
+from app.fetchers.yfinance import YFetcher
+from app.repository.assets import get_asset_by_id
+from app.repository.stock_splits import insert_stock_split
 
 
 def insert_stock_splits(asset_id: int) -> bool:

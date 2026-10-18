@@ -3,17 +3,17 @@ from decimal import Decimal
 
 from scipy import optimize
 
-from investment_analyser.models.models import (
+from app.models.models import (
     AdjustedTransaction,
     CashFlow,
     DividendReceived,
     MarketPrice,
 )
-from investment_analyser.repository import prices
-from investment_analyser.repository.assets import get_all_assets, get_asset_by_id
-from investment_analyser.repository.transactions import get_transactions_from_asset
-from investment_analyser.services.dividends import get_dividends_received
-from investment_analyser.services.transactions import get_split_adjusted_transactions
+from app.repository import prices
+from app.repository.assets import get_all_assets, get_asset_by_id
+from app.repository.transactions import get_transactions_from_asset
+from app.services.dividends import get_dividends_received
+from app.services.transactions import get_split_adjusted_transactions
 
 
 def get_all_return() -> list[dict]:

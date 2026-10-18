@@ -2,15 +2,15 @@ import os
 
 from flask import Flask
 
-from investment_analyser import filters
-from investment_analyser.db import connection
-from investment_analyser.routes.accounts import accounts_bp
-from investment_analyser.routes.assets import assets_bp
-from investment_analyser.routes.homepage import homepage_bp
-from investment_analyser.routes.market_analysis import market_analysis_bp
-from investment_analyser.routes.market_data import market_bp
-from investment_analyser.routes.portfolio_analysis import portfolio_analysis_bp
-from investment_analyser.routes.transactions import transactions_bp
+from app import filters
+from app.db import connection
+from app.routes.accounts import accounts_bp
+from app.routes.assets import assets_bp
+from app.routes.homepage import homepage_bp
+from app.routes.market_analysis import market_analysis_bp
+from app.routes.market_data import market_bp
+from app.routes.portfolio_analysis import portfolio_analysis_bp
+from app.routes.transactions import transactions_bp
 
 
 def create_app():

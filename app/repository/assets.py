@@ -1,9 +1,9 @@
-from investment_analyser.db.connection import (
+from app.db.connection import (
     execute_db,
     fetch_multiple_records,
     fetch_single_record,
 )
-from investment_analyser.models.models import Account, AssetInfo, AssetPosition, EtfInfo
+from app.models.models import Account, AssetInfo, AssetPosition, EtfInfo
 
 ALL_ASSETS_QUERY = (
     "SELECT assets.account_id, assets.asset_id, assets.asset_symbol, assets.asset_name,"

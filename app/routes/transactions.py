@@ -3,8 +3,8 @@ from decimal import Decimal
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from investment_analyser.repository.assets import get_all_assets
-from investment_analyser.repository.transactions import (
+from app.repository.assets import get_all_assets
+from app.repository.transactions import (
     delete_transaction,
     get_all_transactions,
     get_transaction_by_id,

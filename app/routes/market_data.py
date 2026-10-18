@@ -1,21 +1,21 @@
 from flask import Blueprint, flash, redirect, render_template, url_for
 
-from investment_analyser.repository import assets
-from investment_analyser.repository.dividends import (
+from app.repository import assets
+from app.repository.dividends import (
     delete_dividends,
     get_dividends,
 )
-from investment_analyser.repository.prices import (
+from app.repository.prices import (
     delete_prices,
     get_market_prices,
 )
-from investment_analyser.repository.stock_splits import (
+from app.repository.stock_splits import (
     delete_stock_splits,
     get_stock_splits,
 )
-from investment_analyser.services.market_dividends import insert_dividends
-from investment_analyser.services.market_prices import insert_prices
-from investment_analyser.services.stock_splits import insert_stock_splits
+from app.services.market_dividends import insert_dividends
+from app.services.market_prices import insert_prices
+from app.services.stock_splits import insert_stock_splits
 
 market_bp = Blueprint("market", __name__)
 

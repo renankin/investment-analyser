@@ -1,11 +1,11 @@
 from datetime import date
 
-from investment_analyser.db.connection import (
+from app.db.connection import (
     execute_db,
     fetch_multiple_records,
     fetch_single_record,
 )
-from investment_analyser.models.models import AssetInfo, MarketPrice
+from app.models.models import AssetInfo, MarketPrice
 
 
 def get_market_prices(asset_id: int) -> list[MarketPrice]:

@@ -1,12 +1,12 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from investment_analyser.repository.accounts import (
+from app.repository.accounts import (
     create_account,
     get_account,
     get_all_accounts,
     update_account,
 )
-from investment_analyser.services.account import delete_account_if_empty
+from app.services.account import delete_account_if_empty
 
 accounts_bp = Blueprint("accounts", __name__)
 

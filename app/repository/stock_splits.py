@@ -1,11 +1,11 @@
 from datetime import date
 from decimal import Decimal
 
-from investment_analyser.db.connection import (
+from app.db.connection import (
     execute_db,
     fetch_multiple_records,
 )
-from investment_analyser.models.models import AssetInfo, StockSplit
+from app.models.models import AssetInfo, StockSplit
 
 
 def get_stock_splits(asset_id: int) -> list[StockSplit]:

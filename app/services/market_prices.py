@@ -1,9 +1,9 @@
 from pandas import Series
 
-from investment_analyser.fetchers import tesouro_direto
-from investment_analyser.fetchers.yfinance import YFetcher
-from investment_analyser.repository.assets import get_asset_by_id
-from investment_analyser.repository.prices import insert_price
+from app.fetchers import tesouro_direto
+from app.fetchers.yfinance import YFetcher
+from app.repository.assets import get_asset_by_id
+from app.repository.prices import insert_price
 
 
 def insert_prices(asset_id: int) -> bool:

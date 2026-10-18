@@ -1,10 +1,10 @@
 from pandas import DataFrame, Series, concat
 
-from investment_analyser.repository import prices
-from investment_analyser.repository.accounts import get_all_accounts
-from investment_analyser.repository.assets import get_assets_from_account
-from investment_analyser.repository.transactions import get_transactions_from_asset
-from investment_analyser.services.transactions import get_split_adjusted_transactions
+from app.repository import prices
+from app.repository.accounts import get_all_accounts
+from app.repository.assets import get_assets_from_account
+from app.repository.transactions import get_transactions_from_asset
+from app.services.transactions import get_split_adjusted_transactions
 
 
 def get_all_accounts_history() -> Series:

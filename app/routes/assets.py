@@ -1,14 +1,14 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from investment_analyser.repository.accounts import get_account, get_all_accounts
-from investment_analyser.repository.assets import (
+from app.repository.accounts import get_account, get_all_accounts
+from app.repository.assets import (
     edit_asset,
     get_all_assets,
     get_asset_by_id,
     insert_asset,
 )
-from investment_analyser.services.asset_deletion import delete_asset_if_unused
-from investment_analyser.services.dividends import get_dividends_received
+from app.services.asset_deletion import delete_asset_if_unused
+from app.services.dividends import get_dividends_received
 
 assets_bp = Blueprint("assets", __name__)
 

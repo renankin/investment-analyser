@@ -1,10 +1,10 @@
 from datetime import date
 
-from investment_analyser.db.connection import (
+from app.db.connection import (
     execute_db,
     fetch_multiple_records,
 )
-from investment_analyser.models.models import AssetInfo, MarketDividend
+from app.models.models import AssetInfo, MarketDividend
 
 
 def get_dividends(asset_id: int) -> list[MarketDividend]:
