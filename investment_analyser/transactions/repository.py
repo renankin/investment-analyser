@@ -161,7 +161,7 @@ def insert_transaction(
 def update_transaction(
     transaction_id: int,
     asset_id: int,
-    date: date,
+    date: str,
     shares: Decimal,
     price: Decimal,
 ) -> None:

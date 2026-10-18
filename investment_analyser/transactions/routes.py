@@ -95,8 +95,6 @@ def edit(transaction_id):
 
     transaction = get_transaction_by_id(transaction_id)
 
-    asset = get_asset_by_id(transaction.id)
-
     if not transaction:
         flash("Transaction invalid.")
         return redirect(url_for("transactions.index"))
@@ -114,8 +112,6 @@ def edit(transaction_id):
         if not transaction_date:
             flash("Must provide date.")
             return redirect(url_for("transactions.add"))
-        else:
-            transaction_date = datetime.fromisoformat(transaction_date)
 
         if not shares:
             flash("Must provide shares")
@@ -129,6 +125,4 @@ def edit(transaction_id):
         flash("Transaction updated.")
         return redirect(url_for("transactions.index"))
 
-    return render_template(
-        "edit_transaction.html", transaction=transaction, asset=asset
-    )
+    return render_template("edit_transaction.html", transaction=transaction)
