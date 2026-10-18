@@ -8,7 +8,7 @@ from investment_analyser.accounts.repository import (
 )
 from investment_analyser.accounts.service import delete_account_if_empty
 
-accounts_bp = Blueprint("accounts", __name__, template_folder="templates")
+accounts_bp = Blueprint("accounts", __name__)
 
 
 @accounts_bp.route("/accounts")

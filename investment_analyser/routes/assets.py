@@ -10,7 +10,7 @@ from investment_analyser.assets.repository import (
 from investment_analyser.assets.services.deletion import delete_asset_if_unused
 from investment_analyser.assets.services.dividends import get_dividends_received
 
-assets_bp = Blueprint("assets", __name__, template_folder="templates")
+assets_bp = Blueprint("assets", __name__)
 
 
 @assets_bp.route("/assets")

@@ -4,7 +4,7 @@ from investment_analyser.accounts.repository import get_account, get_all_account
 from investment_analyser.assets import repository
 from investment_analyser.portfolio_analysis.services import capital_evolution, roi
 
-portfolio_analysis_bp = Blueprint("portfolio_analysis", __name__, template_folder="templates")
+portfolio_analysis_bp = Blueprint("portfolio_analysis", __name__)
 
 
 @portfolio_analysis_bp.route("/portfolio-analysis/return")

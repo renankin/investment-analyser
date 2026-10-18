@@ -3,13 +3,13 @@ import os
 from flask import Flask
 
 from investment_analyser import db, filters
-from investment_analyser.accounts.routes import accounts_bp
-from investment_analyser.assets.routes import assets_bp
-from investment_analyser.homepage.routes import homepage_bp
-from investment_analyser.market_analysis.routes import market_analysis_bp
-from investment_analyser.market_data.routes import market_bp
-from investment_analyser.portfolio_analysis.routes import portfolio_analysis_bp
-from investment_analyser.transactions.routes import transactions_bp
+from investment_analyser.routes.accounts import accounts_bp
+from investment_analyser.routes.assets import assets_bp
+from investment_analyser.routes.homepage import homepage_bp
+from investment_analyser.routes.market_analysis import market_analysis_bp
+from investment_analyser.routes.market_data import market_bp
+from investment_analyser.routes.portfolio_analysis import portfolio_analysis_bp
+from investment_analyser.routes.transactions import transactions_bp
 
 
 def create_app():

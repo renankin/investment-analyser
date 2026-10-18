@@ -5,7 +5,7 @@ from investment_analyser.market_analysis.services.etfs import (
     get_etfs_for_comparison,
 )
 
-market_analysis_bp = Blueprint("market_analysis", __name__, template_folder="templates")
+market_analysis_bp = Blueprint("market_analysis", __name__)
 
 
 @market_analysis_bp.route("/market-analysis/compare-etfs")

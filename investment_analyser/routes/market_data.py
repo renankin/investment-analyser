@@ -17,7 +17,7 @@ from investment_analyser.market_data.services.dividends import insert_dividends
 from investment_analyser.market_data.services.prices import insert_prices
 from investment_analyser.market_data.services.stock_splits import insert_stock_splits
 
-market_bp = Blueprint("market", __name__, template_folder="templates")
+market_bp = Blueprint("market", __name__)
 
 
 @market_bp.route("/market/dividends/add/<int:asset_id>", methods=["POST"])

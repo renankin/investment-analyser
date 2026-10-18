@@ -3,7 +3,7 @@ from decimal import Decimal
 
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from investment_analyser.assets.repository import get_all_assets, get_asset_by_id
+from investment_analyser.assets.repository import get_all_assets
 from investment_analyser.transactions.repository import (
     delete_transaction,
     get_all_transactions,
@@ -12,7 +12,7 @@ from investment_analyser.transactions.repository import (
     update_transaction,
 )
 
-transactions_bp = Blueprint("transactions", __name__, template_folder="templates")
+transactions_bp = Blueprint("transactions", __name__)
 
 
 @transactions_bp.route("/transactions")
