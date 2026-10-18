@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block title %}
+  ETF comparer
+{% endblock title %}
+{% block main %}
+  <div class="container table-responsive">
+    <table class="table">
+      <thead>
+        {% for label in all_etfs[0].keys() %}<th>{{ label }}</th>{% endfor %}
+      </thead>
+      <tbody>
+        {% for etf in all_etfs %}
+          <tr>
+            {% for data in etf.values() %}<td>{{ data }}</td>{% endfor %}
+          {% endfor %}
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% endblock main %}

@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+{% block title %}
+  Prices
+{% endblock title %}
+{% block main %}
+  <div>
+    <canvas id="myChart"></canvas>
+  </div>
+{% endblock main %}
+{% block javascript %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('myChart');
+
+    const labels = {{ labels | tojson }}
+    const data = {{ data | tojson }}
+    const title = {{ asset_name | tojson }}
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: title,
+          data: data,
+          borderWidth: 1,
+          pointStyle: false,
+        }]
+      }
+    });
+  </script>
+{% endblock javascript %}

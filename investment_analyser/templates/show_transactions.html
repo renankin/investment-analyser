@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block title %}
+  History
+{% endblock title %}
+{% block main %}
+  <div class="container">
+    <div class="mb-3">
+      <a href="{{ url_for('transactions.add') }}">Add new transaction</a>
+    </div>
+    <form action="{{ url_for('transactions.index') }}" method="get">
+      <div class="mb-3">
+        <input type="text"
+               class="form-control"
+               name="search"
+               placeholder="Type asset name">
+      </div>
+      <div class="mb-3">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+    </form>
+    {% if transactions %}
+      <div class="table-responsive">
+        <table class="table" id="transactions-table">
+          <thead>
+            <tr>
+              <th>Account</th>
+              <th>Asset</th>
+              <th>Date</th>
+              <th>Shares</th>
+              <th>Price</th>
+              <th>..</th>
+              <th>..</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for transaction in transactions: %}
+              <tr>
+                <td>{{ transaction.asset.account.name }}</td>
+                <td>{{ transaction.asset.info.symbol }}</td>
+                <td>{{ transaction.date | format_date }}</td>
+                <td>{{ "%.2f" | format(transaction.shares) }}</td>
+                <td>{{ transaction.price | format_currency(transaction.asset.account.currency) }}</td>
+
+                <td>
+                  <form action="{{ url_for('transactions.edit', transaction_id=transaction.id) }}"
+                        method="get">
+                    <button type="submit" class="btn btn-primary">Edit</button>
+                  </form>
+                </td>
+                <td>
+                  <form action="{{ url_for('transactions.delete', transaction_id=transaction.id) }}"
+                        method="post">
+                    <button type="submit" class="btn btn-primary">Delete</button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+{% endblock main %}

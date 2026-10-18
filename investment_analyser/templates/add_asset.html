@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block title %}
+  Add new asset
+{% endblock title %}
+{% block main %}
+  <div class="container">
+    <form action="{{ url_for('assets.add') }}" method="post">
+      <div class="mb-3">
+        <label class="form-label" for="accountNameSelect">Account</label>
+        <select class="form-select" id="accountNameSelect" name="account_id">
+          {% for account in accounts %}
+            <option value="{{ account.id }}">{{ account.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="assetSymbolInput">Asset symbol</label>
+        <input type="text"
+               class="form-control"
+               id="assetSymbolInput"
+               placeholder="Asset symbol"
+               name="asset_symbol">
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="assetNameInput">Asset Name</label>
+        <input class="form-control"
+               name="asset_name"
+               type="text"
+               id="assetNameInput"
+               placeholder="Asset name" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="assetTypeSelect">Asset type</label>
+        <select class="form-select" id="assetTypeSelect" name="asset_type">
+          <option value="Stock">Stock</option>
+          <option value="ETF">ETF</option>
+          <option value="Brazilian bond">Brazilian bond</option>
+        </select>
+      </div>
+      <div class="form-check mb-3">
+        <input class="form-check-input"
+               type="checkbox"
+               value="1"
+               name="still_open"
+               id="checkPosition">
+        <label class="form-check-label" for="checkPosition">Position open</label>
+      </div>
+      <button type="input" class="btn btn-primary">Add</button>
+    </form>
+  </div>
+{% endblock main %}
