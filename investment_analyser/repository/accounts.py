@@ -1,4 +1,4 @@
-from investment_analyser.db import (
+from investment_analyser.db.connection import (
     execute_db,
     fetch_multiple_records,
     fetch_single_record,

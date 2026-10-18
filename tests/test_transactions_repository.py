@@ -3,7 +3,7 @@ from datetime import date
 from pytest import fixture
 
 from investment_analyser import create_app
-from investment_analyser.db import get_db
+from investment_analyser.db.connection import get_db
 from investment_analyser.repository.transactions import get_transactions_for_open_assets
 
 

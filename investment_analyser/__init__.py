@@ -2,7 +2,8 @@ import os
 
 from flask import Flask
 
-from investment_analyser import db, filters
+from investment_analyser import filters
+from investment_analyser.db import connection
 from investment_analyser.routes.accounts import accounts_bp
 from investment_analyser.routes.assets import assets_bp
 from investment_analyser.routes.homepage import homepage_bp
@@ -22,7 +23,7 @@ def create_app():
 
     os.makedirs(app.instance_path, exist_ok=True)
 
-    db.init_app(app)
+    connection.init_app(app)
 
     app.jinja_env.filters["format_currency"] = filters.format_currency
     app.jinja_env.filters["format_date"] = filters.format_date
