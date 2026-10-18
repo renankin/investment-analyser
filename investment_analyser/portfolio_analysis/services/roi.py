@@ -1,28 +1,19 @@
-from datetime import UTC, date, datetime
+from datetime import UTC, datetime
 from decimal import Decimal
-from typing import TypedDict
 
 from scipy import optimize
 
-from investment_analyser.assets.repository import get_all_assets, get_asset
-from investment_analyser.assets.services.dividends import (
-    Dividend,
-    get_dividends_received,
-)
+from investment_analyser.assets.repository import get_all_assets, get_asset_by_id
+from investment_analyser.assets.services.dividends import get_dividends_received
 from investment_analyser.market_data.repository import prices
-from investment_analyser.market_data.services.prices import Price
-from investment_analyser.transactions.repository import get_transactions
-from investment_analyser.transactions.service import (
-    Transaction,
-    get_split_adjusted_transactions,
+from investment_analyser.models.models import (
+    AdjustedTransaction,
+    CashFlow,
+    DividendReceived,
+    MarketPrice,
 )
-
-
-class Cashflow(TypedDict):
-    """Contains `date` and `value`."""
-
-    date: date
-    value: Decimal
+from investment_analyser.transactions.repository import get_transactions_from_asset
+from investment_analyser.transactions.service import get_split_adjusted_transactions
 
 
 def get_all_return() -> list[dict]:
@@ -35,19 +26,21 @@ def get_all_return() -> list[dict]:
     all_stats = []
 
     for asset in all_assets:
-        divs = get_dividends_received(asset["asset_id"])
-        total_divs = sum(div["amount_received"] for div in divs)
+        divs = get_dividends_received(asset.id)
+        total_divs = sum(div.value for div in divs)
 
-        trans = get_split_adjusted_transactions(transactions=get_transactions(asset["asset_id"]))
-        total_invested = sum(t["price"] * t["shares"] for t in trans if t["shares"] > 0)
-        total_sold = sum(t["price"] * -t["shares"] for t in trans if t["shares"] < 0)
+        trans = get_split_adjusted_transactions(
+            transactions=get_transactions_from_asset(asset.id)
+        )
+        total_invested = sum(t.price * t.shares for t in trans if t.shares > 0)
+        total_sold = sum(t.price * -t.shares for t in trans if t.shares < 0)
 
         market_value = 0
-        if asset["still_open"]:
-            p = prices.get_most_recent_price(asset["asset_id"])
+        if asset.still_open:
+            p = prices.get_most_recent_price(asset.id)
             if p:
-                total_shares = sum(t["shares"] for t in trans)
-                market_value = total_shares * p["unit_price"]
+                total_shares = sum(t.shares for t in trans)
+                market_value = total_shares * p.value
 
         total_return = market_value + total_sold + total_divs
         if total_invested > 0 and total_return > 0:
@@ -56,16 +49,15 @@ def get_all_return() -> list[dict]:
             roi = None
 
         if total_invested > 0:
-
             stats = {
-                "asset_name": asset["asset_name"],
-                "still_open": asset["still_open"],
-                "currency": asset["currency"],
+                "asset_name": asset.info.name,
+                "still_open": asset.still_open,
+                "currency": asset.account.currency,
                 "total_invested": total_invested,
                 "total_sold": total_sold,
                 "market_value": market_value,
                 "total_dividends": total_divs,
-                "irr": get_irr(asset["asset_id"]),
+                "irr": get_irr(asset.id),
                 "roi": roi,
             }
 
@@ -79,7 +71,9 @@ def get_irr(asset_id: int) -> float | None:
     dividends and current valuation if position is still open.
     If holding period is less than a year returns `None`."""
 
-    t = get_split_adjusted_transactions(transactions=get_transactions(asset_id))
+    t = get_split_adjusted_transactions(
+        transactions=get_transactions_from_asset(asset_id)
+    )
 
     if not t:
         return None
@@ -88,22 +82,22 @@ def get_irr(asset_id: int) -> float | None:
     dates = []
     total_shares = 0
     for transaction in t:
-        cashflow.append(-1 * transaction["price"] * transaction["shares"])
-        dates.append(transaction["date"])
-        total_shares += transaction["shares"]
+        cashflow.append(-1 * transaction.price * transaction.shares)
+        dates.append(transaction.transaction_record.date)
+        total_shares += transaction.shares
 
     dividends = get_dividends_received(asset_id)
     if dividends:
         for div in dividends:
-            cashflow.append(div["amount_received"])
-            dates.append(div["date"])
+            cashflow.append(div.value)
+            dates.append(div.date)
 
-    a = get_asset(asset_id)
-    if a["still_open"]:
+    asset = get_asset_by_id(asset_id)
+    if asset.still_open:
         p = prices.get_most_recent_price(asset_id)
         if p:
-            cashflow.append(p["unit_price"] * total_shares)
-            dates.append(p["date"])
+            cashflow.append(p.value * total_shares)
+            dates.append(p.date)
         else:
             return None
 
@@ -115,55 +109,55 @@ def get_irr(asset_id: int) -> float | None:
         return compute_irr(cashflow, elapsed_years)
 
 
-def build_dividend_cashflows(dividends: list[Dividend]) -> list[Cashflow]:
+def build_dividend_cashflows(dividends: list[DividendReceived]) -> list[CashFlow]:
     """
     Build cashflow with dividends.
     """
 
-    cashflows: list[Cashflow] = []
+    cashflows: list[CashFlow] = []
 
     for dividend in dividends:
-        cashflow: Cashflow = {"value": dividend["value"], "date": dividend["date"]}
-
-        cashflows.append(cashflow)
+        cashflows.append(CashFlow(date=dividend.date, value=dividend.value))
 
     return cashflows
 
 
-def build_transaction_cashflows(transactions: list[Transaction]) -> list[Cashflow]:
+def build_transaction_cashflows(
+    transactions: list[AdjustedTransaction],
+) -> list[CashFlow]:
     """
     Builds cashflow with transactions.
     """
 
-    cashflows: list[Cashflow] = []
+    cashflows: list[CashFlow] = []
 
     for transaction in transactions:
-        cashflow: Cashflow = {
-            "value": -1 * transaction["price"] * transaction["shares"],
-            "date": transaction["date"],
-        }
-
-        cashflows.append(cashflow)
+        cashflows.append(
+            CashFlow(
+                date=transaction.transaction_record.date,
+                value=-1 * transaction.price * transaction.shares,
+            )
+        )
 
     return cashflows
 
 
 def build_cashflows(
-    transactions: list[Transaction],
-    dividends: list[Dividend],
-    current_price: Price,
+    transactions: list[AdjustedTransaction],
+    dividends: list[DividendReceived],
+    current_price: MarketPrice,
     open_shares: Decimal,
-) -> list[Cashflow]:
+) -> list[CashFlow]:
     """
     Builds cashflows
     """
 
-    transaction_cashflows: list[Cashflow] = build_transaction_cashflows(transactions)
+    transaction_cashflows: list[CashFlow] = build_transaction_cashflows(transactions)
 
-    dividend_cashflows: list[Cashflow] = build_dividend_cashflows(dividends)
+    dividend_cashflows: list[CashFlow] = build_dividend_cashflows(dividends)
 
-    price_cashflow = Cashflow(
-        date=current_price["date"], value=current_price["value"] * open_shares
+    price_cashflow = CashFlow(
+        date=current_price.date, value=current_price.value * open_shares
     )
 
     return transaction_cashflows + dividend_cashflows + [price_cashflow]
@@ -192,7 +186,7 @@ def compute_irr(
     return solver.x[0]
 
 
-def calculate_irr(cashflows: list[Cashflow], initial_guess=0.1) -> float | None:
+def calculate_irr(cashflows: list[CashFlow], initial_guess=0.1) -> float | None:
     """
     Returns the internal rate of return (IRR) by taking a list of Cashflow.
     """
@@ -200,8 +194,8 @@ def calculate_irr(cashflows: list[Cashflow], initial_guess=0.1) -> float | None:
     if not cashflows:
         return None
 
-    transaction_values = [float(cashflow["value"]) for cashflow in cashflows]
-    dates = [cashflow["date"] for cashflow in cashflows]
+    transaction_values = [float(cashflow.value) for cashflow in cashflows]
+    dates = [cashflow.date for cashflow in cashflows]
     elapsed_time = [(date - min(dates)).days / 365 for date in dates]
 
     # IRR is found when the sum of net present value equals 0

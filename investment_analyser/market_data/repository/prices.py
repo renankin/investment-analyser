@@ -1,55 +1,63 @@
 from datetime import date
-from typing import Any
 
 from investment_analyser.db import (
     execute_db,
     fetch_multiple_records,
     fetch_single_record,
 )
+from investment_analyser.models.models import AssetInfo, MarketPrice
 
 
-def get_prices(asset_id: int) -> list[dict[str, Any]]:
-    """Get the prices for asset id and return them as list of dictionaries
-    with `date`, `unit_price` and `currency` as keys."""
+def get_market_prices(asset_id: int) -> list[MarketPrice]:
+    return [
+        MarketPrice(
+            date=row["date"],
+            asset=AssetInfo(
+                symbol=row["asset_symbol"],
+                name=row["asset_name"],
+                type=row["asset_type"],
+            ),
+            value=row["unit_price"],
+        )
+        for row in fetch_multiple_records(
+            (
+                "SELECT * FROM prices"
+                " JOIN assets ON assets.asset_id = prices.asset_id"
+                " JOIN accounts ON accounts.account_id = assets.account_id"
+                " WHERE prices.asset_id = ?"
+            ),
+            (asset_id,),
+        )
+    ]
 
-    query = (
-        "SELECT prices.date, prices.unit_price, accounts.currency FROM prices"
-        " JOIN accounts ON accounts.account_id = "
-        " (SELECT account_id FROM assets WHERE asset_id = ?)"
-        " WHERE prices.asset_id = ?"
-        " ORDER BY prices.date"
+
+def get_most_recent_price(asset_id: int) -> MarketPrice:
+    record = fetch_single_record(
+        (
+            "SELECT * FROM prices"
+            " JOIN assets ON assets.asset_id = prices.asset_id"
+            " JOIN accounts ON accounts.account_id = assets.account_id"
+            " WHERE prices.asset_id = ?"
+            " ORDER BY prices.date DESC LIMIT 1"
+        ),
+        (asset_id,),
+    )
+    return MarketPrice(
+        date=record["date"],
+        asset=AssetInfo(
+            symbol=record["asset_symbol"],
+            name=record["asset_name"],
+            type=record["asset_type"],
+        ),
+        value=record["unit_price"],
     )
 
-    return [dict(row) for row in fetch_multiple_records(query, (asset_id, asset_id))]
 
-
-def get_most_recent_price(asset_id: int) -> dict[str, Any] | None:
-    """Returns the most recent price for asset as dictionary with keys `unit_price` and `date`."""
-
-    query = "SELECT unit_price, date FROM prices WHERE asset_id = ? ORDER BY date DESC LIMIT 1"
-
-    result = fetch_single_record(query, (asset_id,))
-
-    if result:
-        return dict(result)
-
-    return None
-
-
-def delete_prices(asset_id: int) -> bool:
-    """Deletes prices from database and returns True if successful."""
-
-    prices = get_prices(asset_id)
-
-    if prices:
-        execute_db("DELETE FROM prices WHERE asset_id = ?", (asset_id,))
-        return True
-
-    return False
+def delete_prices(asset_id: int) -> None:
+    execute_db("DELETE FROM prices WHERE asset_id = ?", (asset_id,))
 
 
 def insert_price(asset_id: int, date: date, unit_price: float) -> None:
-
     execute_db(
         "INSERT INTO prices (asset_id, date, unit_price) VALUES (?, ?, ?)"
         " ON CONFLICT (date, asset_id) DO NOTHING",

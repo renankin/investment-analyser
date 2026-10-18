@@ -66,7 +66,7 @@ def executemany_db(query: str, args: list[tuple[Any, ...]]):
     db.commit()
 
 
-def fetch_single_record(query: str, args: tuple[Any, ...] = ()) -> Row | None:
+def fetch_single_record(query: str, args: tuple[Any, ...] = ()) -> Row:
     database = get_db()
     cursor = database.execute(query, args)
     record = cursor.fetchone()

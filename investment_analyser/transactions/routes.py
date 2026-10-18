@@ -1,10 +1,13 @@
+from datetime import datetime
+from decimal import Decimal
+
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from investment_analyser.assets import repository
+from investment_analyser.assets.repository import get_all_assets, get_asset_by_id
 from investment_analyser.transactions.repository import (
     delete_transaction,
     get_all_transactions,
-    get_transaction,
+    get_transaction_by_id,
     insert_transaction,
     update_transaction,
 )
@@ -22,7 +25,7 @@ def index():
 
     all_transactions = []
     for transaction in get_all_transactions():
-        if asset_search.upper() in transaction["asset_symbol"].upper():
+        if asset_search.upper() in transaction.asset.info.symbol.upper():
             all_transactions.append(transaction)
 
     return render_template("show_transactions.html", transactions=all_transactions)
@@ -32,21 +35,27 @@ def index():
 def add():
     """Adds new transaction into database"""
 
-    a = repository.get_all_assets()
+    available_assets = get_all_assets()
 
-    if not a:
+    if not available_assets:
         flash("No assets to show. Must add asset first.")
         return redirect(url_for("assets.add"))
 
     if request.method == "POST":
         asset_id = request.form.get("asset_id", type=int)
-        date = request.form.get("date")
-        shares = request.form.get("shares", type=float)
-        price = request.form.get("price", type=float)
+        transaction_date = request.form.get("date")
+        shares = request.form.get("shares", type=Decimal)
+        price = request.form.get("price", type=Decimal)
 
-        if not date:
+        if not asset_id:
+            flash("Invalid asset.")
+            return redirect(url_for("transactions.add"))
+
+        if not transaction_date:
             flash("Must provide date.")
             return redirect(url_for("transactions.add"))
+        else:
+            transaction_date = datetime.fromisoformat(transaction_date)
 
         if not shares:
             flash("Must provide shares")
@@ -56,18 +65,18 @@ def add():
             flash("Must provide price.")
             return redirect(url_for("transactions.add"))
 
-        insert_transaction(asset_id, date, shares, price)
+        insert_transaction(asset_id, transaction_date, shares, price)
         flash("Transaction added.")
         return redirect(url_for("transactions.index"))
 
-    return render_template("add_transaction.html", assets=a)
+    return render_template("add_transaction.html", assets=available_assets)
 
 
 @transactions_bp.route("/transactions/delete/<int:transaction_id>", methods=["POST"])
 def delete(transaction_id):
     """Deletes transaction"""
 
-    t = get_transaction(transaction_id)
+    t = get_transaction_by_id(transaction_id)
 
     if t:
         delete_transaction(transaction_id)
@@ -84,34 +93,36 @@ def delete(transaction_id):
 def edit(transaction_id):
     """Edit transaction"""
 
-    t = get_transaction(transaction_id)
+    transaction = get_transaction_by_id(transaction_id)
 
-    asset = repository.get_asset(t["asset_id"])
-
-    if not t:
+    if not transaction:
         flash("Transaction invalid.")
         return redirect(url_for("transactions.index"))
 
     if request.method == "POST":
         asset_id = request.form.get("asset_id", type=int)
-        date = request.form.get("date")
-        shares = request.form.get("shares", type=float)
-        price = request.form.get("price", type=float)
+        transaction_date = request.form.get("date")
+        shares = request.form.get("shares", type=Decimal)
+        price = request.form.get("price", type=Decimal)
 
-        if not date:
+        if not asset_id:
+            flash("Invalid asset.")
+            return redirect(url_for("transactions.add"))
+
+        if not transaction_date:
             flash("Must provide date.")
-            return redirect(url_for("transactions.edit", transaction_id))
+            return redirect(url_for("transactions.add"))
 
         if not shares:
             flash("Must provide shares")
-            return redirect(url_for("transactions.edit", transaction_id))
+            return redirect(url_for("transactions.add"))
 
         if not price:
             flash("Must provide price.")
-            return redirect(url_for("transactions.edit", transaction_id))
+            return redirect(url_for("transactions.add"))
 
-        update_transaction(transaction_id, asset_id, date, shares, price)
+        update_transaction(transaction_id, asset_id, transaction_date, shares, price)
         flash("Transaction updated.")
         return redirect(url_for("transactions.index"))
 
-    return render_template("edit_transaction.html", transaction=t, asset=asset)
+    return render_template("edit_transaction.html", transaction=transaction)

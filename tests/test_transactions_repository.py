@@ -45,13 +45,14 @@ def init_db(test_app):
 
 
 def test_transactions_for_open_assets(init_db):
-    open_assets = get_transactions_for_open_assets()
-    assert [asset["asset_id"] for asset in open_assets] == [1]
-    assert [asset["asset_symbol"] for asset in open_assets] == ["APPL"]
-    assert [asset["asset_name"] for asset in open_assets] == ["Apple"]
-    assert [asset["asset_type"] for asset in open_assets] == ["Stock"]
-    assert [asset["date"] for asset in open_assets] == [date(2024, 1, 31)]
-    assert [asset["shares"] for asset in open_assets] == [100]
-    assert [asset["price"] for asset in open_assets] == [200]
-    assert [asset["currency"] for asset in open_assets] == ["GBP"]
-
+    transactions = get_transactions_for_open_assets()
+    assert [transaction.id for transaction in transactions] == [1]
+    assert [transaction.asset.info.symbol for transaction in transactions] == ["APPL"]
+    assert [transaction.asset.info.name for transaction in transactions] == ["Apple"]
+    assert [transaction.asset.info.type for transaction in transactions] == ["Stock"]
+    assert [transaction.date for transaction in transactions] == [date(2024, 1, 31)]
+    assert [transaction.shares for transaction in transactions] == [100]
+    assert [transaction.price for transaction in transactions] == [200]
+    assert [transaction.asset.account.currency for transaction in transactions] == [
+        "GBP"
+    ]

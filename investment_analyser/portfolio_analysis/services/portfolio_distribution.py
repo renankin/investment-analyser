@@ -1,7 +1,6 @@
 from pandas import DataFrame, Series
 from yfinance import Ticker
 
-from investment_analyser.assets.repository import get_etf_data
 from investment_analyser.market_data.fetchers.yfinance import YFetcher
 from investment_analyser.market_data.repository.prices import get_most_recent_price
 from investment_analyser.transactions.repository import get_transactions_for_open_assets
@@ -26,18 +25,32 @@ def get_asset_allocation() -> DataFrame:
     """
 
     raw_transactions = get_transactions_for_open_assets()
-    adjusted_transactions = DataFrame(get_split_adjusted_transactions(raw_transactions))
+    adjusted_transactions = get_split_adjusted_transactions(raw_transactions)
+    df = DataFrame(
+        [
+            {
+                "asset_id": transaction.transaction_record.asset.id,
+                "asset_symbol": transaction.transaction_record.asset.info.symbol,
+                "asset_type": transaction.transaction_record.asset.info.type,
+                "currency": transaction.transaction_record.asset.account.currency,
+                "shares": transaction.shares,
+            }
+            for transaction in adjusted_transactions
+        ]
+    )
 
-    grouped_df = adjusted_transactions.groupby(
+    grouped_df = df.groupby(
         ["asset_id", "asset_symbol", "asset_type", "currency"],
         as_index=False,
     )[["shares"]].sum()
-    grouped_df[["unit_price", "price_date"]] = (
-        grouped_df["asset_id"].apply(get_most_recent_price).apply(Series)
+    grouped_df[["unit_price", "price_date"]] = grouped_df["asset_id"].apply(
+        lambda asset_id: Series(
+            [get_most_recent_price(asset_id).value, get_most_recent_price(asset_id).date]
+        )
     )
-    grouped_df[["unit_price", "currency"]] = grouped_df[["unit_price", "currency"]].apply(
-        convert_currency, axis=1
-    )
+    grouped_df[["unit_price", "currency"]] = grouped_df[
+        ["unit_price", "currency"]
+    ].apply(convert_currency, axis=1)
     grouped_df["total"] = grouped_df["unit_price"] * grouped_df["shares"]
     grouped_df["weight_percent"] = grouped_df["total"] / grouped_df["total"].sum(axis=0)
 
@@ -65,12 +78,6 @@ def get_sector_distribution() -> dict:
     portfolio_sectors = {}
     for _, portfolio_asset in portfolio_df.iterrows():
         asset_symbol = portfolio_asset["asset_symbol"]
-
-        if portfolio_asset["asset_type"] == "ETF":
-            etf_data = get_etf_data(portfolio_asset["asset_id"])
-
-            if "underlying_etf_symbol" in etf_data:
-                asset_symbol = etf_data["underlying_etf_symbol"]
 
         asset_sectors = YFetcher(asset_symbol).get_sector_weighting()
 

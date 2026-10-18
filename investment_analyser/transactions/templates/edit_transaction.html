@@ -4,16 +4,16 @@
 {% endblock title %}
 {% block main %}
   <div class="container">
-    <form action="{{ url_for('transactions.edit', transaction_id=transaction['transaction_id']) }}"
+    <form action="{{ url_for('transactions.edit', transaction_id=transaction.id) }}"
           method="post">
-      <input name="asset_id" type="hidden" value="{{ transaction['asset_id'] }}" />
+      <input name="asset_id" type="hidden" value="{{ transaction.asset.id }}" />
       <div class="mb-3">
         <label class="form-label" for="assetNameInput">Asset name</label>
         <input name="asset_name"
                type="text"
                class="form-control"
                id="assetNameInput"
-               value="{{ asset['asset_name'] }}"
+               value="{{ transaction.asset.info.name }}"
                disabled />
       </div>
       <div class="mb-3">
@@ -22,7 +22,7 @@
                type="date"
                class="form-control"
                id="dateInput"
-               value="{{ transaction['date'] }}" />
+               value="{{ transaction.date }}" />
       </div>
       <div class="mb-3">
         <label class="form-label" for="sharesInput">Shares</label>
@@ -31,7 +31,7 @@
                class="form-control"
                id="sharesInput"
                step="0.01"
-               value="{{ transaction['shares'] }}" />
+               value="{{ transaction.shares }}" />
       </div>
       <div class="mb-3">
         <label class="form-label" for="priceInput">Price</label>
@@ -41,7 +41,7 @@
                id="priceInput"
                step="0.01"
                min="0"
-               value="{{ transaction['price'] }}" />
+               value="{{ transaction.price }}" />
       </div>
       <div class="mb-3">
         <button type="submit" class="btn btn-primary">Edit</button>

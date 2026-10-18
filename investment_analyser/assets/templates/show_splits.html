@@ -13,8 +13,8 @@
     <tbody>
       {% for split in splits: %}
         <tr>
-          <td>{{ split["date"] | format_date }}</td>
-          <td>{{ split["split_ratio"] }}</td>
+          <td>{{ split.date | format_date }}</td>
+          <td>{{ split.split_ratio }}</td>
         </tr>
       {% endfor %}
     </tbody>
