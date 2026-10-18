@@ -2,7 +2,8 @@ from flask import Blueprint, flash, json, render_template, request
 
 from investment_analyser.repository.accounts import get_account, get_all_accounts
 from investment_analyser.repository import assets
-from investment_analyser.portfolio_analysis.services import capital_evolution, roi
+from investment_analyser.services import roi
+from investment_analyser.services import capital_evolution
 
 portfolio_analysis_bp = Blueprint("portfolio_analysis", __name__)
 

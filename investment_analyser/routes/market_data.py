@@ -13,9 +13,9 @@ from investment_analyser.repository.stock_splits import (
     delete_stock_splits,
     get_stock_splits,
 )
-from investment_analyser.market_data.services.dividends import insert_dividends
-from investment_analyser.market_data.services.prices import insert_prices
-from investment_analyser.market_data.services.stock_splits import insert_stock_splits
+from investment_analyser.services.market_dividends import insert_dividends
+from investment_analyser.services.market_prices import insert_prices
+from investment_analyser.services.stock_splits import insert_stock_splits
 
 market_bp = Blueprint("market", __name__)
 

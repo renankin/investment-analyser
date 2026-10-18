@@ -1,9 +1,9 @@
-from investment_analyser.repository.stock_splits import get_stock_splits
 from investment_analyser.models.models import (
     AdjustedTransaction,
     StockSplit,
     TransactionRecord,
 )
+from investment_analyser.repository.stock_splits import get_stock_splits
 
 
 def get_split_adjusted_transactions(

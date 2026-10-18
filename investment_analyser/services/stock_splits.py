@@ -1,7 +1,7 @@
 from pandas import Series
 
+from investment_analyser.fetchers.yfinance import YFetcher
 from investment_analyser.repository.assets import get_asset_by_id
-from investment_analyser.market_data.fetchers.yfinance import YFetcher
 from investment_analyser.repository.stock_splits import insert_stock_split
 
 

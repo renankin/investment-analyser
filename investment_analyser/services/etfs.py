@@ -1,13 +1,13 @@
 from pandas import Series, Timedelta
 
+from investment_analyser.fetchers.yfinance import YFetcher
+from investment_analyser.filters import format_currency, format_percent
+from investment_analyser.repository import prices
 from investment_analyser.repository.assets import (
     get_all_assets,
     get_asset_by_symbol,
     get_etf_data,
 )
-from investment_analyser.filters import format_currency, format_percent
-from investment_analyser.market_data.fetchers.yfinance import YFetcher
-from investment_analyser.repository import prices
 
 
 def calculate_price_change(prices: Series, years: float) -> float | None:

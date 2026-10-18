@@ -1,10 +1,10 @@
 from pandas import DataFrame, Series
 from yfinance import Ticker
 
-from investment_analyser.market_data.fetchers.yfinance import YFetcher
+from investment_analyser.fetchers.yfinance import YFetcher
 from investment_analyser.repository.prices import get_most_recent_price
 from investment_analyser.repository.transactions import get_transactions_for_open_assets
-from investment_analyser.transactions.service import get_split_adjusted_transactions
+from investment_analyser.services.transactions import get_split_adjusted_transactions
 
 
 def get_asset_allocation() -> DataFrame:

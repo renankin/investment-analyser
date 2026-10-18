@@ -7,8 +7,8 @@ from investment_analyser.repository.assets import (
     get_asset_by_id,
     insert_asset,
 )
-from investment_analyser.assets.services.deletion import delete_asset_if_unused
-from investment_analyser.assets.services.dividends import get_dividends_received
+from investment_analyser.services.asset_deletion import delete_asset_if_unused
+from investment_analyser.services.dividends import get_dividends_received
 
 assets_bp = Blueprint("assets", __name__)
 

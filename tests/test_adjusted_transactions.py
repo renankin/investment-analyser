@@ -9,7 +9,7 @@ from investment_analyser.models.models import (
     StockSplit,
     TransactionRecord,
 )
-from investment_analyser.transactions.service import adjust_transactions_for_splits
+from investment_analyser.services.transactions import adjust_transactions_for_splits
 
 ACCOUNT = Account(id=1, name="Account", currency="USD")
 ASSET_INFO = AssetInfo(symbol="APPL", name="Apple", type="Stock")

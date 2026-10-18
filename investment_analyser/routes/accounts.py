@@ -6,7 +6,7 @@ from investment_analyser.repository.accounts import (
     get_all_accounts,
     update_account,
 )
-from investment_analyser.accounts.service import delete_account_if_empty
+from investment_analyser.services.account import delete_account_if_empty
 
 accounts_bp = Blueprint("accounts", __name__)
 
