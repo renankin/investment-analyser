@@ -12,7 +12,7 @@ def insert_dividends(asset_id: int) -> bool:
 
     dividends = Series()
     if asset.info.type == "Stock":
-        dividends = YFetcher(asset["asset_symbol"]).get_dividends()
+        dividends = YFetcher(asset.info.symbol).get_dividends()
 
     if not dividends.empty:
         for date, div in dividends.items():

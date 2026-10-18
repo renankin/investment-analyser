@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, json, redirect, render_template, url_for
+from flask import Blueprint, flash, redirect, render_template, url_for
 
 from investment_analyser.assets import repository
 from investment_analyser.market_data.repository.dividends import (
@@ -87,12 +87,12 @@ def show_prices(asset_id):
 
     p = get_market_prices(asset_id)
 
-    data = json.dumps([price.value for price in p])
-    labels = json.dumps([price.date for price in p])
+    data = [float(price.value) for price in p]
+    labels = [price.date.isoformat() for price in p]
 
     a = repository.get_asset_by_id(asset_id)
 
-    asset_name = json.dumps(a.info.name)
+    asset_name = a.info.name
 
     if p:
         return render_template(

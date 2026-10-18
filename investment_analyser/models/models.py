@@ -35,6 +35,7 @@ class MarketDividend:
     date: date
     asset: AssetInfo
     value: Decimal
+    currency: str
 
 @dataclass
 class DividendReceived:

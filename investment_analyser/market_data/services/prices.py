@@ -15,7 +15,7 @@ def insert_prices(asset_id: int) -> bool:
     if asset.info.type in ["Stock", "ETF"]:
         prices = YFetcher(asset.info.symbol).get_prices()
     if asset.info.type == "Brazilian bond":
-        prices = tesouro_direto.get_prices(asset.info.type)
+        prices = tesouro_direto.get_prices(asset.info.symbol)
 
     if not prices.empty:
         for date, price in prices.items():

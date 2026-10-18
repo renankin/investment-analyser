@@ -13,8 +13,8 @@
     <tbody>
       {% for div in dividends: %}
         <tr>
-          <td>{{ div["date"] | format_date }}</td>
-          <td>{{ div["dividend_value"] | format_currency(div["currency"]) }}</td>
+          <td>{{ div.date | format_date }}</td>
+          <td>{{ div.value | format_currency(div.currency) }}</td>
         </tr>
       {% endfor %}
     </tbody>
