@@ -1,10 +1,10 @@
 from typing import Literal
 
-from investment_analyser.assets.repository import delete_asset
-from investment_analyser.market_data.repository.dividends import get_dividends
-from investment_analyser.market_data.repository.prices import get_market_prices
-from investment_analyser.market_data.repository.stock_splits import get_stock_splits
-from investment_analyser.transactions.repository import get_transactions_from_asset
+from investment_analyser.repository.assets import delete_asset
+from investment_analyser.repository.dividends import get_dividends
+from investment_analyser.repository.prices import get_market_prices
+from investment_analyser.repository.stock_splits import get_stock_splits
+from investment_analyser.repository.transactions import get_transactions_from_asset
 
 DeletionBlocker = Literal["transactions", "prices", "dividends", "splits"]
 

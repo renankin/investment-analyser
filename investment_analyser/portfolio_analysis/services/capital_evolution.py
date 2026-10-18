@@ -1,9 +1,9 @@
 from pandas import DataFrame, Series, concat
 
-from investment_analyser.accounts.repository import get_all_accounts
-from investment_analyser.assets.repository import get_assets_from_account
-from investment_analyser.market_data.repository import prices
-from investment_analyser.transactions.repository import get_transactions_from_asset
+from investment_analyser.repository.accounts import get_all_accounts
+from investment_analyser.repository.assets import get_assets_from_account
+from investment_analyser.repository import prices
+from investment_analyser.repository.transactions import get_transactions_from_asset
 from investment_analyser.transactions.service import get_split_adjusted_transactions
 
 

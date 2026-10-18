@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from investment_analyser.accounts.repository import get_account, get_all_accounts
-from investment_analyser.assets.repository import (
+from investment_analyser.repository.accounts import get_account, get_all_accounts
+from investment_analyser.repository.assets import (
     edit_asset,
     get_all_assets,
     get_asset_by_id,
