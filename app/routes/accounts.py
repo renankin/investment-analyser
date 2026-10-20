@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from app.repository.accounts import (
+from app.repositories.accounts import (
     create_account,
     get_account,
     get_all_accounts,

@@ -4,7 +4,7 @@ from pytest import fixture
 
 from app import create_app
 from app.db.connection import get_db
-from app.repository.transactions import get_transactions_for_open_assets
+from app.repositories.transactions import get_transactions_for_open_assets
 
 
 @fixture
@@ -18,7 +18,7 @@ def test_app():
 def init_db(test_app):
     with test_app.app_context():
         conn = get_db()
-        with test_app.open_resource("schema.sql", mode="r") as f:
+        with test_app.open_resource("db/schema.sql", mode="r") as f:
             conn.executescript(f.read())
         conn.execute(
             "INSERT INTO accounts (account_name, currency) VALUES ('test_account', 'GBP')"

@@ -1,7 +1,7 @@
 from flask import Blueprint, flash, json, render_template, request
 
-from app.repository.accounts import get_account, get_all_accounts
-from app.repository import assets
+from app.repositories.accounts import get_account, get_all_accounts
+from app.repositories import assets
 from app.services import roi
 from app.services import capital_evolution
 

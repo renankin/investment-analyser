@@ -3,7 +3,7 @@ from app.models.models import (
     StockSplit,
     TransactionRecord,
 )
-from app.repository.stock_splits import get_stock_splits
+from app.repositories.stock_splits import get_stock_splits
 
 
 def get_split_adjusted_transactions(

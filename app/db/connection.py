@@ -44,7 +44,7 @@ def close_db(e=None):
 def init_db():
     """Instantiate a database from CLI."""
     db = get_db()
-    with current_app.open_resource("schema.sql", mode="r") as f:
+    with current_app.open_resource("db/schema.sql", mode="r") as f:
         db.executescript(f.read())
     db.commit()
     click.echo("Database initialised.")

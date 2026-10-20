@@ -1,7 +1,7 @@
 from app.models.models import Account, DividendReceived
-from app.repository import dividends
-from app.repository.assets import get_asset_by_id
-from app.repository.transactions import get_transactions_from_asset
+from app.repositories import dividends
+from app.repositories.assets import get_asset_by_id
+from app.repositories.transactions import get_transactions_from_asset
 from app.services.transactions import get_split_adjusted_transactions
 
 

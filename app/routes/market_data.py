@@ -1,15 +1,15 @@
 from flask import Blueprint, flash, redirect, render_template, url_for
 
-from app.repository import assets
-from app.repository.dividends import (
+from app.repositories import assets
+from app.repositories.dividends import (
     delete_dividends,
     get_dividends,
 )
-from app.repository.prices import (
+from app.repositories.prices import (
     delete_prices,
     get_market_prices,
 )
-from app.repository.stock_splits import (
+from app.repositories.stock_splits import (
     delete_stock_splits,
     get_stock_splits,
 )

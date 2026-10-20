@@ -2,8 +2,8 @@ from pandas import Series, Timedelta
 
 from app.fetchers.yfinance import YFetcher
 from app.filters import format_currency, format_percent
-from app.repository import prices
-from app.repository.assets import (
+from app.repositories import prices
+from app.repositories.assets import (
     get_all_assets,
     get_asset_by_symbol,
     get_etf_data,

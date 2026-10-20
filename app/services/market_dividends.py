@@ -1,8 +1,8 @@
 from pandas import Series
 
 from app.fetchers.yfinance import YFetcher
-from app.repository.assets import get_asset_by_id
-from app.repository.dividends import insert_dividend
+from app.repositories.assets import get_asset_by_id
+from app.repositories.dividends import insert_dividend
 
 
 def insert_dividends(asset_id: int) -> bool:

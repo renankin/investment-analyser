@@ -44,15 +44,15 @@ def mock_db(monkeypatch):
 
 def test_connection_lifecycle(test_app):
     with test_app.app_context():
-        connection = connection.get_db()
-        assert g.db is connection
-        assert connection.get_db() is connection
+        conn = connection.get_db()
+        assert g.db is conn
+        assert connection.get_db() is conn
 
         connection.close_db()
         assert "db" not in g
 
         with raises(ProgrammingError):
-            connection.cursor()
+            conn.cursor()
 
 
 def test_single_record(mock_db):

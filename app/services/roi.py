@@ -9,9 +9,9 @@ from app.models.models import (
     DividendReceived,
     MarketPrice,
 )
-from app.repository import prices
-from app.repository.assets import get_all_assets, get_asset_by_id
-from app.repository.transactions import get_transactions_from_asset
+from app.repositories import prices
+from app.repositories.assets import get_all_assets, get_asset_by_id
+from app.repositories.transactions import get_transactions_from_asset
 from app.services.dividends import get_dividends_received
 from app.services.transactions import get_split_adjusted_transactions
 

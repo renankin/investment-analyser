@@ -2,8 +2,8 @@ from pandas import DataFrame, Series
 from yfinance import Ticker
 
 from app.fetchers.yfinance import YFetcher
-from app.repository.prices import get_most_recent_price
-from app.repository.transactions import get_transactions_for_open_assets
+from app.repositories.prices import get_most_recent_price
+from app.repositories.transactions import get_transactions_for_open_assets
 from app.services.transactions import get_split_adjusted_transactions
 
 
