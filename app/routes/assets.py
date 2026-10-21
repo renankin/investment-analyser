@@ -10,7 +10,7 @@ from app.repositories.assets import (
 from app.services.asset_deletion import delete_asset_if_unused
 from app.services.dividends import get_dividends_received
 
-assets_bp = Blueprint("assets", __name__)
+assets_bp = Blueprint("assets", __name__, template_folder="../templates/asset-page")
 
 
 @assets_bp.route("/assets")
@@ -122,3 +122,9 @@ def show_dividends(asset_id):
         currency=account.currency,
         asset_id=asset_id,
     )
+
+
+@assets_bp.route("/assets/<int:asset_id>/price")
+def plot_price(asset_id):
+
+    return render_template("asset_price_graph.html")

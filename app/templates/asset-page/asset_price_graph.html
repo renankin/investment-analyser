@@ -1,0 +1,64 @@
+{% extends "asset_layout.html" %}
+{% block asset %}
+  <div class="col">
+    <div class="row mb-4">
+      <h2>
+        {{ last_price["unit_price"] | format_currency(last_price["currency"]) }}
+      </h2>
+      <canvas id="myChart"></canvas>
+    </div>
+    <div class="row">
+      <p>
+        Last updated:
+        {{ last_price["date"] | format_date }}
+      </p>
+    </div>
+    <div class="row mb-4">
+      <form action="{{ url_for('market.add_prices', asset_id=asset['asset_id']) }}"
+            method="post">
+        <button type="submit" class="btn btn-primary">Update prices</button>
+      </form>
+    </div>
+    <div class="row">
+      <h2>Price evolution</h2>
+      <table class="table">
+        {% for year in price_change %}
+          <tbody>
+            <tr>
+              <td>{{ year }}</td>
+              <td>{{ price_change[year] | format_percent }}</td>
+            </tr>
+          </tbody>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+{% endblock asset %}
+{% block javascript %}
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const ctx = document.getElementById('myChart');
+
+    const labels = JSON.parse({{ labels | tojson }})
+    const data = JSON.parse({{ data | tojson }})
+
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          data: data,
+          borderWidth: 1,
+          pointStyle: false,
+        }]
+      },
+      options: {
+        plugins: {
+          legend: {
+            display: false
+          }
+        }
+      }
+    });
+  </script>
+{% endblock javascript %}
