@@ -1,0 +1,80 @@
+from pandas import DataFrame, Series, concat
+
+from app.repositories import prices
+from app.repositories.accounts import get_all_accounts
+from app.repositories.assets import get_assets_from_account
+from app.repositories.transactions import get_transactions_from_asset
+from app.services.transactions import get_split_adjusted_transactions
+
+
+def get_all_accounts_history() -> Series:
+    """Returns Series"""
+
+    all_accounts = get_all_accounts()
+
+    df = DataFrame()
+
+    for account in all_accounts:
+        ser = get_account_history(account.id)
+
+        df = concat([df, ser], axis=1).sort_index()
+
+    return df.sum(axis=1)
+
+
+def get_account_history(account_id: int) -> Series:
+    """Returns a Series with `values` for the account history."""
+
+    all_assets = get_assets_from_account(account_id)
+
+    df = DataFrame()
+
+    for asset in all_assets:
+        ser = get_asset_history(asset.id)
+
+        df = concat([df, ser], axis=1).sort_index()
+
+    return df.sum(axis=1)
+
+
+def get_asset_history(asset_id: int) -> Series:
+    """Returns a Series with `values` for the asset history."""
+
+    # Get the cummulative sum of shares
+    t = get_split_adjusted_transactions(
+        transactions=get_transactions_from_asset(asset_id)
+    )
+    if not t:
+        return Series()
+
+    df1 = DataFrame(
+        [{"date": item.transaction_record.date, "shares": item.shares} for item in t]
+    ).set_index("date").sort_values("date")
+
+    # Combine transactions which are ocurring in the same date
+    df1 = df1.groupby("date").sum()
+    df1["shares_cumsum"] = df1["shares"].cumsum()
+
+    # Get the prices for that asset
+    p = [
+        {"unit_price": price.value, "date": price.date}
+        for price in prices.get_market_prices(asset_id)
+    ]
+    if not p:
+        return Series()
+
+    df2 = DataFrame(p).set_index("date").sort_values("date")
+
+    # Select dates which start from initial transaction
+    df2 = df2[df2.index >= df1.first_valid_index()]
+
+    # Include cumsum on the column of df2
+    df2 = df2.merge(df1, left_index=True, right_index=True, how="left")
+
+    # Replace NaN values
+    df2.ffill(inplace=True)
+
+    # calculate valuation
+    df2["asset_history"] = df2["unit_price"] * df2["shares_cumsum"]
+
+    return df2["asset_history"]

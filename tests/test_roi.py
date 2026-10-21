@@ -3,8 +3,8 @@ from decimal import Decimal
 
 from pytest import approx
 
-from investment_analyser.models.models import CashFlow
-from investment_analyser.portfolio_analysis.services.roi import calculate_irr
+from app.models.models import CashFlow
+from app.services.roi import calculate_irr
 
 
 def test_empty_imputs():

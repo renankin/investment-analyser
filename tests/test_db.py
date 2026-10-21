@@ -12,7 +12,8 @@ from flask import g
 from pandas import Timestamp
 from pytest import fixture, raises
 
-from investment_analyser import create_app, db
+from app import create_app
+from app.db import connection
 
 
 @fixture
@@ -26,9 +27,9 @@ def test_app():
 def mock_db(monkeypatch):
     database = connect(":memory:", detect_types=PARSE_DECLTYPES)
     database.row_factory = Row
-    register_converter("date", db.convert_date)
-    register_adapter(date, db.adapt_date_iso)
-    register_adapter(Timestamp, db.adapt_date_pandas)
+    register_converter("date", connection.convert_date)
+    register_adapter(date, connection.adapt_date_iso)
+    register_adapter(Timestamp, connection.adapt_date_pandas)
 
     cursor = database.cursor()
     cursor.execute(
@@ -36,22 +37,22 @@ def mock_db(monkeypatch):
     )
     cursor.close()
 
-    monkeypatch.setattr(db, "get_db", lambda: database)
-    yield db
+    monkeypatch.setattr(connection, "get_db", lambda: database)
+    yield connection
     database.close()
 
 
 def test_connection_lifecycle(test_app):
     with test_app.app_context():
-        connection = db.get_db()
-        assert g.db is connection
-        assert db.get_db() is connection
+        conn = connection.get_db()
+        assert g.db is conn
+        assert connection.get_db() is conn
 
-        db.close_db()
+        connection.close_db()
         assert "db" not in g
 
         with raises(ProgrammingError):
-            connection.cursor()
+            conn.cursor()
 
 
 def test_single_record(mock_db):

@@ -1,0 +1,92 @@
+from pandas import DataFrame, Series
+from yfinance import Ticker
+
+from app.fetchers.yfinance import YFetcher
+from app.repositories.prices import get_most_recent_price
+from app.repositories.transactions import get_transactions_for_open_assets
+from app.services.transactions import get_split_adjusted_transactions
+
+
+def get_asset_allocation() -> DataFrame:
+    """
+    Calculates the current porfolio distribution, showing the total shares, current price,
+    total value and weight percent for each asset hold.
+
+    Returns a dataframe with following columns:
+    - `asset_id`
+    - `asset_symbol`
+    - `asset_type`
+    - `currency`
+    - `shares`
+    - `unit_price`
+    - `price_date`
+    - `total`
+    - `weight_percent`
+    """
+
+    raw_transactions = get_transactions_for_open_assets()
+    adjusted_transactions = get_split_adjusted_transactions(raw_transactions)
+    df = DataFrame(
+        [
+            {
+                "asset_id": transaction.transaction_record.asset.id,
+                "asset_symbol": transaction.transaction_record.asset.info.symbol,
+                "asset_type": transaction.transaction_record.asset.info.type,
+                "currency": transaction.transaction_record.asset.account.currency,
+                "shares": transaction.shares,
+            }
+            for transaction in adjusted_transactions
+        ]
+    )
+
+    grouped_df = df.groupby(
+        ["asset_id", "asset_symbol", "asset_type", "currency"],
+        as_index=False,
+    )[["shares"]].sum()
+    grouped_df[["unit_price", "price_date"]] = grouped_df["asset_id"].apply(
+        lambda asset_id: Series(
+            [get_most_recent_price(asset_id).value, get_most_recent_price(asset_id).date]
+        )
+    )
+    grouped_df[["unit_price", "currency"]] = grouped_df[
+        ["unit_price", "currency"]
+    ].apply(convert_currency, axis=1)
+    grouped_df["total"] = grouped_df["unit_price"] * grouped_df["shares"]
+    grouped_df["weight_percent"] = grouped_df["total"] / grouped_df["total"].sum(axis=0)
+
+    return grouped_df
+
+
+def convert_currency(row):
+
+    if row["currency"] == "BRL":
+        df = Ticker("GBPBRL=X").history(period="1d")
+        row["unit_price"] /= df["Close"].iloc[0]
+        row["currency"] = "GBP"
+
+    return row
+
+
+def get_sector_distribution() -> dict:
+    """
+    Returns a dictionary containing the sector distribution for the portfolio.
+    The returned dictionary contains the sector keys and weight distribution.
+    """
+
+    portfolio_df = get_asset_allocation()
+
+    portfolio_sectors = {}
+    for _, portfolio_asset in portfolio_df.iterrows():
+        asset_symbol = portfolio_asset["asset_symbol"]
+
+        asset_sectors = YFetcher(asset_symbol).get_sector_weighting()
+
+        for sector_key in asset_sectors:
+            asset_weight = asset_sectors[sector_key] * portfolio_asset["weight_percent"]
+
+            if sector_key in portfolio_sectors:
+                portfolio_sectors[sector_key] += asset_weight
+            else:
+                portfolio_sectors[sector_key] = asset_weight
+
+    return portfolio_sectors
