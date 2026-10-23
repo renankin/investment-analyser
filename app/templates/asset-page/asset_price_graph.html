@@ -3,7 +3,7 @@
   <div class="col">
     <div class="row mb-4">
       <h2>
-        {{ last_price["unit_price"] | format_currency(last_price["currency"]) }}
+        {{ last_price | format_currency(last_price["currency"]) }}
       </h2>
       <canvas id="myChart"></canvas>
     </div>

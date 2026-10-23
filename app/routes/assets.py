@@ -127,4 +127,21 @@ def show_dividends(asset_id):
 @assets_bp.route("/assets/<int:asset_id>/price")
 def plot_price(asset_id):
 
-    return render_template("asset_price_graph.html")
+    price_values = [price["unit_price"] for price in prices.get_prices(asset_id)]
+    price_dates = [price["date"] for price in prices.get_prices(asset_id)]
+
+    prices_ser = Series(data=price_values, index=price_dates)
+
+    years = [1, 3, 5, 10]
+    price_change = {}
+    for year in years:
+        price_change[f"{year} year"] = calculate_price_change(prices_ser, years=year)
+
+    return render_template(
+        "show_prices.html",
+        data=dumps(price_values),
+        last_price=prices.get_most_recent_price(asset_id),
+        labels=dumps([date.isoformat() for date in price_dates]),
+        asset=assets.get_asset(asset_id),
+        price_change=price_change,
+    )
