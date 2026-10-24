@@ -4,13 +4,11 @@ from app.repositories.accounts import get_account, get_all_accounts
 from app.repositories.assets import (
     edit_asset,
     get_all_assets,
-    get_asset_by_id,
     insert_asset,
 )
 from app.services.asset_deletion import delete_asset_if_unused
-from app.services.dividends import get_dividends_received
 from app.services.asset_service import AssetService
-from app.services.price_analyser import fetch_price_analyser_for_asset
+from app.services.dividends import get_dividends_received
 
 assets_bp = Blueprint("assets", __name__, template_folder="../templates/asset-page")
 
@@ -66,7 +64,6 @@ def edit(asset_id):
 
     asset_service = AssetService(asset_id)
 
-
     if request.method == "POST":
         asset_symbol = request.form.get("asset_symbol")
         asset_name = request.form.get("asset_name")
@@ -91,8 +88,6 @@ def edit(asset_id):
 
 @assets_bp.route("/assets/<int:asset_id>/delete", methods=["POST"])
 def delete(asset_id):
-    """Delete asset."""
-
     deletion_blocker = delete_asset_if_unused(asset_id)
     messages = {
         "transactions": "Must delete transactions first.",
@@ -107,12 +102,9 @@ def delete(asset_id):
 
 @assets_bp.route("/assets/<int:asset_id>/dividends")
 def show_dividends(asset_id):
-    """Show dividends received for asset."""
-
     dividends = get_dividends_received(asset_id)
     asset_service = AssetService(asset_id)
     account = get_account(asset_service.asset.account.id)
-    
     return render_template(
         "show_dividends_received.html",
         dividends=dividends,
@@ -123,16 +115,18 @@ def show_dividends(asset_id):
 
 @assets_bp.route("/assets/<int:asset_id>/price")
 def plot_prices(asset_id):
-
-    price_analyser = fetch_price_analyser_for_asset(asset_id)
     asset_service = AssetService(asset_id)
-
     return render_template(
         "asset_price_graph.html",
-        dates=price_analyser.get_dates(),
-        prices=price_analyser.get_prices(),
+        dates=asset_service.price_analyser.get_dates(),
+        prices=asset_service.price_analyser.get_prices(),
         yearly_change=[
-            {"year": year, "percentage": price_analyser.calculate_yearly_change(year)}
+            {
+                "year": year,
+                "percentage": asset_service.price_analyser.calculate_yearly_change(
+                    year
+                ),
+            }
             for year in [1, 3, 5]
         ],
         asset=asset_service.asset,

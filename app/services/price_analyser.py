@@ -2,7 +2,6 @@ import datetime
 from decimal import Decimal
 
 from app.models.models import MarketPrice
-from app.repositories.prices import get_market_prices
 
 
 class PriceAnalyser:
@@ -45,7 +44,3 @@ class PriceAnalyser:
             initial_date=inital_date, final_date=most_recent_price
         )
 
-
-def fetch_price_analyser_for_asset(asset_id: int) -> PriceAnalyser:
-    prices = get_market_prices(asset_id)
-    return PriceAnalyser(prices)

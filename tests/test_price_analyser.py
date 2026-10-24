@@ -5,6 +5,7 @@ import pytest
 
 from app.models.models import AssetInfo, MarketPrice
 from app.services.price_analyser import PriceAnalyser
+from app.services.asset_service import AssetService
 
 asset_info = AssetInfo(symbol="APPL", name="Apple", type="Stock")
 
@@ -26,7 +27,6 @@ prices = [
     ),
 ]
 price_analyser = PriceAnalyser(prices)
-
 
 def test_price_change_for_complete_period():
     assert price_analyser.calculate_price_change(
