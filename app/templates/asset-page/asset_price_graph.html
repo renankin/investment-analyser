@@ -2,19 +2,14 @@
 {% block asset %}
   <div class="col">
     <div class="row mb-4">
-      <h2>
-        {{ last_price | format_currency(last_price["currency"]) }}
-      </h2>
+      <h2>Todo</h2>
       <canvas id="myChart"></canvas>
     </div>
     <div class="row">
-      <p>
-        Last updated:
-        {{ last_price["date"] | format_date }}
-      </p>
+      <p>Last updated: {{ dates[-1] | format_date }}</p>
     </div>
     <div class="row mb-4">
-      <form action="{{ url_for('market.add_prices', asset_id=asset['asset_id']) }}"
+      <form action="{{ url_for('market.add_prices', asset_id=asset_id) }}"
             method="post">
         <button type="submit" class="btn btn-primary">Update prices</button>
       </form>
@@ -22,14 +17,14 @@
     <div class="row">
       <h2>Price evolution</h2>
       <table class="table">
-        {% for year in price_change %}
-          <tbody>
+        <tbody>
+          {% for data in yearly_change %}
             <tr>
-              <td>{{ year }}</td>
-              <td>{{ price_change[year] | format_percent }}</td>
+            <td>{{ data.year }}-year</td>
+              <td>{{ data.percentage | format_percent }}</td>
             </tr>
-          </tbody>
-        {% endfor %}
+          {% endfor %}
+        </tbody>
       </table>
     </div>
   </div>
@@ -39,8 +34,8 @@
   <script>
     const ctx = document.getElementById('myChart');
 
-    const labels = JSON.parse({{ labels | tojson }})
-    const data = JSON.parse({{ data | tojson }})
+    const labels = {{ dates | tojson }}
+    const data = {{ prices | tojson }}
 
     new Chart(ctx, {
       type: 'line',

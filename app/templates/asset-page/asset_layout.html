@@ -16,7 +16,8 @@
              href="{{ url_for('assets.show_dividends', asset_id=asset_id) }}">Dividends</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Link</a>
+          <a class="nav-link"
+             href="{{ url_for('assets.plot_prices', asset_id=asset_id) }}">Prices</a>
         </li>
         <li class="nav-item">
           <a class="nav-link disabled" aria-disabled="true">Disabled</a>
