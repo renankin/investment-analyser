@@ -9,7 +9,8 @@ from app.repositories.assets import (
 )
 from app.services.asset_deletion import delete_asset_if_unused
 from app.services.dividends import get_dividends_received
-from app.services import market_prices
+from app.services.asset_service import AssetService
+from app.services.price_analyser import fetch_price_analyser_for_asset
 
 assets_bp = Blueprint("assets", __name__, template_folder="../templates/asset-page")
 
@@ -63,7 +64,8 @@ def add():
 def edit(asset_id):
     """Edit asset."""
 
-    asset = get_asset_by_id(asset_id)
+    asset_service = AssetService(asset_id)
+
 
     if request.method == "POST":
         asset_symbol = request.form.get("asset_symbol")
@@ -73,18 +75,18 @@ def edit(asset_id):
 
         if not still_open:
             still_open = False
-            asset.still_open = still_open
+            asset_service.asset.still_open = still_open
 
         if asset_symbol and asset_name and asset_type:
-            asset.info.symbol = asset_symbol
-            asset.info.name = asset_name
-            asset.info.type = asset_type
+            asset_service.asset.info.symbol = asset_symbol
+            asset_service.asset.info.name = asset_name
+            asset_service.asset.info.type = asset_type
 
-        edit_asset(asset)
+        edit_asset(asset_service.asset)
         flash("Asset updated.")
         return redirect(url_for("assets.index"))
 
-    return render_template("edit_asset.html", asset=asset, asset_id=asset_id)
+    return render_template("edit_asset.html", asset=asset_service.asset)
 
 
 @assets_bp.route("/assets/<int:asset_id>/delete", methods=["POST"])
@@ -108,35 +110,44 @@ def show_dividends(asset_id):
     """Show dividends received for asset."""
 
     dividends = get_dividends_received(asset_id)
-
-    asset = get_asset_by_id(asset_id)
-
-    account = get_account(asset.account.id)
-
-    if not dividends:
-        flash("No dividends to show.")
-        return redirect(url_for("assets.index"))
-
+    asset_service = AssetService(asset_id)
+    account = get_account(asset_service.asset.account.id)
+    
     return render_template(
         "show_dividends_received.html",
         dividends=dividends,
         currency=account.currency,
-        asset_id=asset_id,
+        asset=asset_service.asset,
     )
 
 
 @assets_bp.route("/assets/<int:asset_id>/price")
 def plot_prices(asset_id):
 
-    price_analyser = market_prices.fetch_price_analyser_for_asset(asset_id)
+    price_analyser = fetch_price_analyser_for_asset(asset_id)
+    asset_service = AssetService(asset_id)
 
     return render_template(
         "asset_price_graph.html",
         dates=price_analyser.get_dates(),
         prices=price_analyser.get_prices(),
-        asset_id=asset_id,
         yearly_change=[
             {"year": year, "percentage": price_analyser.calculate_yearly_change(year)}
             for year in [1, 3, 5]
         ],
+        asset=asset_service.asset,
+    )
+
+
+@assets_bp.route("/assets/<int:asset_id>/price/update", methods=["POST"])
+def update_prices(asset_id):
+    asset_service = AssetService(asset_id)
+    asset_service.update_prices()
+    flash("Prices updated.")
+    return redirect(
+        url_for(
+            "assets.plot_prices",
+            asset_id=asset_service.asset.id,
+            asset_name=asset_service.asset.info.name,
+        )
     )

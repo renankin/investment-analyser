@@ -2,14 +2,13 @@
 {% block asset %}
   <div class="col">
     <div class="row mb-4">
-      <h2>Todo</h2>
       <canvas id="myChart"></canvas>
     </div>
     <div class="row">
       <p>Last updated: {{ dates[-1] | format_date }}</p>
     </div>
     <div class="row mb-4">
-      <form action="{{ url_for('market.add_prices', asset_id=asset_id) }}"
+      <form action="{{ url_for('assets.update_prices', asset_id=asset.id) }}"
             method="post">
         <button type="submit" class="btn btn-primary">Update prices</button>
       </form>

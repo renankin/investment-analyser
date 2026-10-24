@@ -4,7 +4,7 @@ from decimal import Decimal
 import pytest
 
 from app.models.models import AssetInfo, MarketPrice
-from app.services.market_prices import PriceAnalyser
+from app.services.price_analyser import PriceAnalyser
 
 asset_info = AssetInfo(symbol="APPL", name="Apple", type="Stock")
 

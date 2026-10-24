@@ -14,7 +14,6 @@ from app.repositories.stock_splits import (
     get_stock_splits,
 )
 from app.services.market_dividends import insert_dividends
-from app.services.market_prices import insert_prices
 from app.services.stock_splits import insert_stock_splits
 
 market_bp = Blueprint("market", __name__)
@@ -54,18 +53,6 @@ def show_dividends(asset_id):
         return render_template("show_dividends.html", dividends=divs)
 
     flash("No dividends to show.")
-    return redirect(url_for("assets.index"))
-
-
-@market_bp.route("/market/prices/add/<int:asset_id>", methods=["POST"])
-def add_prices(asset_id):
-    """Insert prices for asset."""
-
-    if insert_prices(asset_id):
-        flash("Prices added.")
-    else:
-        flash("Failed to add prices.")
-
     return redirect(url_for("assets.index"))
 
 
