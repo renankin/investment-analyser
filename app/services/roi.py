@@ -12,7 +12,7 @@ from app.models.models import (
 from app.repositories import prices
 from app.repositories.assets import get_all_assets, get_asset_by_id
 from app.repositories.transactions import get_transactions_from_asset
-from app.services.dividends import get_dividends_received
+from app.services.asset_service import AssetService
 from app.services.transactions import get_split_adjusted_transactions
 
 
@@ -26,7 +26,7 @@ def get_all_return() -> list[dict]:
     all_stats = []
 
     for asset in all_assets:
-        divs = get_dividends_received(asset.id)
+        divs = AssetService(asset.id).get_dividends_received()
         total_divs = sum(div.value for div in divs)
 
         trans = get_split_adjusted_transactions(
@@ -86,7 +86,7 @@ def get_irr(asset_id: int) -> float | None:
         dates.append(transaction.transaction_record.date)
         total_shares += transaction.shares
 
-    dividends = get_dividends_received(asset_id)
+    dividends = AssetService(asset_id).get_dividends_received()
     if dividends:
         for div in dividends:
             cashflow.append(div.value)

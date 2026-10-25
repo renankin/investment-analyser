@@ -1,6 +1,6 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from app.repositories.accounts import get_account, get_all_accounts
+from app.repositories.accounts import get_all_accounts
 from app.repositories.assets import (
     edit_asset,
     get_all_assets,
@@ -8,7 +8,6 @@ from app.repositories.assets import (
 )
 from app.services.asset_deletion import delete_asset_if_unused
 from app.services.asset_service import AssetService
-from app.services.dividends import get_dividends_received
 
 assets_bp = Blueprint("assets", __name__, template_folder="../templates/assets")
 
@@ -102,13 +101,10 @@ def delete(asset_id):
 
 @assets_bp.route("/assets/<int:asset_id>/dividends-received")
 def show_dividends_received(asset_id):
-    dividends = get_dividends_received(asset_id)
     asset_service = AssetService(asset_id)
-    account = get_account(asset_service.asset.account.id)
     return render_template(
         "show_dividends_received.html",
-        dividends=dividends,
-        currency=account.currency,
+        dividends=asset_service.get_dividends_received(),
         asset=asset_service.asset,
     )
 

@@ -8,20 +8,17 @@
       </tr>
     </thead>
     <tbody>
-      {% set ns = namespace(total=0, currency="") %}
       {% for div in dividends: %}
         <tr>
           <td>{{ div.date | format_date }}</td>
-          <td>{{ div.value | format_currency(currency) }}</td>
+          <td>{{ div.value | format_currency(div.account.currency) }}</td>
         </tr>
-        {% set ns.total = ns.total + div.value %}
-        {% set ns.currency = div.account.currency %}
       {% endfor %}
     </tbody>
     <tfoot>
       <tr>
         <th class="border-0 text-end">Total</th>
-        <td class="border-0">{{ ns.total | format_currency(currency) }}</td>
+        <td class="border-0">To-do</td>
       </tr>
     </tfoot>
   </table>

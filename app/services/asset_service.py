@@ -2,11 +2,14 @@ from pandas import Series, to_datetime
 
 from app.fetchers.tesouro_direto import get_prices
 from app.fetchers.yfinance import YFetcher
+from app.models.models import DividendReceived
 from app.repositories.assets import get_asset_by_id
 from app.repositories.dividends import get_dividends, insert_dividend
 from app.repositories.prices import get_market_prices, insert_price
 from app.repositories.stock_splits import get_stock_splits, insert_stock_split
+from app.repositories.transactions import get_transactions_from_asset
 from app.services.price_analyser import PriceAnalyser
+from app.services.transactions import get_split_adjusted_transactions
 
 
 class AssetService:
@@ -15,6 +18,7 @@ class AssetService:
         self.price_analyser = PriceAnalyser(get_market_prices(self.asset.id))
         self.stock_splits = get_stock_splits(asset_id)
         self.dividends = get_dividends(asset_id)
+        self.transactions = get_transactions_from_asset(asset_id)
 
     def update_prices(self) -> None:
         prices = Series()
@@ -56,3 +60,35 @@ class AssetService:
                     date=to_datetime(str(date)).date(),
                     dividend_value=div,
                 )
+
+    def get_dividends_received(self) -> list[DividendReceived]:
+
+        t = get_split_adjusted_transactions(self.transactions)
+
+        divs_received = []
+        for div in self.dividends:
+            if not self.asset.still_open:
+                last_date = max(
+                    [transaction.transaction_record.date for transaction in t]
+                )
+                if div.date >= last_date:
+                    continue
+
+            # Find how many shares on that dividend date
+            shares = 0
+            div_received = False
+            for transaction in t:
+                if transaction.transaction_record.date <= div.date:
+                    div_received = True
+                    shares += transaction.shares
+
+            if div_received:
+                divs_received.append(
+                    DividendReceived(
+                        date=div.date,
+                        value=shares * div.value,
+                        account=self.asset.account,
+                    )
+                )
+
+        return divs_received
