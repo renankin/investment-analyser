@@ -10,7 +10,7 @@ from app.services.asset_deletion import delete_asset_if_unused
 from app.services.asset_service import AssetService
 from app.services.dividends import get_dividends_received
 
-assets_bp = Blueprint("assets", __name__, template_folder="../templates/asset-page")
+assets_bp = Blueprint("assets", __name__, template_folder="../templates/assets")
 
 
 @assets_bp.route("/assets")
@@ -100,8 +100,8 @@ def delete(asset_id):
     return redirect(url_for("assets.index"))
 
 
-@assets_bp.route("/assets/<int:asset_id>/dividends")
-def show_dividends(asset_id):
+@assets_bp.route("/assets/<int:asset_id>/dividends-received")
+def show_dividends_received(asset_id):
     dividends = get_dividends_received(asset_id)
     asset_service = AssetService(asset_id)
     account = get_account(asset_service.asset.account.id)
@@ -111,6 +111,24 @@ def show_dividends(asset_id):
         currency=account.currency,
         asset=asset_service.asset,
     )
+
+
+@assets_bp.route("/assets/<int:asset_id>/dividends")
+def show_dividends(asset_id):
+    asset_service = AssetService(asset_id)
+    return render_template(
+        "show_dividend_history.html",
+        dividends=asset_service.dividends,
+        asset=asset_service.asset,
+    )
+
+
+@assets_bp.route("/assets/<int:asset_id>/dividends/update", methods=["POST"])
+def update_dividends(asset_id):
+    asset_service = AssetService(asset_id)
+    asset_service.update_dividends()
+    flash("Dividends updated.")
+    return redirect(url_for("assets.show_dividends", asset_id=asset_service.asset.id))
 
 
 @assets_bp.route("/assets/<int:asset_id>/price")

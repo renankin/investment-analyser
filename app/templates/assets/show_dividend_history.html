@@ -1,0 +1,29 @@
+{% extends "asset_layout.html" %}
+{% block asset %}
+  <div class="col">
+    <div class="row">
+      <form action="{{ url_for('assets.update_dividends', asset_id=asset.id) }}"
+            method="post">
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+    </div>
+    <div class="row">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Dividend per share</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for div in dividends: %}
+            <tr>
+              <td>{{ div.date | format_date }}</td>
+              <td>{{ div.value | format_currency(div.currency) }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock asset %}
