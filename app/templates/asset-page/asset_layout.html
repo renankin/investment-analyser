@@ -14,14 +14,15 @@
         </li>
         <li class="nav-item">
           <a class="nav-link"
-             href="{{ url_for('assets.show_dividends', asset_id=asset.id) }}">Dividends</a>
+             href="{{ url_for('assets.show_dividends', asset_id=asset.id) }}">Dividends Received</a>
         </li>
         <li class="nav-item">
           <a class="nav-link"
              href="{{ url_for('assets.plot_prices', asset_id=asset.id) }}">Prices</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+          <a class="nav-link"
+             href="{{ url_for('assets.show_stock_splits', asset_id=asset.id) }}">Stock Splits</a>
         </li>
       </ul>
     </div>

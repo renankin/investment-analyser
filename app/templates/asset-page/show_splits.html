@@ -1,0 +1,29 @@
+{% extends "asset_layout.html" %}
+{% block asset %}
+  <div class="col">
+    <div class="row">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Split ratio</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for split in splits: %}
+            <tr>
+              <td>{{ split.date | format_date }}</td>
+              <td>{{ split.split_ratio }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="row">
+      <form action="{{ url_for('assets.update_stock_splits', asset_id=asset.id) }}"
+            method="post">
+        <button type="submit" class="btn btn-primary">Update</button>
+      </form>
+    </div>
+  </div>
+{% endblock asset %}

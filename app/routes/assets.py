@@ -145,3 +145,21 @@ def update_prices(asset_id):
             asset_name=asset_service.asset.info.name,
         )
     )
+
+
+@assets_bp.route("/assets/<int:asset_id>/stock-splits", methods=["GET"])
+def show_stock_splits(asset_id):
+    asset_service = AssetService(asset_id)
+    return render_template(
+        "show_splits.html", asset=asset_service.asset, splits=asset_service.stock_splits
+    )
+
+
+@assets_bp.route("/assets/<int:asset_id>/stock-splits/update", methods=["POST"])
+def update_stock_splits(asset_id):
+    asset_service = AssetService(asset_id)
+    asset_service.update_stock_splits()
+    flash("Stock split updated.")
+    return redirect(
+        url_for("assets.show_stock_splits", asset_id=asset_service.asset.id)
+    )

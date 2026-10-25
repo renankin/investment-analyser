@@ -8,7 +8,6 @@ from app.routes.accounts import accounts_bp
 from app.routes.assets import assets_bp
 from app.routes.homepage import homepage_bp
 from app.routes.market_analysis import market_analysis_bp
-from app.routes.market_data import market_bp
 from app.routes.portfolio_analysis import portfolio_analysis_bp
 from app.routes.transactions import transactions_bp
 
@@ -33,7 +32,6 @@ def create_app():
     app.register_blueprint(portfolio_analysis_bp)
     app.register_blueprint(assets_bp)
     app.register_blueprint(homepage_bp)
-    app.register_blueprint(market_bp)
     app.register_blueprint(market_analysis_bp)
     app.register_blueprint(transactions_bp)
 

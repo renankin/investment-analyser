@@ -4,14 +4,15 @@ from app.fetchers.tesouro_direto import get_prices
 from app.fetchers.yfinance import YFetcher
 from app.repositories.assets import get_asset_by_id
 from app.repositories.prices import get_market_prices, insert_price
+from app.repositories.stock_splits import get_stock_splits, insert_stock_split
 from app.services.price_analyser import PriceAnalyser
 
 
 class AssetService:
     def __init__(self, asset_id: int) -> None:
         self.asset = get_asset_by_id(asset_id)
-        self.prices = get_market_prices(self.asset.id)
-        self.price_analyser = PriceAnalyser(self.prices)
+        self.price_analyser = PriceAnalyser(get_market_prices(self.asset.id))
+        self.stock_splits = get_stock_splits(asset_id)
 
     def update_prices(self) -> None:
         prices = Series()
@@ -27,3 +28,18 @@ class AssetService:
                     date=to_datetime(str(date)).date(),
                     unit_price=price,
                 )
+
+    def update_stock_splits(self) -> None:
+        splits = Series()
+        if self.asset.info.type == "Stock":
+            splits = YFetcher(self.asset.info.symbol).get_stock_splits()
+
+        if not splits.empty:
+            for date, split in splits.items():
+                insert_stock_split(
+                    asset_id=self.asset.id,
+                    date=to_datetime(str(date)).date(),
+                    split_ratio=split,
+                )
+
+
