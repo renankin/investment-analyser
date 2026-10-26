@@ -2,8 +2,8 @@ from pandas import Series, to_datetime
 
 from app.fetchers.tesouro_direto import get_prices
 from app.fetchers.yfinance import YFetcher
-from app.models.models import AdjustedTransaction, DividendReceived
-from app.repositories.assets import get_asset_by_id
+from app.models.models import AdjustedTransaction, AssetPosition, DividendReceived
+from app.repositories.assets import delete_asset, edit_asset, get_asset_by_id
 from app.repositories.dividends import get_dividends, insert_dividend
 from app.repositories.prices import get_market_prices, insert_price
 from app.repositories.stock_splits import get_stock_splits, insert_stock_split
@@ -94,6 +94,23 @@ class AssetService:
                 )
 
         return divs_received
+
+    def delete_asset(self) -> str | None:
+        """Attempt to delete the asset. If it can't, return the name of the feature which blocked
+        the deletion."""
+        if get_transactions_from_asset(self.asset.id):
+            return "transactions"
+        if get_market_prices(self.asset.id):
+            return "prices"
+        if get_dividends(self.asset.id):
+            return "dividends"
+        if get_stock_splits(self.asset.id):
+            return "splits"
+        delete_asset(self.asset.id)
+        return None
+
+    def edit_asset(self, new_asset: AssetPosition) -> None:
+        edit_asset(new_asset)
 
     def get_transactions_from_asset(self) -> list[AdjustedTransaction]:
         transactions = get_transactions_from_asset(self.asset.id)

@@ -2,11 +2,9 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from app.repositories.accounts import get_all_accounts
 from app.repositories.assets import (
-    edit_asset,
     get_all_assets,
     insert_asset,
 )
-from app.services.asset_deletion import delete_asset_if_unused
 from app.services.asset_service import AssetService
 
 assets_bp = Blueprint("assets", __name__, template_folder="../templates/assets")
@@ -78,24 +76,28 @@ def edit(asset_id):
             asset_service.asset.info.name = asset_name
             asset_service.asset.info.type = asset_type
 
-        edit_asset(asset_service.asset)
+        asset_service.edit_asset(asset_service.asset)
         flash("Asset updated.")
-        return redirect(url_for("assets.index"))
+        return redirect(url_for("assets.edit", asset_id=asset_service.asset.id))
 
     return render_template("edit_asset.html", asset=asset_service.asset)
 
 
 @assets_bp.route("/assets/<int:asset_id>/delete", methods=["POST"])
-def delete(asset_id):
-    deletion_blocker = delete_asset_if_unused(asset_id)
-    messages = {
-        "transactions": "Must delete transactions first.",
-        "prices": "Must delete prices first.",
-        "dividends": "Must delete dividends first.",
-        "splits": "Must delete splits first.",
-    }
-    flash(messages[deletion_blocker] if deletion_blocker else "Asset deleted.")
+def delete_asset(asset_id):
+    asset_service = AssetService(asset_id)
+    deletion_blocker = asset_service.delete_asset()
+    if deletion_blocker:
+        messages = {
+            "transactions": "Must delete transactions first.",
+            "prices": "Must delete prices first.",
+            "dividends": "Must delete dividends first.",
+            "splits": "Must delete splits first.",
+        }
+        flash(messages[deletion_blocker])
+        return redirect(url_for("assets.edit", asset_id=asset_service.asset.id))
 
+    flash("Asset deleted.")
     return redirect(url_for("assets.index"))
 
 
@@ -184,5 +186,6 @@ def show_transactions(asset_id):
     asset_service = AssetService(asset_id)
     return render_template(
         "show_asset_transactions.html",
-        transactions=asset_service.get_transactions_from_asset(), asset=asset_service.asset
+        transactions=asset_service.get_transactions_from_asset(),
+        asset=asset_service.asset,
     )
