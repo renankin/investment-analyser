@@ -6,9 +6,9 @@ from app.repositories.accounts import (
     get_all_accounts,
     update_account,
 )
-from app.services.account import delete_account_if_empty
+from app.services.account_service import AccountService
 
-accounts_bp = Blueprint("accounts", __name__)
+accounts_bp = Blueprint("accounts", __name__, template_folder="../templates/accounts")
 
 
 @accounts_bp.route("/accounts")
@@ -68,11 +68,9 @@ def edit(account_id):
 
 @accounts_bp.route("/accounts/<int:account_id>/delete", methods=["POST"])
 def delete(account_id):
-    """Delete account."""
-
-    if not delete_account_if_empty(account_id):
-        flash("Account not deleted. Must delete its transactions first.")
-    else:
+    account_service = AccountService(account_id)
+    if account_service.delete_account():
         flash("Account deleted.")
-
+    else:
+        flash("Account not deleted. Must delete its transactions first.")
     return redirect(url_for("accounts.index"))
