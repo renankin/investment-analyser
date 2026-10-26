@@ -4,7 +4,7 @@ from decimal import Decimal
 from app.models.models import MarketPrice
 
 
-class PriceAnalyser:
+class PriceService:
     def __init__(self, prices: list[MarketPrice]) -> None:
         self.prices = sorted(prices, key=lambda price: price.date)
 

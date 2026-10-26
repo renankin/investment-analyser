@@ -8,14 +8,14 @@ from app.repositories.dividends import get_dividends, insert_dividend
 from app.repositories.prices import get_market_prices, insert_price
 from app.repositories.stock_splits import get_stock_splits, insert_stock_split
 from app.repositories.transactions import get_transactions_from_asset
-from app.services.price_analyser import PriceAnalyser
+from app.services.price_service import PriceService
 from app.services.transaction_service import TransactionService
 
 
 class AssetService:
     def __init__(self, asset_id: int) -> None:
         self.asset = get_asset_by_id(asset_id)
-        self.price_analyser = PriceAnalyser(get_market_prices(self.asset.id))
+        self.price_analyser = PriceService(get_market_prices(self.asset.id))
         self.stock_splits = get_stock_splits(asset_id)
         self.dividends = get_dividends(asset_id)
         self.transactions = get_transactions_from_asset(asset_id)
