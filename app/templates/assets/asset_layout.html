@@ -14,6 +14,10 @@
         </li>
         <li class="nav-item">
           <a class="nav-link"
+             href="{{ url_for('assets.show_transactions', asset_id=asset.id) }}">Transactions</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link"
              href="{{ url_for('assets.show_dividends_received', asset_id=asset.id) }}">Dividends Received</a>
         </li>
         <li class="nav-item">

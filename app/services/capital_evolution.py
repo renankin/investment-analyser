@@ -3,8 +3,9 @@ from pandas import DataFrame, Series, concat
 from app.repositories import prices
 from app.repositories.accounts import get_all_accounts
 from app.repositories.assets import get_assets_from_account
+from app.repositories.stock_splits import get_stock_splits
 from app.repositories.transactions import get_transactions_from_asset
-from app.services.transactions import get_split_adjusted_transactions
+from app.services.transaction_service import TransactionService
 
 
 def get_all_accounts_history() -> Series:
@@ -41,15 +42,22 @@ def get_asset_history(asset_id: int) -> Series:
     """Returns a Series with `values` for the asset history."""
 
     # Get the cummulative sum of shares
-    t = get_split_adjusted_transactions(
-        transactions=get_transactions_from_asset(asset_id)
+    t = TransactionService().adjust_transactions_for_splits(
+        get_transactions_from_asset(asset_id), get_stock_splits(asset_id)
     )
     if not t:
         return Series()
 
-    df1 = DataFrame(
-        [{"date": item.transaction_record.date, "shares": item.shares} for item in t]
-    ).set_index("date").sort_values("date")
+    df1 = (
+        DataFrame(
+            [
+                {"date": item.transaction_record.date, "shares": item.shares}
+                for item in t
+            ]
+        )
+        .set_index("date")
+        .sort_values("date")
+    )
 
     # Combine transactions which are ocurring in the same date
     df1 = df1.groupby("date").sum()

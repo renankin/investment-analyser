@@ -9,7 +9,7 @@ from app.models.models import (
     StockSplit,
     TransactionRecord,
 )
-from app.services.transactions import adjust_transactions_for_splits
+from app.services.transaction_service import TransactionService
 
 ACCOUNT = Account(id=1, name="Account", currency="USD")
 ASSET_INFO = AssetInfo(symbol="APPL", name="Apple", type="Stock")
@@ -42,9 +42,9 @@ def test_single_stock_split_adjustment():
         is_adjusted=True,
     )
 
-    assert adjust_transactions_for_splits([transaction_record], [stock_split]) == [
-        adjusted_transaction
-    ]
+    assert TransactionService().adjust_transactions_for_splits(
+        [transaction_record], [stock_split]
+    ) == [adjusted_transaction]
 
 
 def test_sequential_stock_splits_adjustment():
@@ -73,9 +73,9 @@ def test_sequential_stock_splits_adjustment():
         is_adjusted=True,
     )
 
-    assert adjust_transactions_for_splits([transaction_record], stock_splits) == [
-        adjusted_transaction
-    ]
+    assert TransactionService().adjust_transactions_for_splits(
+        [transaction_record], stock_splits
+    ) == [adjusted_transaction]
 
 
 def test_adjusted_transactions_for_multiple_records():
@@ -122,7 +122,7 @@ def test_adjusted_transactions_for_multiple_records():
     ]
 
     assert (
-        adjust_transactions_for_splits(transactions, stock_splits)
+        TransactionService().adjust_transactions_for_splits(transactions, stock_splits)
         == adjusted_transactions
     )
 
@@ -140,9 +140,7 @@ def test_split_same_date():
     ]
 
     stock_splits = [
-        StockSplit(
-            asset=ASSET_INFO, date=date(2023, 1, 31), split_ratio=Decimal("2.0")
-        )
+        StockSplit(asset=ASSET_INFO, date=date(2023, 1, 31), split_ratio=Decimal("2.0"))
     ]
 
     adjusted_transactions = [
@@ -155,14 +153,14 @@ def test_split_same_date():
     ]
 
     assert (
-        adjust_transactions_for_splits(transactions, stock_splits)
+        TransactionService().adjust_transactions_for_splits(transactions, stock_splits)
         == adjusted_transactions
     )
 
 
 def test_empty_inputs():
 
-    assert adjust_transactions_for_splits([], []) == []
+    assert TransactionService().adjust_transactions_for_splits([], []) == []
 
 
 def test_no_applicable_split():
@@ -196,7 +194,7 @@ def test_no_applicable_split():
     ]
 
     assert (
-        adjust_transactions_for_splits(transactions, stock_splits)
+        TransactionService().adjust_transactions_for_splits(transactions, stock_splits)
         == adjusted_transactions
     )
 
@@ -214,9 +212,7 @@ def test_decimal_precision():
     ]
 
     stock_splits = [
-        StockSplit(
-            asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.5")
-        )
+        StockSplit(asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.5"))
     ]
 
     adjusted_transactions = [
@@ -229,6 +225,6 @@ def test_decimal_precision():
     ]
 
     assert (
-        adjust_transactions_for_splits(transactions, stock_splits)
+        TransactionService().adjust_transactions_for_splits(transactions, stock_splits)
         == adjusted_transactions
     )

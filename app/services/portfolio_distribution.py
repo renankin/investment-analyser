@@ -4,7 +4,7 @@ from yfinance import Ticker
 from app.fetchers.yfinance import YFetcher
 from app.repositories.prices import get_most_recent_price
 from app.repositories.transactions import get_transactions_for_open_assets
-from app.services.transactions import get_split_adjusted_transactions
+from app.services.transaction_service import TransactionService
 
 
 def get_asset_allocation() -> DataFrame:
@@ -25,17 +25,16 @@ def get_asset_allocation() -> DataFrame:
     """
 
     raw_transactions = get_transactions_for_open_assets()
-    adjusted_transactions = get_split_adjusted_transactions(raw_transactions)
     df = DataFrame(
         [
             {
-                "asset_id": transaction.transaction_record.asset.id,
-                "asset_symbol": transaction.transaction_record.asset.info.symbol,
-                "asset_type": transaction.transaction_record.asset.info.type,
-                "currency": transaction.transaction_record.asset.account.currency,
+                "asset_id": transaction.asset.id,
+                "asset_symbol": transaction.asset.info.symbol,
+                "asset_type": transaction.asset.info.type,
+                "currency": transaction.asset.account.currency,
                 "shares": transaction.shares,
             }
-            for transaction in adjusted_transactions
+            for transaction in raw_transactions
         ]
     )
 

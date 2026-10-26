@@ -2,14 +2,14 @@ from pandas import Series, to_datetime
 
 from app.fetchers.tesouro_direto import get_prices
 from app.fetchers.yfinance import YFetcher
-from app.models.models import DividendReceived
+from app.models.models import AdjustedTransaction, DividendReceived
 from app.repositories.assets import get_asset_by_id
 from app.repositories.dividends import get_dividends, insert_dividend
 from app.repositories.prices import get_market_prices, insert_price
 from app.repositories.stock_splits import get_stock_splits, insert_stock_split
 from app.repositories.transactions import get_transactions_from_asset
 from app.services.price_analyser import PriceAnalyser
-from app.services.transactions import get_split_adjusted_transactions
+from app.services.transaction_service import TransactionService
 
 
 class AssetService:
@@ -63,7 +63,9 @@ class AssetService:
 
     def get_dividends_received(self) -> list[DividendReceived]:
 
-        t = get_split_adjusted_transactions(self.transactions)
+        t = TransactionService().adjust_transactions_for_splits(
+            get_transactions_from_asset(self.asset.id), get_stock_splits(self.asset.id)
+        )
 
         divs_received = []
         for div in self.dividends:
@@ -92,3 +94,8 @@ class AssetService:
                 )
 
         return divs_received
+
+    def get_transactions_from_asset(self) -> list[AdjustedTransaction]:
+        transactions = get_transactions_from_asset(self.asset.id)
+        splits = get_stock_splits(self.asset.id)
+        return TransactionService().adjust_transactions_for_splits(transactions, splits)

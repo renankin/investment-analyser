@@ -11,9 +11,10 @@ from app.models.models import (
 )
 from app.repositories import prices
 from app.repositories.assets import get_all_assets, get_asset_by_id
+from app.repositories.stock_splits import get_stock_splits
 from app.repositories.transactions import get_transactions_from_asset
 from app.services.asset_service import AssetService
-from app.services.transactions import get_split_adjusted_transactions
+from app.services.transaction_service import TransactionService
 
 
 def get_all_return() -> list[dict]:
@@ -29,8 +30,8 @@ def get_all_return() -> list[dict]:
         divs = AssetService(asset.id).get_dividends_received()
         total_divs = sum(div.value for div in divs)
 
-        trans = get_split_adjusted_transactions(
-            transactions=get_transactions_from_asset(asset.id)
+        trans = TransactionService().adjust_transactions_for_splits(
+            get_transactions_from_asset(asset.id), get_stock_splits(asset.id)
         )
         total_invested = sum(t.price * t.shares for t in trans if t.shares > 0)
         total_sold = sum(t.price * -t.shares for t in trans if t.shares < 0)
@@ -71,8 +72,8 @@ def get_irr(asset_id: int) -> float | None:
     dividends and current valuation if position is still open.
     If holding period is less than a year returns `None`."""
 
-    t = get_split_adjusted_transactions(
-        transactions=get_transactions_from_asset(asset_id)
+    t = TransactionService().adjust_transactions_for_splits(
+        get_transactions_from_asset(asset_id), get_stock_splits(asset_id)
     )
 
     if not t:

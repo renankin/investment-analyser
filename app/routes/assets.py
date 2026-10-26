@@ -177,3 +177,12 @@ def update_stock_splits(asset_id):
     return redirect(
         url_for("assets.show_stock_splits", asset_id=asset_service.asset.id)
     )
+
+
+@assets_bp.route("/assets/<int:asset_id>/transactions")
+def show_transactions(asset_id):
+    asset_service = AssetService(asset_id)
+    return render_template(
+        "show_asset_transactions.html",
+        transactions=asset_service.get_transactions_from_asset(), asset=asset_service.asset
+    )
