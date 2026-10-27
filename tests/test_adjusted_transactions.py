@@ -42,7 +42,7 @@ def test_single_stock_split_adjustment():
         is_adjusted=True,
     )
 
-    assert TransactionService().adjust_transactions_for_splits(
+    assert TransactionService.adjust_transactions_for_splits(
         [transaction_record], [stock_split]
     ) == [adjusted_transaction]
 
@@ -73,7 +73,7 @@ def test_sequential_stock_splits_adjustment():
         is_adjusted=True,
     )
 
-    assert TransactionService().adjust_transactions_for_splits(
+    assert TransactionService.adjust_transactions_for_splits(
         [transaction_record], stock_splits
     ) == [adjusted_transaction]
 
@@ -122,7 +122,7 @@ def test_adjusted_transactions_for_multiple_records():
     ]
 
     assert (
-        TransactionService().adjust_transactions_for_splits(transactions, stock_splits)
+        TransactionService.adjust_transactions_for_splits(transactions, stock_splits)
         == adjusted_transactions
     )
 
@@ -153,14 +153,14 @@ def test_split_same_date():
     ]
 
     assert (
-        TransactionService().adjust_transactions_for_splits(transactions, stock_splits)
+        TransactionService.adjust_transactions_for_splits(transactions, stock_splits)
         == adjusted_transactions
     )
 
 
 def test_empty_inputs():
 
-    assert TransactionService().adjust_transactions_for_splits([], []) == []
+    assert TransactionService.adjust_transactions_for_splits([], []) == []
 
 
 def test_no_applicable_split():
@@ -194,7 +194,7 @@ def test_no_applicable_split():
     ]
 
     assert (
-        TransactionService().adjust_transactions_for_splits(transactions, stock_splits)
+        TransactionService.adjust_transactions_for_splits(transactions, stock_splits)
         == adjusted_transactions
     )
 
@@ -225,6 +225,6 @@ def test_decimal_precision():
     ]
 
     assert (
-        TransactionService().adjust_transactions_for_splits(transactions, stock_splits)
+        TransactionService.adjust_transactions_for_splits(transactions, stock_splits)
         == adjusted_transactions
     )

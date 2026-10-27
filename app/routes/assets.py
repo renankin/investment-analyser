@@ -2,7 +2,10 @@ from flask import Blueprint, flash, redirect, render_template, request, url_for
 
 from app.services.account_service import AccountService
 from app.services.asset_service import AssetService
+from app.services.dividend_service import DividendService
 from app.services.price_service import PriceService
+from app.services.stock_split_service import StockSplitService
+from app.services.transaction_service import TransactionService
 
 assets_bp = Blueprint("assets", __name__, template_folder="../templates/assets")
 
@@ -63,101 +66,88 @@ def edit(asset_id):
 
 @assets_bp.route("/assets/<int:asset_id>/delete", methods=["POST"])
 def delete_asset(asset_id):
-    asset_service = AssetService(asset_id)
-    deletion_blocker = asset_service.delete_asset()
-
-    if deletion_blocker:
-        messages = {
-            "transactions": "Must delete transactions first.",
-            "prices": "Must delete prices first.",
-            "dividends": "Must delete dividends first.",
-            "splits": "Must delete splits first.",
-        }
-        flash(messages[deletion_blocker])
-        return redirect(url_for("assets.edit", asset_id=asset_service.asset.id))
-
-    flash("Asset deleted.")
+    if AssetService(asset_id).delete_asset():
+        flash("Asset deleted.")
+    else:
+        flash("Asset not deleted. Must delete transactions.")
     return redirect(url_for("assets.index"))
 
 
 @assets_bp.route("/assets/<int:asset_id>/dividends-received")
 def show_dividends_received(asset_id):
-    asset_service = AssetService(asset_id)
     return render_template(
         "show_dividends_received.html",
-        dividends=asset_service.get_dividends_received(),
-        asset=asset_service.asset,
+        dividends=DividendService(asset_id).dividends_received,
+        asset=AssetService(asset_id).asset,
     )
 
 
 @assets_bp.route("/assets/<int:asset_id>/dividends")
 def show_dividends(asset_id):
-    asset_service = AssetService(asset_id)
     return render_template(
         "show_dividend_history.html",
-        dividends=asset_service.dividends,
-        asset=asset_service.asset,
+        dividends=DividendService(asset_id).dividends,
+        asset=AssetService(asset_id).asset,
     )
 
 
 @assets_bp.route("/assets/<int:asset_id>/dividends/update", methods=["POST"])
 def update_dividends(asset_id):
-    asset_service = AssetService(asset_id)
-    asset_service.update_dividends()
+    asset = AssetService(asset_id).asset
+    DividendService.update_dividends(asset)
     flash("Dividends updated.")
-    return redirect(url_for("assets.show_dividends", asset_id=asset_service.asset.id))
+    return redirect(
+        url_for("assets.show_dividends", asset_id=asset_id)
+    )
 
 
 @assets_bp.route("/assets/<int:asset_id>/price")
 def plot_prices(asset_id):
-    asset_service = AssetService(asset_id)
+    price_service = PriceService(asset_id)
     return render_template(
         "asset_price_graph.html",
-        dates=asset_service.price_analyser.get_dates(),
-        prices=asset_service.price_analyser.get_prices(),
+        dates=price_service.get_dates(),
+        prices=price_service.get_prices(),
         yearly_change=[
             {
                 "year": year,
-                "percentage": asset_service.price_analyser.calculate_yearly_change(
-                    year
-                ),
+                "percentage": price_service.calculate_yearly_change(year),
             }
             for year in [1, 3, 5]
         ],
-        asset=asset_service.asset,
+        asset=AssetService(asset_id).asset,
     )
 
 
 @assets_bp.route("/assets/<int:asset_id>/price/update", methods=["POST"])
 def update_prices(asset_id):
-    asset_service = AssetService(asset_id)
-    PriceService.update_prices(asset_service.asset)
+    asset = AssetService(asset_id).asset
+    PriceService.update_prices(asset)
     flash("Prices updated.")
     return redirect(
         url_for(
             "assets.plot_prices",
-            asset_id=asset_service.asset.id,
-            asset_name=asset_service.asset.info.name,
+            asset_id=asset.id,
+            asset_name=asset.info.name,
         )
     )
 
 
 @assets_bp.route("/assets/<int:asset_id>/stock-splits", methods=["GET"])
 def show_stock_splits(asset_id):
-    asset_service = AssetService(asset_id)
     return render_template(
-        "show_splits.html", asset=asset_service.asset, splits=asset_service.stock_splits
+        "show_splits.html",
+        asset=AssetService(asset_id).asset,
+        splits=StockSplitService(asset_id).stock_splits,
     )
 
 
 @assets_bp.route("/assets/<int:asset_id>/stock-splits/update", methods=["POST"])
 def update_stock_splits(asset_id):
-    asset_service = AssetService(asset_id)
-    asset_service.update_stock_splits()
+    asset = AssetService(asset_id).asset
+    StockSplitService(asset_id).update_stock_splits(asset)
     flash("Stock split updated.")
-    return redirect(
-        url_for("assets.show_stock_splits", asset_id=asset_service.asset.id)
-    )
+    return redirect(url_for("assets.show_stock_splits", asset_id=asset_id))
 
 
 @assets_bp.route("/assets/<int:asset_id>/transactions")
@@ -165,6 +155,6 @@ def show_transactions(asset_id):
     asset_service = AssetService(asset_id)
     return render_template(
         "show_asset_transactions.html",
-        transactions=asset_service.get_transactions_from_asset(),
+        transactions=TransactionService(asset_id).adj_transactions,
         asset=asset_service.asset,
     )
