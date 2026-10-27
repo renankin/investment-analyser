@@ -1,11 +1,8 @@
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 
-from app.repositories.accounts import get_all_accounts
-from app.repositories.assets import (
-    get_all_assets,
-    insert_asset,
-)
+from app.services.account_service import AccountService
 from app.services.asset_service import AssetService
+from app.services.price_service import PriceService
 
 assets_bp = Blueprint("assets", __name__, template_folder="../templates/assets")
 
@@ -14,28 +11,11 @@ assets_bp = Blueprint("assets", __name__, template_folder="../templates/assets")
 def index():
     """Show list of assets in account."""
 
-    asset_search = request.args.get("search")
-    if not asset_search:
-        asset_search = ""
-
-    all_assets = []
-    for asset in get_all_assets():
-        if asset_search.upper() in asset.info.symbol.upper():
-            all_assets.append(asset)
-
-    return render_template("show_assets.html", assets=all_assets)
+    return render_template("show_assets.html", assets=AssetService.get_all_assets())
 
 
 @assets_bp.route("/assets/add", methods=["POST", "GET"])
 def add():
-    """Add new asset for account."""
-
-    all_accounts = get_all_accounts()
-
-    if not all_accounts:
-        flash("No accounts. Must add account first.")
-        return redirect(url_for("accounts.add"))
-
     if request.method == "POST":
         account_id = request.form.get("account_id", type=int)
         asset_symbol = request.form.get("asset_symbol")
@@ -47,20 +27,18 @@ def add():
             still_open = False
 
         if account_id and asset_symbol and asset_name and asset_type:
-            insert_asset(account_id, asset_symbol, asset_name, asset_type, still_open)
+            AssetService.add_new_asset(
+                account_id, asset_symbol, asset_name, asset_type, still_open
+            )
             flash("Asset added.")
-
         return redirect(url_for("assets.index"))
 
-    return render_template("add_asset.html", accounts=all_accounts)
+    return render_template("add_asset.html", accounts=AccountService.get_all_accounts())
 
 
 @assets_bp.route("/assets/<int:asset_id>/edit", methods=["POST", "GET"])
 def edit(asset_id):
-    """Edit asset."""
-
     asset_service = AssetService(asset_id)
-
     if request.method == "POST":
         asset_symbol = request.form.get("asset_symbol")
         asset_name = request.form.get("asset_name")
@@ -87,6 +65,7 @@ def edit(asset_id):
 def delete_asset(asset_id):
     asset_service = AssetService(asset_id)
     deletion_blocker = asset_service.delete_asset()
+
     if deletion_blocker:
         messages = {
             "transactions": "Must delete transactions first.",
@@ -152,7 +131,7 @@ def plot_prices(asset_id):
 @assets_bp.route("/assets/<int:asset_id>/price/update", methods=["POST"])
 def update_prices(asset_id):
     asset_service = AssetService(asset_id)
-    asset_service.update_prices()
+    PriceService.update_prices(asset_service.asset)
     flash("Prices updated.")
     return redirect(
         url_for(

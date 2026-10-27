@@ -1,11 +1,16 @@
 from pandas import Series, to_datetime
 
-from app.fetchers.tesouro_direto import get_prices
 from app.fetchers.yfinance import YFetcher
 from app.models.models import AdjustedTransaction, AssetPosition, DividendReceived
-from app.repositories.assets import delete_asset, edit_asset, get_asset_by_id
+from app.repositories.assets import (
+    delete_asset,
+    edit_asset,
+    get_all_assets,
+    get_asset_by_id,
+    insert_asset,
+)
 from app.repositories.dividends import get_dividends, insert_dividend
-from app.repositories.prices import get_market_prices, insert_price
+from app.repositories.prices import get_market_prices
 from app.repositories.stock_splits import get_stock_splits, insert_stock_split
 from app.repositories.transactions import get_transactions_from_asset
 from app.services.price_service import PriceService
@@ -20,20 +25,20 @@ class AssetService:
         self.dividends = get_dividends(asset_id)
         self.transactions = get_transactions_from_asset(asset_id)
 
-    def update_prices(self) -> None:
-        prices = Series()
-        if self.asset.info.type in ["Stock", "ETF"]:
-            prices = YFetcher(self.asset.info.symbol).get_prices()
-        if self.asset.info.type == "Brazilian bond":
-            prices = get_prices(self.asset.info.symbol)
+    @classmethod
+    def add_new_asset(
+        cls,
+        account_id: int,
+        asset_symbol: str,
+        asset_name: str,
+        asset_type: str,
+        still_open: bool,
+    ) -> None:
+        insert_asset(account_id, asset_symbol, asset_name, asset_type, still_open)
 
-        if not prices.empty:
-            for date, price in prices.items():
-                insert_price(
-                    asset_id=self.asset.id,
-                    date=to_datetime(str(date)).date(),
-                    unit_price=price,
-                )
+    @classmethod
+    def get_all_assets(cls) -> list[AssetPosition]:
+        return get_all_assets()
 
     def update_stock_splits(self) -> None:
         splits = Series()

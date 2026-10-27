@@ -1,7 +1,12 @@
 import datetime
 from decimal import Decimal
 
-from app.models.models import MarketPrice
+from pandas import Series, to_datetime
+
+from app.fetchers.tesouro_direto import get_prices
+from app.fetchers.yfinance import YFetcher
+from app.models.models import AssetPosition, MarketPrice
+from app.repositories.prices import insert_price
 
 
 class PriceService:
@@ -44,3 +49,18 @@ class PriceService:
             initial_date=inital_date, final_date=most_recent_price
         )
 
+    @classmethod
+    def update_prices(cls, asset: AssetPosition) -> None:
+        prices = Series()
+        if asset.info.type in ["Stock", "ETF"]:
+            prices = YFetcher(asset.info.symbol).get_prices()
+        if asset.info.type == "Brazilian bond":
+            prices = get_prices(asset.info.symbol)
+
+        if not prices.empty:
+            for date, price in prices.items():
+                insert_price(
+                    asset_id=asset.id,
+                    date=to_datetime(str(date)).date(),
+                    unit_price=price,
+                )

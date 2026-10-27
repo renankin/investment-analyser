@@ -7,17 +7,6 @@
     <div class="mb-3">
       <a href="{{ url_for('assets.add') }}">Add new asset</a>
     </div>
-    <form action="{{ url_for('assets.index') }}" method="get">
-      <div class="mb-3">
-        <input type="text"
-               class="form-control"
-               name="search"
-               placeholder="Type asset name">
-      </div>
-      <div class="mb-3">
-        <button type="submit" class="btn btn-primary">Search</button>
-      </div>
-    </form>
     {% if assets %}
       <div class="table-responsive">
         <table class="table">
@@ -36,9 +25,7 @@
                   </a>
                 </td>
                 <td>
-                  <input type="checkbox"
-                         disabled
-                         {% if asset.still_open %}checked{% endif %} />
+                  <input type="checkbox" disabled {% if asset.still_open %}checked{% endif %} />
                 </td>
               </tr>
             {% endfor %}
