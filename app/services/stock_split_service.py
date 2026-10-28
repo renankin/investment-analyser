@@ -6,11 +6,11 @@ from app.repositories.stock_splits import get_stock_splits, insert_stock_split
 
 
 class StockSplitService:
-
     def __init__(self, asset_id: int) -> None:
         self.stock_splits = get_stock_splits(asset_id)
 
-    def update_stock_splits(self, asset: AssetPosition) -> None:
+    @classmethod
+    def update_stock_splits(cls, asset: AssetPosition) -> None:
         splits = Series()
         if asset.info.type == "Stock":
             splits = YFetcher(asset.info.symbol).get_stock_splits()

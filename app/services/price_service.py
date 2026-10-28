@@ -26,6 +26,23 @@ class PriceService:
             self.prices, initial_date=inital_date, final_date=most_recent_price
         )
 
+    def get_percentage_change_summary(self, years: list[int]):
+
+        yearly_change = []
+        for year in years:
+            try:
+                percentage = self.calculate_yearly_change(year)
+            except ValueError:
+                percentage = None
+            yearly_change.append(
+                {
+                    "year": year,
+                    "percentage": percentage,
+                }
+            )
+
+        return yearly_change
+
     @classmethod
     def calculate_price_change(
         cls,

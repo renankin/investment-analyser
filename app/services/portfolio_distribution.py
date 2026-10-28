@@ -4,7 +4,6 @@ from yfinance import Ticker
 from app.fetchers.yfinance import YFetcher
 from app.repositories.prices import get_most_recent_price
 from app.repositories.transactions import get_transactions_for_open_assets
-from app.services.transaction_service import TransactionService
 
 
 def get_asset_allocation() -> DataFrame:
@@ -44,7 +43,10 @@ def get_asset_allocation() -> DataFrame:
     )[["shares"]].sum()
     grouped_df[["unit_price", "price_date"]] = grouped_df["asset_id"].apply(
         lambda asset_id: Series(
-            [get_most_recent_price(asset_id).value, get_most_recent_price(asset_id).date]
+            [
+                get_most_recent_price(asset_id).value,
+                get_most_recent_price(asset_id).date,
+            ]
         )
     )
     grouped_df[["unit_price", "currency"]] = grouped_df[

@@ -96,25 +96,18 @@ def update_dividends(asset_id):
     asset = AssetService(asset_id).asset
     DividendService.update_dividends(asset)
     flash("Dividends updated.")
-    return redirect(
-        url_for("assets.show_dividends", asset_id=asset_id)
-    )
+    return redirect(url_for("assets.show_dividends", asset_id=asset_id))
 
 
 @assets_bp.route("/assets/<int:asset_id>/price")
 def plot_prices(asset_id):
     price_service = PriceService(asset_id)
+
     return render_template(
         "asset_price_graph.html",
         dates=price_service.get_dates(),
         prices=price_service.get_prices(),
-        yearly_change=[
-            {
-                "year": year,
-                "percentage": price_service.calculate_yearly_change(year),
-            }
-            for year in [1, 3, 5]
-        ],
+        yearly_change=price_service.get_percentage_change_summary([1, 3, 5]),
         asset=AssetService(asset_id).asset,
     )
 
