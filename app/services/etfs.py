@@ -1,8 +1,5 @@
-from pandas import Series, Timedelta
-
 from app.fetchers.yfinance import YFetcher
 from app.filters import format_currency, format_percent
-from app.repositories import prices
 from app.repositories.assets import (
     get_all_assets,
     get_asset_by_symbol,
@@ -29,14 +26,6 @@ def format_etf_table_for_fetched_assets(symbol: str) -> dict:
     if total_assets and currency:
         basic_info["Total assets"] = format_currency(total_assets, currency)
 
-    performance = {}
-    years = [1, 3, 5, 10]
-    for year in years:
-        price_change = calculate_price_change(fetcher.get_prices(), year)
-
-        if price_change:
-            performance[f"{year}-year change"] = format_percent(price_change)
-
     sector_weighting = {}
     i = 1
     for sector_key, sector_weight in fetcher.get_sector_weighting().items():
@@ -53,7 +42,7 @@ def format_etf_table_for_fetched_assets(symbol: str) -> dict:
         )
         i += 1
 
-    return basic_info | performance | sector_weighting | top_holdings
+    return basic_info | sector_weighting | top_holdings
 
 
 def format_etf_table_for_existing_assets(symbol: str) -> dict:
@@ -69,22 +58,6 @@ def format_etf_table_for_existing_assets(symbol: str) -> dict:
     basic_info["Symbol"] = asset.info.symbol
     basic_info["Name"] = asset.info.name
 
-    performance = {}
-    years = [1, 3, 5, 10]
-    for year in years:
-        if asset:
-            asset_prices = prices.get_market_prices(asset.id)
-            prices_ser = Series(
-                data=[item.value for item in asset_prices],
-                index=[item.date for item in asset_prices],
-            )
-            price_change = calculate_price_change(prices_ser, year)
-        else:
-            price_change = calculate_price_change(fetcher.get_prices(), year)
-
-        if price_change:
-            performance[f"{year}-year change"] = format_percent(price_change)
-
     sector_weighting = {}
     i = 1
     for sector_key, sector_weight in fetcher.get_sector_weighting().items():
@@ -101,7 +74,7 @@ def format_etf_table_for_existing_assets(symbol: str) -> dict:
         )
         i += 1
 
-    return basic_info | performance | sector_weighting | top_holdings
+    return basic_info | sector_weighting | top_holdings
 
 
 def get_etfs_for_comparison() -> list[dict]:

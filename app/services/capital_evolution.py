@@ -3,8 +3,6 @@ from pandas import DataFrame, Series, concat
 from app.repositories import prices
 from app.repositories.accounts import get_all_accounts
 from app.repositories.assets import get_assets_from_account
-from app.repositories.stock_splits import get_stock_splits
-from app.repositories.transactions import get_transactions_from_asset
 from app.services.transaction_service import TransactionService
 
 
@@ -42,9 +40,7 @@ def get_asset_history(asset_id: int) -> Series:
     """Returns a Series with `values` for the asset history."""
 
     # Get the cummulative sum of shares
-    t = TransactionService().adjust_transactions_for_splits(
-        get_transactions_from_asset(asset_id), get_stock_splits(asset_id)
-    )
+    t = TransactionService(asset_id).adj_transactions
     if not t:
         return Series()
 
