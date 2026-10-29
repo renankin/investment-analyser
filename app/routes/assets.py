@@ -107,7 +107,11 @@ def plot_prices(asset_id):
         "asset_price_graph.html",
         dates=price_service.get_dates(),
         prices=price_service.get_prices(),
-        yearly_change=price_service.get_percentage_change_summary([1, 3, 5]),
+        yearly_change=[
+            {"year": 1, "percentage": price_service.calculate_yearly_change(1)},
+            {"year": 3, "percentage": price_service.calculate_yearly_change(3)},
+            {"year": 5, "percentage": price_service.calculate_yearly_change(5)},
+        ],
         asset=AssetService(asset_id).asset,
     )
 

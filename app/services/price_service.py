@@ -19,29 +19,17 @@ class PriceService:
     def get_prices(self) -> list[Decimal]:
         return [price.value for price in self.prices]
 
-    def calculate_yearly_change(self, years: int) -> Decimal:
+    def calculate_yearly_change(self, years: int) -> Decimal | None:
         most_recent_price = self.prices[-1].date
         inital_date = most_recent_price - datetime.timedelta(days=365 * years)
-        return self.calculate_price_change(
-            self.prices, initial_date=inital_date, final_date=most_recent_price
-        )
-
-    def get_percentage_change_summary(self, years: list[int]):
-
-        yearly_change = []
-        for year in years:
-            try:
-                percentage = self.calculate_yearly_change(year)
-            except ValueError:
-                percentage = None
-            yearly_change.append(
-                {
-                    "year": year,
-                    "percentage": percentage,
-                }
+        try:
+            price_change = self.calculate_price_change(
+                self.prices, initial_date=inital_date, final_date=most_recent_price
             )
+        except ValueError:
+            return None
 
-        return yearly_change
+        return price_change
 
     @classmethod
     def calculate_price_change(
