@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from pandas import Series, to_datetime
 
 from app.fetchers.yfinance import YFetcher
@@ -14,6 +16,13 @@ class DividendService:
             asset=AssetService(asset_id).asset,
             adj_transactions=TransactionService(asset_id).adj_transactions,
         )
+
+    @property
+    def total_dividends(self) -> Decimal:
+        total = Decimal("0.00")
+        for dividend in self.dividends_received:
+            total += dividend.value
+        return total
 
     def get_dividends_received(
         self, asset: AssetPosition, adj_transactions: list[AdjustedTransaction]
@@ -43,7 +52,7 @@ class DividendService:
                 divs_received.append(
                     DividendReceived(
                         date=div.date,
-                        value=shares * div.value,
+                        value=Decimal(shares) * div.value,
                         account=asset.account,
                     )
                 )

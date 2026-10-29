@@ -75,9 +75,11 @@ def delete_asset(asset_id):
 
 @assets_bp.route("/assets/<int:asset_id>/dividends-received")
 def show_dividends_received(asset_id):
+    dividend_service = DividendService(asset_id)
     return render_template(
         "show_dividends_received.html",
-        dividends=DividendService(asset_id).dividends_received,
+        dividends=dividend_service.dividends_received,
+        total_dividends=dividend_service.total_dividends,
         asset=AssetService(asset_id).asset,
     )
 

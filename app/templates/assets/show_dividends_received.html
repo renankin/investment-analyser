@@ -18,7 +18,9 @@
     <tfoot>
       <tr>
         <th class="border-0 text-end">Total</th>
-        <td class="border-0">To-do</td>
+        <td class="border-0">
+          {{ total_dividends | format_currency(dividends[0].account.currency) }}
+        </td>
       </tr>
     </tfoot>
   </table>
