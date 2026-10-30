@@ -6,7 +6,7 @@ from pandas import Series, to_datetime
 from app.fetchers.tesouro_direto import get_prices
 from app.fetchers.yfinance import YFetcher
 from app.models.models import AssetPosition, MarketPrice
-from app.repositories.prices import get_market_prices, insert_price
+from app.repositories.prices import delete_prices, get_market_prices, insert_price
 
 
 class PriceService:
@@ -20,16 +20,17 @@ class PriceService:
         return [price.value for price in self.prices]
 
     def calculate_yearly_change(self, years: int) -> Decimal | None:
-        most_recent_price = self.prices[-1].date
-        inital_date = most_recent_price - datetime.timedelta(days=365 * years)
-        try:
-            price_change = self.calculate_price_change(
-                self.prices, initial_date=inital_date, final_date=most_recent_price
-            )
-        except ValueError:
-            return None
-
-        return price_change
+        if self.prices:
+            most_recent_price = self.prices[-1].date
+            inital_date = most_recent_price - datetime.timedelta(days=365 * years)
+            try:
+                price_change = self.calculate_price_change(
+                    self.prices, initial_date=inital_date, final_date=most_recent_price
+                )
+            except ValueError:
+                return None
+            return price_change
+        return None
 
     @classmethod
     def calculate_price_change(
@@ -57,6 +58,10 @@ class PriceService:
         return (
             final_matching_price.value - initial_matching_price.value
         ) / initial_matching_price.value
+
+    @classmethod
+    def delete_prices(cls, asset: AssetPosition) -> None:
+        delete_prices(asset.id)
 
     @classmethod
     def update_prices(cls, asset: AssetPosition) -> None:

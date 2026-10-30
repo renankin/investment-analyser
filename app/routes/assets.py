@@ -93,6 +93,14 @@ def show_dividends(asset_id):
     )
 
 
+@assets_bp.route("/assets/<int:asset_id>/dividends/delete", methods=["POST"])
+def delete_dividends(asset_id):
+    asset = AssetService(asset_id).asset
+    DividendService.delete_dividends(asset)
+    flash("Dividends deleted.")
+    return redirect(url_for("assets.show_dividends", asset_id=asset_id))
+
+
 @assets_bp.route("/assets/<int:asset_id>/dividends/update", methods=["POST"])
 def update_dividends(asset_id):
     asset = AssetService(asset_id).asset
@@ -118,6 +126,20 @@ def plot_prices(asset_id):
     )
 
 
+@assets_bp.route("/assets/<int:asset_id>/price/delete", methods=["POST"])
+def delete_prices(asset_id):
+    asset = AssetService(asset_id).asset
+    PriceService.delete_prices(asset)
+    flash("Prices deleted.")
+    return redirect(
+        url_for(
+            "assets.plot_prices",
+            asset_id=asset.id,
+            asset_name=asset.info.name,
+        )
+    )
+
+
 @assets_bp.route("/assets/<int:asset_id>/price/update", methods=["POST"])
 def update_prices(asset_id):
     asset = AssetService(asset_id).asset
@@ -139,6 +161,14 @@ def show_stock_splits(asset_id):
         asset=AssetService(asset_id).asset,
         splits=StockSplitService(asset_id).stock_splits,
     )
+
+
+@assets_bp.route("/assets/<int:asset_id>/stock-splits/delete", methods=["POST"])
+def delete_stock_splits(asset_id):
+    asset = AssetService(asset_id).asset
+    StockSplitService(asset_id).delete_stock_splits(asset)
+    flash("Stock split deleted.")
+    return redirect(url_for("assets.show_stock_splits", asset_id=asset_id))
 
 
 @assets_bp.route("/assets/<int:asset_id>/stock-splits/update", methods=["POST"])

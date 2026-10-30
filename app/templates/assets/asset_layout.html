@@ -8,31 +8,31 @@
     <div class="mb-4">
       <ul class="nav nav-tabs">
         <li class="nav-item">
-          <a class="nav-link"
+          <a class="nav-link {{ 'active' if request.endpoint == 'assets.show_transactions' else '' }}"
              href="{{ url_for('assets.show_transactions', asset_id=asset.id) }}">Transactions</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link"
+          <a class="nav-link {{ 'active' if request.endpoint == 'assets.plot_prices' else '' }}"
              href="{{ url_for('assets.plot_prices', asset_id=asset.id) }}">Prices</a>
         </li>
         {% if asset.info.type == "Stock" %}
           <li class="nav-item">
-            <a class="nav-link"
+            <a class="nav-link {{ 'active' if request.endpoint == 'assets.show_dividends' else '' }}"
                href="{{ url_for('assets.show_dividends', asset_id=asset.id) }}">Dividend history</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link"
+            <a class="nav-link {{ 'active' if request.endpoint == 'assets.show_dividends_received' else '' }}"
                href="{{ url_for('assets.show_dividends_received', asset_id=asset.id) }}">Dividends Received</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link"
+            <a class="nav-link {{ 'active' if request.endpoint == 'assets.show_stock_splits' else '' }}"
                href="{{ url_for('assets.show_stock_splits', asset_id=asset.id) }}">Stock Splits</a>
           </li>
         {% endif %}
         <li class="nav-item">
-          <a class="nav-link active"
+          <a class="nav-link {{ 'active' if request.endpoint == 'assets.edit' else '' }}"
              aria-current="page"
-             href="{{ url_for('assets.edit', asset_id=asset.id) }}">Edit</a>
+             href="{{ url_for('assets.edit', asset_id=asset.id) }}">Edit asset</a>
         </li>
       </ul>
     </div>

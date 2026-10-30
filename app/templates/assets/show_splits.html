@@ -20,10 +20,18 @@
       </table>
     </div>
     <div class="row">
-      <form action="{{ url_for('assets.update_stock_splits', asset_id=asset.id) }}"
-            method="post">
-        <button type="submit" class="btn btn-primary">Update</button>
-      </form>
+      <div class="col">
+        <form action="{{ url_for('assets.update_stock_splits', asset_id=asset.id) }}"
+              method="post">
+          <button type="submit" class="btn btn-primary">Update</button>
+        </form>
+      </div>
+            <div class="col">
+        <form action="{{ url_for('assets.delete_stock_splits', asset_id=asset.id) }}"
+              method="post">
+          <button type="submit" class="btn btn-primary">Delete</button>
+        </form>
+      </div>
     </div>
   </div>
 {% endblock asset %}

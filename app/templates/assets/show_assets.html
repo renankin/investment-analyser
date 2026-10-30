@@ -20,7 +20,7 @@
             {% for asset in assets: %}
               <tr>
                 <td>
-                  <a href="{{ url_for('assets.edit', asset_id=asset.id) }}">
+                  <a href="{{ url_for('assets.show_transactions', asset_id=asset.id) }}">
                     {{ asset.info.symbol }}
                   </a>
                 </td>

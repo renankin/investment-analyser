@@ -4,7 +4,7 @@ from pandas import Series, to_datetime
 
 from app.fetchers.yfinance import YFetcher
 from app.models.models import AdjustedTransaction, AssetPosition, DividendReceived
-from app.repositories.dividends import get_dividends, insert_dividend
+from app.repositories.dividends import get_dividends, insert_dividend, delete_dividends
 from app.services.asset_service import AssetService
 from app.services.transaction_service import TransactionService
 
@@ -58,6 +58,10 @@ class DividendService:
                 )
 
         return divs_received
+
+    @classmethod
+    def delete_dividends(cls, asset: AssetPosition) -> None:
+        delete_dividends(asset.id)
 
     @classmethod
     def update_dividends(cls, asset: AssetPosition) -> None:

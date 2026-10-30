@@ -2,12 +2,20 @@ from pandas import Series, to_datetime
 
 from app.fetchers.yfinance import YFetcher
 from app.models.models import AssetPosition
-from app.repositories.stock_splits import get_stock_splits, insert_stock_split
+from app.repositories.stock_splits import (
+    delete_stock_splits,
+    get_stock_splits,
+    insert_stock_split,
+)
 
 
 class StockSplitService:
     def __init__(self, asset_id: int) -> None:
         self.stock_splits = get_stock_splits(asset_id)
+
+    @classmethod
+    def delete_stock_splits(cls, asset: AssetPosition) -> None:
+        delete_stock_splits(asset.id)
 
     @classmethod
     def update_stock_splits(cls, asset: AssetPosition) -> None:
