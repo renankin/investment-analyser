@@ -25,7 +25,7 @@ class AssetService:
         insert_asset(account_id, asset_symbol, asset_name, asset_type, still_open)
 
     def delete_asset(self) -> bool:
-        if TransactionService(self.asset.id).transactions:
+        if TransactionService(self.asset.id).transactions_from_asset:
             return False
         delete_asset(self.asset.id)
         return True

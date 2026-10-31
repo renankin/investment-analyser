@@ -4,17 +4,23 @@ from pandas import Series, to_datetime
 
 from app.fetchers.yfinance import YFetcher
 from app.models.models import AdjustedTransaction, AssetPosition, DividendReceived
-from app.repositories.dividends import get_dividends, insert_dividend, delete_dividends
+from app.repositories.dividends import delete_dividends, get_dividends, insert_dividend
 from app.services.asset_service import AssetService
 from app.services.transaction_service import TransactionService
 
 
 class DividendService:
     def __init__(self, asset_id: int) -> None:
+        self.asset_id = asset_id
         self.dividends = get_dividends(asset_id)
-        self.dividends_received = self.get_dividends_received(
-            asset=AssetService(asset_id).asset,
-            adj_transactions=TransactionService(asset_id).adj_transactions,
+
+    @property
+    def dividends_received(self) -> list[DividendReceived]:
+        return self.get_dividends_received(
+            asset=AssetService(self.asset_id).asset,
+            adj_transactions=TransactionService.get_adjusted_transactions_from_asset(
+                self.asset_id
+            ),
         )
 
     @property

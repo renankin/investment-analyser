@@ -184,6 +184,6 @@ def show_transactions(asset_id):
     asset_service = AssetService(asset_id)
     return render_template(
         "show_asset_transactions.html",
-        transactions=TransactionService(asset_id).adj_transactions,
+        transactions=TransactionService.get_adjusted_transactions_from_asset(asset_id),
         asset=asset_service.asset,
     )
