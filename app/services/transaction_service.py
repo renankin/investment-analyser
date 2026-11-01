@@ -57,9 +57,10 @@ class TransactionService:
             adj_transactions.append(adj_transaction)
         return adj_transactions
 
-    def add_transaction(self, date: date, shares: Decimal, price: Decimal) -> None:
+    @classmethod
+    def add_transaction(cls, asset_id: int, date: date, shares: Decimal, price: Decimal) -> None:
         insert_transaction(
-            asset_id=self.transaction.asset.id,
+            asset_id=asset_id,
             date=date,
             shares=shares,
             price=price,

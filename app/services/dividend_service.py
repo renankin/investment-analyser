@@ -25,10 +25,10 @@ class DividendService:
 
     @property
     def total_dividends(self) -> Decimal:
-        total = Decimal("0.00")
+        total = 0
         for dividend in self.dividends_received:
             total += dividend.value
-        return total
+        return Decimal(total)
 
     def get_dividends_received(
         self, asset: AssetPosition, adj_transactions: list[AdjustedTransaction]
@@ -58,7 +58,7 @@ class DividendService:
                 divs_received.append(
                     DividendReceived(
                         date=div.date,
-                        value=Decimal(shares) * div.value,
+                        value=shares * div.value,
                         account=asset.account,
                     )
                 )

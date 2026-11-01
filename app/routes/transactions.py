@@ -24,17 +24,14 @@ def index():
 
 
 @transactions_bp.route("/transactions/add", methods=["GET", "POST"])
-@transactions_bp.route(
-    "/assets/<int:asset_id>/transactions/add", methods=["POST", "GET"]
-)
-def add(asset_id=None):
+def add():
     if request.method == "POST":
-        form_asset_id = request.form.get("asset_id", type=int)
+        asset_id = request.form.get("asset_id", type=int)
         transaction_date = request.form.get("date")
         shares = request.form.get("shares", type=Decimal)
         price = request.form.get("price", type=Decimal)
 
-        if not form_asset_id:
+        if not asset_id:
             flash("Invalid asset.")
             return redirect(url_for("transactions.add"))
 
@@ -50,8 +47,11 @@ def add(asset_id=None):
             flash("Must provide price.")
             return redirect(url_for("transactions.add"))
 
-        TransactionService(form_asset_id).add_transaction(
-            date=datetime.fromisoformat(transaction_date).date(), shares=shares, price=price
+        TransactionService.add_transaction(
+            asset_id=asset_id,
+            date=datetime.fromisoformat(transaction_date).date(),
+            shares=shares,
+            price=price,
         )
         flash("Transaction added.")
 
@@ -61,16 +61,14 @@ def add(asset_id=None):
 
     return render_template(
         "add_transaction.html",
-        assets=[AssetService(asset_id).asset]
-        if asset_id
-        else AssetService.get_all_assets(),
+        assets=AssetService.get_all_assets(),
     )
 
 
 @transactions_bp.route("/transactions/delete/<int:transaction_id>", methods=["POST"])
 def delete(transaction_id):
     TransactionService(transaction_id).delete_transaction()
-    flash("Transaction not deleted.")
+    flash("Transaction deleted.")
     return redirect(url_for("transactions.index"))
 
 

@@ -28,7 +28,7 @@ def get_all_return() -> list[dict]:
         divs = DividendService(asset.id).dividends_received
         total_divs = sum(div.value for div in divs)
 
-        trans = TransactionService(asset.id).adj_transactions
+        trans = TransactionService.get_adjusted_transactions_from_asset(asset.id)
         total_invested = sum(t.price * t.shares for t in trans if t.shares > 0)
         total_sold = sum(t.price * -t.shares for t in trans if t.shares < 0)
 
@@ -68,7 +68,7 @@ def get_irr(asset_id: int) -> float | None:
     dividends and current valuation if position is still open.
     If holding period is less than a year returns `None`."""
 
-    t = TransactionService(asset_id).adj_transactions
+    t = TransactionService.get_adjusted_transactions_from_asset(asset_id)
 
     if not t:
         return None

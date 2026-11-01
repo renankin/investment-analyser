@@ -40,7 +40,7 @@ def get_asset_history(asset_id: int) -> Series:
     """Returns a Series with `values` for the asset history."""
 
     # Get the cummulative sum of shares
-    t = TransactionService(asset_id).adj_transactions
+    t = TransactionService.get_adjusted_transactions_from_asset(asset_id)
     if not t:
         return Series()
 
