@@ -40,7 +40,6 @@
                 <td>{{ transaction.date | format_date }}</td>
                 <td>{{ "%.2f" | format(transaction.shares) }}</td>
                 <td>{{ transaction.price | format_currency(transaction.asset.account.currency) }}</td>
-
                 <td>
                   <form action="{{ url_for('transactions.edit', transaction_id=transaction.id) }}"
                         method="get">

@@ -1,9 +1,8 @@
 from flask import Blueprint, flash, json, render_template, request
 
-from app.repositories.accounts import get_account, get_all_accounts
-from app.repositories import assets
-from app.services import roi
-from app.services import capital_evolution
+from app.services import capital_evolution, roi
+from app.services.account_service import AccountService
+from app.services.asset_service import AssetService
 
 portfolio_analysis_bp = Blueprint("portfolio_analysis", __name__)
 
@@ -29,10 +28,10 @@ def portfolio_evolution():
 
     if account_id:
         hist = capital_evolution.get_account_history(account_id)
-        title_label = get_account(account_id).name
+        title_label = AccountService(account_id).account.name
     elif asset_id:
         hist = capital_evolution.get_asset_history(asset_id)
-        title_label = assets.get_asset_by_id(asset_id).info.name
+        title_label = AssetService(asset_id).asset.info.name
     else:
         hist = capital_evolution.get_all_accounts_history()
         title_label = "All accounts"
@@ -49,6 +48,6 @@ def portfolio_evolution():
         labels=index,
         data=values,
         title=title,
-        accounts=get_all_accounts(),
-        assets=assets.get_all_assets(),
+        accounts=AccountService.get_all_accounts(),
+        assets=AssetService.get_all_assets(),
     )

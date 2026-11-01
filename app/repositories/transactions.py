@@ -154,20 +154,20 @@ def insert_transaction(
 
     execute_db(
         "INSERT INTO transactions (asset_id, date, price, shares) VALUES (?, ?, ?, ?)",
-        (asset_id, date, price, shares),
+        (asset_id, date.isoformat(), price, shares),
     )
 
 
-def update_transaction(
-    transaction_id: int,
-    asset_id: int,
-    date: str,
-    shares: Decimal,
-    price: Decimal,
-) -> None:
+def update_transaction(transaction: TransactionRecord) -> None:
 
     execute_db(
         "UPDATE transactions SET asset_id = ?, date = ?, shares = ?, price = ?"
         " WHERE transaction_id = ?",
-        (asset_id, date, shares, price, transaction_id),
+        (
+            transaction.asset.id,
+            transaction.date.isoformat(),
+            transaction.shares,
+            transaction.price,
+            transaction.id,
+        ),
     )

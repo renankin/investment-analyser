@@ -11,9 +11,8 @@ from app.models.models import (
 )
 from app.repositories import prices
 from app.repositories.assets import get_all_assets, get_asset_by_id
-from app.repositories.transactions import get_transactions_from_asset
-from app.services.dividends import get_dividends_received
-from app.services.transactions import get_split_adjusted_transactions
+from app.services.dividend_service import DividendService
+from app.services.transaction_service import TransactionService
 
 
 def get_all_return() -> list[dict]:
@@ -26,12 +25,10 @@ def get_all_return() -> list[dict]:
     all_stats = []
 
     for asset in all_assets:
-        divs = get_dividends_received(asset.id)
+        divs = DividendService(asset.id).dividends_received
         total_divs = sum(div.value for div in divs)
 
-        trans = get_split_adjusted_transactions(
-            transactions=get_transactions_from_asset(asset.id)
-        )
+        trans = TransactionService.get_adjusted_transactions_from_asset(asset.id)
         total_invested = sum(t.price * t.shares for t in trans if t.shares > 0)
         total_sold = sum(t.price * -t.shares for t in trans if t.shares < 0)
 
@@ -71,9 +68,7 @@ def get_irr(asset_id: int) -> float | None:
     dividends and current valuation if position is still open.
     If holding period is less than a year returns `None`."""
 
-    t = get_split_adjusted_transactions(
-        transactions=get_transactions_from_asset(asset_id)
-    )
+    t = TransactionService.get_adjusted_transactions_from_asset(asset_id)
 
     if not t:
         return None
@@ -86,7 +81,7 @@ def get_irr(asset_id: int) -> float | None:
         dates.append(transaction.transaction_record.date)
         total_shares += transaction.shares
 
-    dividends = get_dividends_received(asset_id)
+    dividends = DividendService(asset_id).dividends_received
     if dividends:
         for div in dividends:
             cashflow.append(div.value)

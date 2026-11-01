@@ -1,4 +1,5 @@
 from datetime import date
+from decimal import Decimal
 
 from app.db.connection import (
     execute_db,
