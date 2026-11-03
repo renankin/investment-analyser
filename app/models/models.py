@@ -61,7 +61,7 @@ class StockSplit:
 @dataclass
 class TransactionRecord:
     id: int
-    asset: AssetPosition
+    asset_id: int
     date: date
     shares: Decimal
     price: Decimal

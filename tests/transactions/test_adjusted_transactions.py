@@ -25,7 +25,7 @@ def test_single_stock_split_adjustment():
 
     transaction_record = TransactionRecord(
         id=1,
-        asset=ASSET_POS,
+        asset_id=1,
         date=date(2024, 1, 31),
         shares=Decimal("10.00"),
         price=Decimal("100.00"),
@@ -51,7 +51,7 @@ def test_sequential_stock_splits_adjustment():
 
     transaction_record = TransactionRecord(
         id=1,
-        asset=ASSET_POS,
+        asset_id=1,
         date=date(2024, 1, 31),
         shares=Decimal("10.00"),
         price=Decimal("100.00"),
@@ -83,14 +83,14 @@ def test_adjusted_transactions_for_multiple_records():
     transactions = [
         TransactionRecord(
             id=1,
-            asset=ASSET_POS,
+            asset_id=1,
             date=date(2026, 1, 31),
             shares=Decimal("10.00"),
             price=Decimal("60.00"),
         ),
         TransactionRecord(
             id=2,
-            asset=ASSET_POS,
+            asset_id=1,
             date=date(2023, 1, 31),
             shares=Decimal("5.00"),
             price=Decimal("10.00"),
@@ -132,7 +132,7 @@ def test_split_same_date():
     transactions = [
         TransactionRecord(
             id=3,
-            asset=ASSET_POS,
+            asset_id=1,
             date=date(2023, 1, 31),
             shares=Decimal("5.00"),
             price=Decimal("10.00"),
@@ -168,7 +168,7 @@ def test_no_applicable_split():
     transactions = [
         TransactionRecord(
             id=4,
-            asset=ASSET_POS,
+            asset_id=1,
             date=date(2024, 1, 31),
             shares=Decimal("10.00"),
             price=Decimal("100.00"),
@@ -204,7 +204,7 @@ def test_decimal_precision():
     transactions = [
         TransactionRecord(
             id=5,
-            asset=ASSET_POS,
+            asset_id=1,
             date=date(2024, 1, 31),
             shares=Decimal("10.53"),
             price=Decimal("10.20"),

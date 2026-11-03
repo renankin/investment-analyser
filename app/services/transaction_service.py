@@ -1,6 +1,3 @@
-from datetime import date
-from decimal import Decimal
-
 from app.models.models import (
     AdjustedTransaction,
     StockSplit,
@@ -36,7 +33,6 @@ class TransactionService:
     def get_all_transactions(cls) -> list[TransactionRecord]:
         return get_all_transactions()
 
-
     @classmethod
     def adjust_transactions_for_splits(
         cls, transactions: list[TransactionRecord], stock_splits: list[StockSplit]
@@ -58,12 +54,12 @@ class TransactionService:
         return adj_transactions
 
     @classmethod
-    def add_transaction(cls, asset_id: int, date: date, shares: Decimal, price: Decimal) -> None:
+    def add_transaction(cls, transaction: TransactionRecord) -> None:
         insert_transaction(
-            asset_id=asset_id,
-            date=date,
-            shares=shares,
-            price=price,
+            asset_id=transaction.asset_id,
+            date=transaction.date,
+            shares=transaction.shares,
+            price=transaction.price,
         )
 
     def edit_transaction(self, new_transaction: TransactionRecord) -> None:
