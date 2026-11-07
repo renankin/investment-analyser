@@ -1,21 +1,16 @@
 from datetime import date
 from decimal import Decimal
 
-from app.models.models import (
-    Account,
-    AdjustedTransaction,
-    AssetInfo,
-    AssetPosition,
-    StockSplit,
-    TransactionRecord,
-)
+from app.models import models
 from app.services.transaction_service import TransactionService
 
-ACCOUNT = Account(id=1, name="Account")
-ASSET_INFO = AssetInfo(symbol="APPL", name="Apple", type="Stock")
-ASSET_POS = AssetPosition(
+ACCOUNT = models.Account(id=1, name="Account")
+ASSET_INFO = models.AssetInfo(symbol="APPL", name="Apple", type="Stock")
+ASSET_POS = models.AssetPosition(
     id=1,
-    info=ASSET_INFO,
+    symbol="APPL",
+    name="Apple",
+    type=models.AssetType.STOCK,
     still_open=True,
     account=ACCOUNT,
 )
@@ -23,7 +18,7 @@ ASSET_POS = AssetPosition(
 
 def test_single_stock_split_adjustment():
 
-    transaction_record = TransactionRecord(
+    transaction_record = models.TransactionRecord(
         id=1,
         asset_id=1,
         date=date(2024, 1, 31),
@@ -31,11 +26,11 @@ def test_single_stock_split_adjustment():
         price=Decimal("100.00"),
     )
 
-    stock_split = StockSplit(
+    stock_split = models.StockSplit(
         asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.0")
     )
 
-    adjusted_transaction = AdjustedTransaction(
+    adjusted_transaction = models.AdjustedTransaction(
         transaction_record=transaction_record,
         shares=Decimal("20.00"),
         price=Decimal("50.00"),
@@ -49,7 +44,7 @@ def test_single_stock_split_adjustment():
 
 def test_sequential_stock_splits_adjustment():
 
-    transaction_record = TransactionRecord(
+    transaction_record = models.TransactionRecord(
         id=1,
         asset_id=1,
         date=date(2024, 1, 31),
@@ -58,15 +53,15 @@ def test_sequential_stock_splits_adjustment():
     )
 
     stock_splits = [
-        StockSplit(
+        models.StockSplit(
             asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.0")
         ),
-        StockSplit(
+        models.StockSplit(
             asset=ASSET_INFO, date=date(2026, 1, 31), split_ratio=Decimal("2.0")
         ),
     ]
 
-    adjusted_transaction = AdjustedTransaction(
+    adjusted_transaction = models.AdjustedTransaction(
         transaction_record=transaction_record,
         shares=Decimal("40.00"),
         price=Decimal("25.00"),
@@ -81,14 +76,14 @@ def test_sequential_stock_splits_adjustment():
 def test_adjusted_transactions_for_multiple_records():
 
     transactions = [
-        TransactionRecord(
+        models.TransactionRecord(
             id=1,
             asset_id=1,
             date=date(2026, 1, 31),
             shares=Decimal("10.00"),
             price=Decimal("60.00"),
         ),
-        TransactionRecord(
+        models.TransactionRecord(
             id=2,
             asset_id=1,
             date=date(2023, 1, 31),
@@ -98,22 +93,22 @@ def test_adjusted_transactions_for_multiple_records():
     ]
 
     stock_splits = [
-        StockSplit(
+        models.StockSplit(
             asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.0")
         ),
-        StockSplit(
+        models.StockSplit(
             asset=ASSET_INFO, date=date(2022, 1, 31), split_ratio=Decimal("10.0")
         ),
     ]
 
     adjusted_transactions = [
-        AdjustedTransaction(
+        models.AdjustedTransaction(
             transaction_record=transactions[0],
             shares=Decimal("10.00"),
             price=Decimal("60.00"),
             is_adjusted=False,
         ),
-        AdjustedTransaction(
+        models.AdjustedTransaction(
             transaction_record=transactions[1],
             shares=Decimal("10.00"),
             price=Decimal("5.00"),
@@ -130,7 +125,7 @@ def test_adjusted_transactions_for_multiple_records():
 def test_split_same_date():
 
     transactions = [
-        TransactionRecord(
+        models.TransactionRecord(
             id=3,
             asset_id=1,
             date=date(2023, 1, 31),
@@ -140,11 +135,11 @@ def test_split_same_date():
     ]
 
     stock_splits = [
-        StockSplit(asset=ASSET_INFO, date=date(2023, 1, 31), split_ratio=Decimal("2.0"))
+        models.StockSplit(asset=ASSET_INFO, date=date(2023, 1, 31), split_ratio=Decimal("2.0"))
     ]
 
     adjusted_transactions = [
-        AdjustedTransaction(
+        models.AdjustedTransaction(
             transaction_record=transactions[0],
             is_adjusted=False,
             shares=Decimal("5.00"),
@@ -166,7 +161,7 @@ def test_empty_inputs():
 def test_no_applicable_split():
 
     transactions = [
-        TransactionRecord(
+        models.TransactionRecord(
             id=4,
             asset_id=1,
             date=date(2024, 1, 31),
@@ -176,16 +171,16 @@ def test_no_applicable_split():
     ]
 
     stock_splits = [
-        StockSplit(
+        models.StockSplit(
             asset=ASSET_INFO, date=date(2023, 1, 31), split_ratio=Decimal("2.0")
         ),
-        StockSplit(
+        models.StockSplit(
             asset=ASSET_INFO, date=date(2022, 1, 31), split_ratio=Decimal("3.0")
         ),
     ]
 
     adjusted_transactions = [
-        AdjustedTransaction(
+        models.AdjustedTransaction(
             transaction_record=transactions[0],
             is_adjusted=False,
             shares=Decimal("10.00"),
@@ -202,7 +197,7 @@ def test_no_applicable_split():
 def test_decimal_precision():
 
     transactions = [
-        TransactionRecord(
+        models.TransactionRecord(
             id=5,
             asset_id=1,
             date=date(2024, 1, 31),
@@ -212,11 +207,11 @@ def test_decimal_precision():
     ]
 
     stock_splits = [
-        StockSplit(asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.5"))
+        models.StockSplit(asset=ASSET_INFO, date=date(2025, 1, 31), split_ratio=Decimal("2.5"))
     ]
 
     adjusted_transactions = [
-        AdjustedTransaction(
+        models.AdjustedTransaction(
             transaction_record=transactions[0],
             is_adjusted=True,
             shares=Decimal("26.325"),

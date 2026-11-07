@@ -1,6 +1,13 @@
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
+from enum import StrEnum
+
+
+class AssetType(StrEnum):
+    STOCK = "Stock"
+    BOND = "Bond"
+    ETF = "ETF"
 
 
 @dataclass
@@ -19,9 +26,12 @@ class AssetInfo:
 @dataclass
 class AssetPosition:
     id: int
-    info: AssetInfo
+    symbol: str
+    name: str
+    type: AssetType
     still_open: bool
     account: Account
+
 
 @dataclass
 class CashFlow:
@@ -35,6 +45,7 @@ class MarketDividend:
     asset: AssetInfo
     value: Decimal
     currency: str
+
 
 @dataclass
 class DividendReceived:
