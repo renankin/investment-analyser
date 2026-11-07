@@ -7,7 +7,6 @@ from decimal import Decimal
 class Account:
     id: int
     name: str
-    currency: str
 
 
 @dataclass

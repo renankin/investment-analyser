@@ -11,7 +11,7 @@ from app.models.models import (
 )
 from app.services.transaction_service import TransactionService
 
-ACCOUNT = Account(id=1, name="Account", currency="USD")
+ACCOUNT = Account(id=1, name="Account")
 ASSET_INFO = AssetInfo(symbol="APPL", name="Apple", type="Stock")
 ASSET_POS = AssetPosition(
     id=1,
