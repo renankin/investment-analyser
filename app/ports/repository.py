@@ -31,11 +31,30 @@ class AssetRepository(ABC):
     def get_asset_by_id(self, asset_id: int) -> models.AssetPosition: ...
 
 
+class StockSplitRepository(ABC):
+    @abstractmethod
+    def add_stock_split(self, stock_split: models.StockSplit): ...
+
+    @abstractmethod
+    def get_stock_splits_for_asset(self, asset_id: int) -> list[models.StockSplit]: ...
+
+
 class TransactionRepository(ABC):
     @abstractmethod
-    def add_new_transaction(self, transaction: models.TransactionRecord) -> None: ...
+    def add_transaction(self, transaction: models.TransactionRecord) -> None: ...
+
+    @abstractmethod
+    def delete_transaction(self, transaction: models.TransactionRecord) -> None: ...
+
+    @abstractmethod
+    def edit_transaction(self, new_transaction: models.TransactionRecord) -> None: ...
 
     @abstractmethod
     def get_transaction_by_id(
         self, transaction_id: int
     ) -> models.TransactionRecord: ...
+
+    @abstractmethod
+    def get_transactions_for_asset(
+        self, asset_id: int
+    ) -> list[models.TransactionRecord]: ...

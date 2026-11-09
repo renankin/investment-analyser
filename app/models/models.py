@@ -10,6 +10,12 @@ class AssetType(StrEnum):
     ETF = "ETF"
 
 
+class TransactionType(StrEnum):
+    SELL = "Sell"
+    PURCHASE = "Purchase"
+    DIVIDEND = "Dividend"
+
+
 @dataclass
 class Account:
     id: int
@@ -64,7 +70,7 @@ class MarketPrice:
 @dataclass(frozen=True)
 class StockSplit:
     date: date
-    asset: AssetInfo
+    asset_id: int
     split_ratio: Decimal
 
 
@@ -73,6 +79,7 @@ class TransactionRecord:
     id: int
     asset_id: int
     date: date
+    type: TransactionType
     shares: Decimal
     price: Decimal
 
