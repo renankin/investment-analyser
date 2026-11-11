@@ -31,6 +31,14 @@ class AssetRepository(ABC):
     def get_asset_by_id(self, asset_id: int) -> models.AssetPosition: ...
 
 
+class MarketPriceRepository(ABC):
+    @abstractmethod
+    def add_prices(self, prices: list[models.MarketPrice]) -> None: ...
+
+    @abstractmethod
+    def get_prices_for_asset(self, asset_id: int) -> list[models.MarketPrice]: ...
+
+
 class StockSplitRepository(ABC):
     @abstractmethod
     def add_stock_split(self, stock_split: models.StockSplit): ...

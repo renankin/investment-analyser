@@ -62,9 +62,10 @@ class DividendReceived:
 
 @dataclass(frozen=True)
 class MarketPrice:
+    asset_id: int
     date: date
-    asset: AssetInfo
     value: Decimal
+    currency: str
 
 
 @dataclass(frozen=True)
