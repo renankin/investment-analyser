@@ -26,7 +26,7 @@ def get_all_return() -> list[dict]:
 
     for asset in all_assets:
         divs = DividendService(asset.id).dividends_received
-        total_divs = sum(div.value for div in divs)
+        total_divs = sum(div.received_value for div in divs)
 
         trans = TransactionService.get_adjusted_transactions_from_asset(asset.id)
         total_invested = sum(t.price * t.shares for t in trans if t.shares > 0)
@@ -84,7 +84,7 @@ def get_irr(asset_id: int) -> float | None:
     dividends = DividendService(asset_id).dividends_received
     if dividends:
         for div in dividends:
-            cashflow.append(div.value)
+            cashflow.append(div.received_value)
             dates.append(div.date)
 
     asset = get_asset_by_id(asset_id)
@@ -112,7 +112,7 @@ def build_dividend_cashflows(dividends: list[DividendReceived]) -> list[CashFlow
     cashflows: list[CashFlow] = []
 
     for dividend in dividends:
-        cashflows.append(CashFlow(date=dividend.date, value=dividend.value))
+        cashflows.append(CashFlow(date=dividend.date, value=dividend.received_value))
 
     return cashflows
 

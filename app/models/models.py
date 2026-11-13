@@ -47,17 +47,18 @@ class CashFlow:
 
 @dataclass(frozen=True)
 class MarketDividend:
+    asset_id: int
     date: date
-    asset: AssetInfo
-    value: Decimal
+    dividend_per_share: Decimal
     currency: str
 
 
 @dataclass
 class DividendReceived:
+    asset: AssetPosition
     date: date
-    value: Decimal
-    account: Account
+    received_value: Decimal
+    currency: str
 
 
 @dataclass(frozen=True)

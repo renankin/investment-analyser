@@ -31,6 +31,14 @@ class AssetRepository(ABC):
     def get_asset_by_id(self, asset_id: int) -> models.AssetPosition: ...
 
 
+class MarketDividendRepository(ABC):
+    @abstractmethod
+    def add_dividends(self, dividends: list[models.MarketDividend]) -> None: ...
+
+    @abstractmethod
+    def get_dividends_for_asset(self, asset_id: int) -> list[models.MarketDividend]: ...
+
+
 class MarketPriceRepository(ABC):
     @abstractmethod
     def add_prices(self, prices: list[models.MarketPrice]) -> None: ...

@@ -26,7 +26,7 @@ def get_dividends(asset_id: int) -> list[MarketDividend]:
                 name=row["asset_name"],
                 type=row["asset_type"],
             ),
-            value=row["dividend_value"],
+            dividend_per_share=row["dividend_value"],
             currency=row["currency"],
         )
         for row in fetch_multiple_records(query, (asset_id,))

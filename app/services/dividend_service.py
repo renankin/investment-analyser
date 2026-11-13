@@ -1,41 +1,23 @@
-from decimal import Decimal
 
-from pandas import Series, to_datetime
-
-from app.fetchers.yfinance import YFetcher
+from app.models import models
 from app.models.models import AdjustedTransaction, AssetPosition, DividendReceived
-from app.repositories.dividends import delete_dividends, get_dividends, insert_dividend
-from app.services.asset_service import AssetService
-from app.services.transaction_service import TransactionService
+from app.ports.repository import MarketDividendRepository
 
 
 class DividendService:
-    def __init__(self, asset_id: int) -> None:
-        self.asset_id = asset_id
-        self.dividends = get_dividends(asset_id)
+    def __init__(self, repository: MarketDividendRepository) -> None:
+        self._repository = repository
 
-    @property
-    def dividends_received(self) -> list[DividendReceived]:
-        return self.get_dividends_received(
-            asset=AssetService(self.asset_id).asset,
-            adj_transactions=TransactionService.get_adjusted_transactions_from_asset(
-                self.asset_id
-            ),
-        )
+    def add_market_dividends(self, market_divs: list[models.MarketDividend]) -> None:
+        self._repository.add_dividends(market_divs)
 
-    @property
-    def total_dividends(self) -> Decimal:
-        total = 0
-        for dividend in self.dividends_received:
-            total += dividend.value
-        return Decimal(total)
-
-    def get_dividends_received(
+    def calculate_dividends_received(
         self, asset: AssetPosition, adj_transactions: list[AdjustedTransaction]
     ) -> list[DividendReceived]:
 
         divs_received = []
-        for div in self.dividends:
+        market_divs = self._repository.get_dividends_for_asset(asset.id)
+        for div in market_divs:
             if not asset.still_open:
                 last_date = max(
                     [
@@ -50,35 +32,18 @@ class DividendService:
             shares = 0
             div_received = False
             for transaction in adj_transactions:
-                if transaction.transaction_record.date <= div.date:
+                if transaction.transaction_record.date < div.date:
                     div_received = True
                     shares += transaction.shares
 
             if div_received:
                 divs_received.append(
                     DividendReceived(
+                        asset=asset,
                         date=div.date,
-                        value=shares * div.value,
-                        account=asset.account,
+                        received_value=shares * div.dividend_per_share,
+                        currency=div.currency,
                     )
                 )
 
-        return divs_received
-
-    @classmethod
-    def delete_dividends(cls, asset: AssetPosition) -> None:
-        delete_dividends(asset.id)
-
-    @classmethod
-    def update_dividends(cls, asset: AssetPosition) -> None:
-        dividends = Series()
-        if asset.info.type == "Stock":
-            dividends = YFetcher(asset.info.symbol).get_dividends()
-
-        if not dividends.empty:
-            for date, div in dividends.items():
-                insert_dividend(
-                    asset_id=asset.id,
-                    date=to_datetime(str(date)).date(),
-                    dividend_value=div,
-                )
+        return sorted(divs_received, key=lambda div: div.date)
