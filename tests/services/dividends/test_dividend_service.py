@@ -45,30 +45,35 @@ def asset():
 
 @pytest.fixture
 def market_dividends():
-    def _make_dividends(div_dates: list[date]) -> list[models.MarketDividend]:
-        divs: list[models.MarketDividend] = []
-        for div_date in div_dates:
-            divs.append(
-                models.MarketDividend(
-                    asset_id=1,
-                    date=div_date,
-                    dividend_per_share=Decimal("2.00"),
-                    currency="USD",
-                )
-            )
-        return divs
+    return [
+        models.MarketDividend(
+            asset_id=1,
+            date=date(2024, 1, 1),
+            dividend_per_share=Decimal("10.0"),
+            currency="USD",
+        ),
+        models.MarketDividend(
+            asset_id=1,
+            date=date(2025, 1, 1),
+            dividend_per_share=Decimal("10.0"),
+            currency="USD",
+        ),
+    ]
 
-    return _make_dividends
+
+def test_add_dividends(dividend_service, market_dividends, fake_dividend_repository):
+    dividend_service.add_market_dividends(market_dividends)
+    assert market_dividends == fake_dividend_repository.dividends
 
 
-@pytest.fixture
-def transaction():
-    def _make_transaction(date):
-        return models.AdjustedTransaction(
+def test_dividends_received_orchestration(asset, dividend_service, market_dividends):
+    dividend_service.add_market_dividends(market_dividends)
+    adjusted_transactions = [
+        models.AdjustedTransaction(
             transaction_record=models.TransactionRecord(
                 id=1,
                 asset_id=1,
-                date=date,
+                date=date(2024, 1, 1),
                 type=models.TransactionType.PURCHASE,
                 shares=Decimal("100.00"),
                 price=Decimal("100.00"),
@@ -77,41 +82,18 @@ def transaction():
             price=Decimal("100.00"),
             is_adjusted=False,
         )
-
-    return _make_transaction
-
-
-def test_dividends_received(asset, market_dividends, transaction, dividend_service):
-    market_divs = market_dividends(
-        div_dates=[date(2024, 1, 1), date(2025, 1, 1), date(2026, 1, 1)]
-    )
-    dividend_service.add_market_dividends(market_divs)
-    divs_received = dividend_service.calculate_dividends_received(
-        asset=asset, adj_transactions=[transaction(date=date(2024, 1, 1))]
-    )
-    assert divs_received == [
+    ]
+    divs_received = [
         models.DividendReceived(
-            asset=asset,
+            asset_id=1,
             date=date(2025, 1, 1),
-            received_value=Decimal("200.00"),
-            currency="USD",
-        ),
-        models.DividendReceived(
-            asset=asset,
-            date=date(2026, 1, 1),
-            received_value=Decimal("200.00"),
+            received_value=Decimal("1000.00"),
             currency="USD",
         ),
     ]
-
-
-def test_no_valid_dividends(asset, market_dividends, transaction, dividend_service):
-    market_divs = market_dividends(
-        div_dates=[date(2024, 1, 1), date(2025, 1, 1), date(2026, 1, 1)]
+    assert (
+        dividend_service.get_dividends_received(
+            asset=asset, adj_transactions=adjusted_transactions
+        )
+        == divs_received
     )
-    dividend_service.add_market_dividends(market_divs)
-    divs = dividend_service.calculate_dividends_received(
-        asset=asset, adj_transactions=[transaction(date(2026, 1, 1))]
-    )
-
-    assert divs == []

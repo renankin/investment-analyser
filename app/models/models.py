@@ -55,7 +55,7 @@ class MarketDividend:
 
 @dataclass
 class DividendReceived:
-    asset: AssetPosition
+    asset_id: int
     date: date
     received_value: Decimal
     currency: str
