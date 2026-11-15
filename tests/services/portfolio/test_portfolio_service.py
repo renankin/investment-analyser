@@ -8,6 +8,7 @@ from app.services.portfolio_service import PortfolioService
 
 
 def test_roi_for_asset(
+    asset_service,
     transaction_service,
     dividend_service,
     price_service,
@@ -51,6 +52,6 @@ def test_roi_for_asset(
         ]
     )
     portfolio_service = PortfolioService(
-        transaction_service, dividend_service, price_service
+        asset_service, transaction_service, dividend_service, price_service
     )
     assert portfolio_service.get_irr_for_asset(asset) == pytest.approx(1.0)

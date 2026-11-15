@@ -30,6 +30,12 @@ class AssetRepository(ABC):
     @abstractmethod
     def get_asset_by_id(self, asset_id: int) -> models.AssetPosition: ...
 
+    @abstractmethod
+    def get_all_assets(self) -> list[models.AssetPosition]: ...
+
+    @abstractmethod
+    def get_open_assets(self) -> list[models.AssetPosition]: ...
+
 
 class MarketDividendRepository(ABC):
     @abstractmethod

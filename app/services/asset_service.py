@@ -14,3 +14,6 @@ class AssetService:
 
     def edit_asset(self, new_asset: models.AssetPosition) -> None:
         self._repository.edit_asset(new_asset)
+
+    def get_open_assets(self) -> list[models.AssetPosition]:
+        return self._repository.get_open_assets()

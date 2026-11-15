@@ -1,8 +1,10 @@
 import datetime as dt
+from decimal import Decimal
 
 from scipy import optimize
 
 from app.models import models
+from app.services.asset_service import AssetService
 from app.services.dividend_service import DividendService
 from app.services.price_service import PriceService
 from app.services.transaction_service import TransactionService
@@ -36,10 +38,12 @@ def calculate_irr(cashflows: list[models.CashFlow], initial_guess=0.1) -> float 
 class PortfolioService:
     def __init__(
         self,
+        asset_service: AssetService,
         transaction_service: TransactionService,
         dividend_service: DividendService,
         price_service: PriceService,
     ) -> None:
+        self._asset_service = asset_service
         self._transaction_service = transaction_service
         self._dividend_service = dividend_service
         self._price_service = price_service
@@ -98,3 +102,22 @@ class PortfolioService:
     def get_irr_for_asset(self, asset: models.AssetPosition) -> float | None:
         cashflows = self._create_cashflows_for_asset(asset)
         return calculate_irr(cashflows)
+
+    def calculate_asset_value(self, asset: models.AssetPosition) -> Decimal:
+        if asset.still_open:
+            shares = self._transaction_service.get_shares_balance(asset.id)
+            current_price = self._price_service.get_most_recent_price(asset.id)
+            return shares * current_price.value
+        return Decimal(0)
+
+    def calculate_portfolio_value(self) -> Decimal:
+        open_assets = self._asset_service.get_open_assets()
+        portfolio_value = Decimal(0)
+        for asset in open_assets:
+            portfolio_value += self.calculate_asset_value(asset)
+        return portfolio_value
+
+    def calculate_asset_allocation(self, asset: models.AssetPosition) -> Decimal:
+        portfolio_value = self.calculate_portfolio_value()
+        asset_value = self.calculate_asset_value(asset)
+        return asset_value / portfolio_value
