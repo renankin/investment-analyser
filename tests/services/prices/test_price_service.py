@@ -1,6 +1,7 @@
-import pytest
 import datetime
 from decimal import Decimal
+
+import pytest
 
 from app.models.models import MarketPrice
 from app.ports.repository import MarketPriceRepository

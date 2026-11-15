@@ -1,3 +1,4 @@
+from decimal import Decimal
 from app.models import models
 from app.ports import repository
 
@@ -43,6 +44,13 @@ class TransactionService:
                 asset_id
             ),
         )
+
+    def get_shares_balance(self, asset_id: int) -> Decimal:
+        adjusted_transactions = self.get_adjusted_transactions(asset_id)
+        total_shares = Decimal("0.0")
+        for transaction in adjusted_transactions:
+            total_shares += transaction.shares
+        return total_shares
 
     def add_transaction(self, transaction: models.TransactionRecord) -> None:
         self._transaction_repository.add_transaction(transaction)

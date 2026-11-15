@@ -4,7 +4,7 @@ from decimal import Decimal
 from pytest import approx
 
 from app.models.models import CashFlow
-from app.services.roi import calculate_irr
+from app.services.portfolio_service import calculate_irr
 
 
 def test_empty_imputs():
