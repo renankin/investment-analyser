@@ -4,31 +4,6 @@ from decimal import Decimal
 import pytest
 
 from app.models import models
-from app.ports.repository import MarketDividendRepository
-from app.services.dividend_service import DividendService
-
-
-class FakeMarketDividendRepository(MarketDividendRepository):
-    def __init__(self) -> None:
-        self.dividends: list[models.MarketDividend] = []
-
-    def add_dividends(self, dividends: list[models.MarketDividend]) -> None:
-        [self.dividends.append(dividend) for dividend in dividends]
-
-    def get_dividends_for_asset(self, asset_id: int) -> list[models.MarketDividend]:
-        return [
-            dividend for dividend in self.dividends if dividend.asset_id == asset_id
-        ]
-
-
-@pytest.fixture
-def fake_dividend_repository():
-    return FakeMarketDividendRepository()
-
-
-@pytest.fixture
-def dividend_service(fake_dividend_repository):
-    return DividendService(fake_dividend_repository)
 
 
 @pytest.fixture

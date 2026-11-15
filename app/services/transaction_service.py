@@ -1,4 +1,5 @@
 from decimal import Decimal
+
 from app.models import models
 from app.ports import repository
 
