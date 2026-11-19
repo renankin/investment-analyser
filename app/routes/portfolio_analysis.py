@@ -1,6 +1,5 @@
 from flask import Blueprint, flash, json, render_template, request
 
-from app.services import capital_evolution
 from app.services.account_service import AccountService
 from app.services.asset_service import AssetService
 

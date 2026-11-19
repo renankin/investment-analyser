@@ -16,6 +16,9 @@ class AccountRepository(ABC):
     @abstractmethod
     def get_account_by_id(self, account_id: int) -> models.Account: ...
 
+    @abstractmethod
+    def get_all_accounts(self) -> list[models.Account]: ...
+
 
 class AssetRepository(ABC):
     @abstractmethod
@@ -35,6 +38,11 @@ class AssetRepository(ABC):
 
     @abstractmethod
     def get_open_assets(self) -> list[models.AssetPosition]: ...
+
+    @abstractmethod
+    def get_assets_from_account(
+        self, account_id: int
+    ) -> list[models.AssetPosition]: ...
 
 
 class MarketDividendRepository(ABC):

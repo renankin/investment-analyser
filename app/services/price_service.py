@@ -60,6 +60,9 @@ class PriceService:
     def add_prices(self, prices: list[MarketPrice]) -> None:
         self._repository.add_prices(prices)
 
+    def get_prices_for_asset(self, asset_id: int) -> list[MarketPrice]:
+        return self._repository.get_prices_for_asset(asset_id)
+
     def get_most_recent_price(self, asset_id: int) -> MarketPrice:
-        prices = self._repository.get_prices_for_asset(asset_id)
+        prices = self.get_prices_for_asset(asset_id)
         return max(prices, key=lambda price: price.date)

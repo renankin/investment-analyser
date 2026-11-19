@@ -1,10 +1,5 @@
 from flask import Blueprint, render_template
 
-from app.services.portfolio_distribution import (
-    get_asset_allocation,
-    get_sector_distribution,
-)
-
 homepage_bp = Blueprint("homepage", __name__, template_folder="templates")
 
 

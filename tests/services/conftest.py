@@ -2,11 +2,33 @@ import pytest
 
 from app.models import models
 from app.ports import repository
+from app.services.account_service import AccountService
 from app.services.asset_service import AssetService
 from app.services.dividend_service import DividendService
 from app.services.price_service import PriceService
 from app.services.stock_split_service import StockSplitService
 from app.services.transaction_service import TransactionService
+
+
+class FakeAccountRepository(repository.AccountRepository):
+    def __init__(self):
+        self.accounts: list[models.Account] = []
+
+    def add_new_account(self, account: models.Account) -> None:
+        self.accounts.append(account)
+
+    def delete_account(self, account: models.Account):
+        self.accounts.remove(account)
+
+    def edit_account(self, new_account: models.Account):
+        account = self.get_account_by_id(new_account.id)
+        account.name = new_account.name
+
+    def get_account_by_id(self, account_id: int) -> models.Account:
+        return next(account for account in self.accounts if account.id == account_id)
+
+    def get_all_accounts(self) -> list[models.Account]:
+        return self.accounts
 
 
 class FakeAssetRepository(repository.AssetRepository):
@@ -34,6 +56,9 @@ class FakeAssetRepository(repository.AssetRepository):
 
     def get_open_assets(self) -> list[models.AssetPosition]:
         return [asset for asset in self.assets if asset.still_open]
+
+    def get_assets_from_account(self, account_id: int) -> list[models.AssetPosition]:
+        return [asset for asset in self.assets if asset.account.id == account_id]
 
 
 class FakeMarketDividendRepository(repository.MarketDividendRepository):
@@ -107,6 +132,16 @@ class FakeMarketRepository(repository.MarketPriceRepository):
 
     def get_prices_for_asset(self, asset_id: int) -> list[models.MarketPrice]:
         return [price for price in self.prices if price.asset_id == asset_id]
+
+
+@pytest.fixture
+def fake_account_repository():
+    return FakeAccountRepository()
+
+
+@pytest.fixture
+def account_service(fake_account_repository):
+    return AccountService(fake_account_repository)
 
 
 @pytest.fixture

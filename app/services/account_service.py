@@ -14,3 +14,6 @@ class AccountService:
 
     def edit_account(self, new_account: models.Account) -> None:
         self._repository.edit_account(new_account)
+
+    def get_all_accounts(self) -> list[models.Account]:
+        return self._repository.get_all_accounts()

@@ -17,3 +17,6 @@ class AssetService:
 
     def get_open_assets(self) -> list[models.AssetPosition]:
         return self._repository.get_open_assets()
+
+    def get_assets_from_account(self, account_id: int) -> list[models.AssetPosition]:
+        return self._repository.get_assets_from_account(account_id)

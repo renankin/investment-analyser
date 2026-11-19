@@ -1,9 +1,11 @@
 import datetime as dt
 from decimal import Decimal
 
+import pandas as pd
 from scipy import optimize
 
 from app.models import models
+from app.services.account_service import AccountService
 from app.services.asset_service import AssetService
 from app.services.dividend_service import DividendService
 from app.services.price_service import PriceService
@@ -38,11 +40,13 @@ def calculate_irr(cashflows: list[models.CashFlow], initial_guess=0.1) -> float 
 class PortfolioService:
     def __init__(
         self,
+        account_service: AccountService,
         asset_service: AssetService,
         transaction_service: TransactionService,
         dividend_service: DividendService,
         price_service: PriceService,
     ) -> None:
+        self._account_service = account_service
         self._asset_service = asset_service
         self._transaction_service = transaction_service
         self._dividend_service = dividend_service
@@ -121,3 +125,64 @@ class PortfolioService:
         portfolio_value = self.calculate_portfolio_value()
         asset_value = self.calculate_asset_value(asset)
         return asset_value / portfolio_value
+
+    def calculate_asset_value_history(self, asset_id: int) -> pd.Series:
+        # Get the cummulative sum of shares
+        transactions = self._transaction_service.get_adjusted_transactions(asset_id)
+        df1 = (
+            pd.DataFrame(
+                [
+                    {"date": item.transaction_record.date, "shares": item.shares}
+                    for item in transactions
+                ]
+            )
+            .set_index("date")
+            .sort_values("date")
+        )
+
+        # Combine transactions which are ocurring in the same date
+        df1 = df1.groupby("date").sum()
+        df1["shares_cumsum"] = df1["shares"].cumsum()
+
+        # Get the prices for that asset
+        market_prices = self._price_service.get_prices_for_asset(asset_id)
+        df2 = (
+            pd.DataFrame(
+                [
+                    {"unit_price": price.value, "date": price.date}
+                    for price in market_prices
+                ]
+            )
+            .set_index("date")
+            .sort_values("date")
+        )
+
+        # Select dates which start from initial transaction
+        df2 = df2[df2.index >= df1.first_valid_index()]
+
+        # Include cumsum on the column of df2
+        df2 = df2.merge(df1, left_index=True, right_index=True, how="left")
+
+        # Replace NaN values
+        df2.ffill(inplace=True)
+
+        # calculate valuation
+        df2["asset_history"] = df2["unit_price"] * df2["shares_cumsum"]
+
+        return df2["asset_history"]
+
+    def calculate_account_value_history(self, account_id: int) -> pd.Series:
+        all_assets = self._asset_service.get_assets_from_account(account_id)
+        df = pd.DataFrame()
+        for asset in all_assets:
+            ser = self.calculate_asset_value_history(asset.id)
+            df = pd.concat([df, ser], axis=1).sort_index()
+        return df.sum(axis=1)
+
+    def calculate_portfolio_value_history(self) -> pd.Series:
+        all_accounts = self._account_service.get_all_accounts()
+        df = pd.DataFrame()
+        for account in all_accounts:
+            ser = self.calculate_account_value_history(account.id)
+            df = pd.concat([df, ser], axis=1).sort_index()
+        return df.sum(axis=1)
