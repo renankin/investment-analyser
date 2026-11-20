@@ -42,11 +42,10 @@ class FakeAssetRepository(repository.AssetRepository):
         self.assets.remove(asset)
 
     def edit_asset(self, new_asset: models.AssetPosition) -> None:
-        [
-            new_asset
-            for asset in self.assets
-            if asset == self.get_asset_by_id(new_asset.id)
-        ]
+        asset_id = new_asset.id
+        asset_to_replace = self.get_asset_by_id(asset_id)
+        self.assets.remove(asset_to_replace)
+        self.assets.append(new_asset)
 
     def get_asset_by_id(self, asset_id: int) -> models.AssetPosition:
         return next(asset for asset in self.assets if asset.id == asset_id)
@@ -85,11 +84,10 @@ class FakeTransactionRepository(repository.TransactionRepository):
         self.transactions.remove(transaction)
 
     def edit_transaction(self, new_transaction: models.TransactionRecord) -> None:
-        [
-            new_transaction
-            for transaction in self.transactions
-            if transaction == self.get_transaction_by_id(new_transaction.id)
-        ]
+        transaction_id = new_transaction.id
+        transaction_to_replace = self.get_transaction_by_id(transaction_id)
+        self.transactions.remove(transaction_to_replace)
+        self.transactions.append(new_transaction)
 
     def get_transaction_by_id(self, transaction_id: int) -> models.TransactionRecord:
         return next(

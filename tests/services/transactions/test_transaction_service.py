@@ -1,3 +1,4 @@
+import dataclasses
 from datetime import date
 from decimal import Decimal
 
@@ -51,12 +52,11 @@ def test_edit_transaction(
     transaction, fake_transaction_repository, transaction_service
 ):
     transaction_service.add_transaction(transaction)
-    new_transaction = transaction
-    new_transaction.price = Decimal(50)
+    new_transaction = dataclasses.replace(transaction, price=Decimal("50.00"))
     transaction_service.edit_transaction(new_transaction)
     assert fake_transaction_repository.get_transaction_by_id(
         new_transaction.id
-    ).price == Decimal(50)
+    ).price == Decimal("50.00")
 
 
 def test_adjusted_transaction_orchestration(

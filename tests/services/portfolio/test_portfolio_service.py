@@ -186,7 +186,7 @@ def test_calculate_account_history(
         price_service,
         account,
         asset_id=1,
-        shares=Decimal("10"),
+        shares=Decimal("10.00"),
         prices=[
             (date(2024, 1, 1), Decimal("100.00")),
             (date(2024, 1, 2), Decimal("110.00")),
@@ -198,7 +198,7 @@ def test_calculate_account_history(
         price_service,
         account,
         asset_id=2,
-        shares=Decimal("2"),
+        shares=Decimal("2.00"),
         prices=[
             (date(2024, 1, 2), Decimal("50.00")),
             (date(2024, 1, 3), Decimal("60.00")),

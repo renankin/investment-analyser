@@ -1,3 +1,5 @@
+import dataclasses
+
 import pytest
 
 from app.models import models
@@ -28,7 +30,6 @@ def test_delete_asset(asset, fake_asset_repository, asset_service):
 
 def test_edit_asset(asset, fake_asset_repository, asset_service):
     asset_service.add_asset(asset)
-    editted_asset = asset
-    editted_asset.still_open = False
+    editted_asset = dataclasses.replace(asset, still_open=False)
     asset_service.edit_asset(editted_asset)
     assert fake_asset_repository.get_asset_by_id(editted_asset.id).still_open == False
