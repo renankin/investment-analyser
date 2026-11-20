@@ -5,6 +5,7 @@ from app.ports import repository
 from app.services.account_service import AccountService
 from app.services.asset_service import AssetService
 from app.services.dividend_service import DividendService
+from app.services.portfolio_service import PortfolioService
 from app.services.price_service import PriceService
 from app.services.stock_split_service import StockSplitService
 from app.services.transaction_service import TransactionService
@@ -190,3 +191,16 @@ def fake_price_repository():
 @pytest.fixture
 def price_service(fake_price_repository):
     return PriceService(fake_price_repository)
+
+
+@pytest.fixture
+def portfolio_service(
+    account_service, asset_service, transaction_service, dividend_service, price_service
+):
+    return PortfolioService(
+        account_service,
+        asset_service,
+        transaction_service,
+        dividend_service,
+        price_service,
+    )
