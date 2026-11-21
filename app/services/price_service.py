@@ -1,80 +1,68 @@
 import datetime
 from decimal import Decimal
 
-from pandas import Series, to_datetime
+from app.models.models import MarketPrice
+from app.ports.repository import MarketPriceRepository
 
-from app.fetchers.tesouro_direto import get_prices
-from app.fetchers.yfinance import YFetcher
-from app.models.models import AssetPosition, MarketPrice
-from app.repositories.prices import delete_prices, get_market_prices, insert_price
+
+def calculate_price_change(
+    prices: list[MarketPrice],
+    initial_date: datetime.date,
+    final_date: datetime.date,
+) -> Decimal:
+    if not prices:
+        raise ValueError("Price list is empty.")
+    price_date_key = lambda price: price.date
+    sorted_prices = sorted(prices, key=price_date_key)
+    min_price = min(sorted_prices, key=price_date_key)
+    max_price = max(sorted_prices, key=price_date_key)
+    if initial_date < min_price.date:
+        raise ValueError("Selected initial date is outside price range.")
+    if final_date > max_price.date:
+        raise ValueError("Selected final date is outside price range.")
+
+    initial_matching_price = min_price
+    for price in sorted_prices:
+        if initial_date >= price.date:
+            initial_matching_price = price
+
+    final_matching_price = max_price
+    for price in reversed(sorted_prices):
+        if final_date >= price.date:
+            final_matching_price = price
+            break
+
+    return (
+        final_matching_price.value - initial_matching_price.value
+    ) / initial_matching_price.value
 
 
 class PriceService:
-    def __init__(self, asset_id: int) -> None:
-        self.prices = sorted(get_market_prices(asset_id), key=lambda price: price.date)
+    def __init__(self, repository: MarketPriceRepository) -> None:
+        self._repository = repository
 
-    def get_dates(self) -> list[datetime.date]:
-        return [price.date for price in self.prices]
-
-    def get_prices(self) -> list[Decimal]:
-        return [price.value for price in self.prices]
-
-    def calculate_yearly_change(self, years: int) -> Decimal | None:
-        if self.prices:
-            most_recent_price = self.prices[-1].date
-            inital_date = most_recent_price - datetime.timedelta(days=365 * years)
+    def calculate_yearly_change(self, asset_id: int, years: int) -> Decimal | None:
+        prices = self._repository.get_prices_for_asset(asset_id)
+        if prices:
+            most_recent_price = max(prices, key=lambda price: price.date)
+            inital_date = most_recent_price.date - datetime.timedelta(days=365 * years)
             try:
-                price_change = self.calculate_price_change(
-                    self.prices, initial_date=inital_date, final_date=most_recent_price
+                price_change = calculate_price_change(
+                    prices=prices,
+                    initial_date=inital_date,
+                    final_date=most_recent_price.date,
                 )
             except ValueError:
                 return None
             return price_change
         return None
 
-    @classmethod
-    def calculate_price_change(
-        cls,
-        prices: list[MarketPrice],
-        initial_date: datetime.date,
-        final_date: datetime.date,
-    ) -> Decimal:
-        if initial_date < prices[0].date:
-            raise ValueError("Selected initial date is outside price range.")
-        if final_date > prices[-1].date:
-            raise ValueError("Selected final date is outside price range.")
+    def add_prices(self, prices: list[MarketPrice]) -> None:
+        self._repository.add_prices(prices)
 
-        initial_matching_price = prices[0]
-        for price in prices:
-            if initial_date >= price.date:
-                initial_matching_price = price
+    def get_prices_for_asset(self, asset_id: int) -> list[MarketPrice]:
+        return self._repository.get_prices_for_asset(asset_id)
 
-        final_matching_price = prices[-1]
-        for price in reversed(prices):
-            if final_date >= price.date:
-                final_matching_price = price
-                break
-
-        return (
-            final_matching_price.value - initial_matching_price.value
-        ) / initial_matching_price.value
-
-    @classmethod
-    def delete_prices(cls, asset: AssetPosition) -> None:
-        delete_prices(asset.id)
-
-    @classmethod
-    def update_prices(cls, asset: AssetPosition) -> None:
-        prices = Series()
-        if asset.info.type in ["Stock", "ETF"]:
-            prices = YFetcher(asset.info.symbol).get_prices()
-        if asset.info.type == "Brazilian bond":
-            prices = get_prices(asset.info.symbol)
-
-        if not prices.empty:
-            for date, price in prices.items():
-                insert_price(
-                    asset_id=asset.id,
-                    date=to_datetime(str(date)).date(),
-                    unit_price=price,
-                )
+    def get_most_recent_price(self, asset_id: int) -> MarketPrice:
+        prices = self.get_prices_for_asset(asset_id)
+        return max(prices, key=lambda price: price.date)

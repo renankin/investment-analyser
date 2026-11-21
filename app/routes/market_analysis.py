@@ -1,9 +1,5 @@
 from flask import Blueprint, flash, render_template, request
 
-from app.services.etfs import (
-    get_etf_search_result,
-    get_etfs_for_comparison,
-)
 
 market_analysis_bp = Blueprint("market_analysis", __name__)
 

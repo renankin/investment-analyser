@@ -1,13 +1,25 @@
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
+from enum import StrEnum
+
+
+class AssetType(StrEnum):
+    STOCK = "Stock"
+    BOND = "Bond"
+    ETF = "ETF"
+
+
+class TransactionType(StrEnum):
+    SELL = "Sell"
+    PURCHASE = "Purchase"
+    DIVIDEND = "Dividend"
 
 
 @dataclass
 class Account:
     id: int
     name: str
-    currency: str
 
 
 @dataclass
@@ -20,9 +32,12 @@ class AssetInfo:
 @dataclass
 class AssetPosition:
     id: int
-    info: AssetInfo
+    symbol: str
+    name: str
+    type: AssetType
     still_open: bool
     account: Account
+
 
 @dataclass
 class CashFlow:
@@ -32,37 +47,41 @@ class CashFlow:
 
 @dataclass(frozen=True)
 class MarketDividend:
+    asset_id: int
     date: date
-    asset: AssetInfo
-    value: Decimal
+    dividend_per_share: Decimal
     currency: str
+
 
 @dataclass
 class DividendReceived:
+    asset_id: int
     date: date
-    value: Decimal
-    account: Account
+    received_value: Decimal
+    currency: str
 
 
 @dataclass(frozen=True)
 class MarketPrice:
+    asset_id: int
     date: date
-    asset: AssetInfo
     value: Decimal
+    currency: str
 
 
 @dataclass(frozen=True)
 class StockSplit:
     date: date
-    asset: AssetInfo
+    asset_id: int
     split_ratio: Decimal
 
 
 @dataclass
 class TransactionRecord:
     id: int
-    asset: AssetPosition
+    asset_id: int
     date: date
+    type: TransactionType
     shares: Decimal
     price: Decimal
 

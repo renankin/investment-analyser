@@ -6,12 +6,7 @@ from app.db.connection import (
     fetch_multiple_records,
     fetch_single_record,
 )
-from app.models.models import (
-    Account,
-    AssetInfo,
-    AssetPosition,
-    TransactionRecord,
-)
+from app.models import models
 
 ALL_TRANSACTIONS_QUERY = (
     "SELECT accounts.account_id, accounts.account_name, accounts.currency,"
@@ -28,25 +23,12 @@ def delete_transaction(transaction_id: int) -> None:
     execute_db("DELETE FROM transactions WHERE transaction_id = ?", (transaction_id,))
 
 
-def get_all_transactions() -> list[TransactionRecord]:
+def get_all_transactions() -> list[models.TransactionRecord]:
 
     return [
-        TransactionRecord(
+        models.TransactionRecord(
             id=row["transaction_id"],
-            asset=AssetPosition(
-                id=row["asset_id"],
-                info=AssetInfo(
-                    symbol=row["asset_symbol"],
-                    name=row["asset_name"],
-                    type=row["asset_type"],
-                ),
-                still_open=row["still_open"],
-                account=Account(
-                    id=row["account_id"],
-                    name=row["account_name"],
-                    currency=row["currency"],
-                ),
-            ),
+            asset_id=row["asset_id"],
             date=row["date"],
             shares=row["shares"],
             price=row["price"],
@@ -55,25 +37,12 @@ def get_all_transactions() -> list[TransactionRecord]:
     ]
 
 
-def get_transactions_for_open_assets() -> list[TransactionRecord]:
+def get_transactions_for_open_assets() -> list[models.TransactionRecord]:
 
     return [
-        TransactionRecord(
+        models.TransactionRecord(
             id=row["transaction_id"],
-            asset=AssetPosition(
-                id=row["asset_id"],
-                info=AssetInfo(
-                    symbol=row["asset_symbol"],
-                    name=row["asset_name"],
-                    type=row["asset_type"],
-                ),
-                still_open=row["still_open"],
-                account=Account(
-                    id=row["account_id"],
-                    name=row["account_name"],
-                    currency=row["currency"],
-                ),
-            ),
+            asset_id=row["asset_id"],
             date=row["date"],
             shares=row["shares"],
             price=row["price"],
@@ -85,54 +54,27 @@ def get_transactions_for_open_assets() -> list[TransactionRecord]:
     ]
 
 
-def get_transaction_by_id(transaction_id: int) -> TransactionRecord:
+def get_transaction_by_id(transaction_id: int) -> models.TransactionRecord:
 
     record = fetch_single_record(
-        ALL_TRANSACTIONS_QUERY
-        + " WHERE transactions.transaction_id = ? ORDER BY transactions.date DESC",
+        "SELECT * FROM transactions WHERE transaction_id = ?",
         (transaction_id,),
     )
 
-    return TransactionRecord(
+    return models.TransactionRecord(
         id=record["transaction_id"],
-        asset=AssetPosition(
-            id=record["asset_id"],
-            info=AssetInfo(
-                symbol=record["asset_symbol"],
-                name=record["asset_name"],
-                type=record["asset_type"],
-            ),
-            still_open=record["still_open"],
-            account=Account(
-                id=record["account_id"],
-                name=record["account_name"],
-                currency=record["currency"],
-            ),
-        ),
+        asset_id=record["asset_id"],
         date=record["date"],
         shares=record["shares"],
         price=record["price"],
     )
 
 
-def get_transactions_from_asset(asset_id: int) -> list[TransactionRecord]:
+def get_transactions_from_asset(asset_id: int) -> list[models.TransactionRecord]:
     return [
-        TransactionRecord(
+        models.TransactionRecord(
             id=row["transaction_id"],
-            asset=AssetPosition(
-                id=row["asset_id"],
-                info=AssetInfo(
-                    symbol=row["asset_symbol"],
-                    name=row["asset_name"],
-                    type=row["asset_type"],
-                ),
-                still_open=row["still_open"],
-                account=Account(
-                    id=row["account_id"],
-                    name=row["account_name"],
-                    currency=row["currency"],
-                ),
-            ),
+            asset_id=row["asset_id"],
             date=row["date"],
             shares=row["shares"],
             price=row["price"],
@@ -158,13 +100,13 @@ def insert_transaction(
     )
 
 
-def update_transaction(transaction: TransactionRecord) -> None:
+def update_transaction(transaction: models.TransactionRecord) -> None:
 
     execute_db(
         "UPDATE transactions SET asset_id = ?, date = ?, shares = ?, price = ?"
         " WHERE transaction_id = ?",
         (
-            transaction.asset.id,
+            transaction.asset_id,
             transaction.date.isoformat(),
             transaction.shares,
             transaction.price,
